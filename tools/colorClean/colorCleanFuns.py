@@ -89,6 +89,7 @@ def plotIssue(dat):
 #and color of the closest color in that arch
 #dat will take in an object created by pf.readAndFormat()
 #outputs the same dat with the color and tooth number corrected
+#should return an error if the data has already been cleaned
 def colorCleaner(dat):
     #make a copy of the data for safe keeping
     datC = dat.copy()
@@ -159,3 +160,69 @@ def colorCleaner(dat):
 # plotIssue(dat)
 # dat = colorCleaner(dat)
 # pf.plotPly(dat["face"], dat["vert"])
+
+
+
+
+
+###############################################################################
+#formatting to be in same form as original ply files
+def faceFormatter(dat):
+    datC = dat.copy()
+    datC["face"] = datC["face"][["vertex_indices", "red", "green", "blue", "alpha"]]
+    return datC
+#example
+#see colorCleanProcess.py
+
+###############################################################################
+#exporting the cleaned and formatted files
+
+def write_ply(filename, data):
+    """
+    data["vert"] : pandas DataFrame with columns:
+        x, y, z, nx, ny, nz
+        
+    data["face"] : pandas DataFrame with columns:
+        vertex_indices (list of ints), red, green, blue, alpha
+    """
+
+    verts = data["vert"]
+    faces = data["face"]
+
+    n_verts = len(verts)
+    n_faces = len(faces)
+
+    with open(filename, "w") as f:
+        # ----- HEADER -----
+        f.write("ply\n")
+        f.write("format ascii 1.0\n")
+        f.write("comment color corrected via colorCleanProcess.py\n")
+        f.write(f"element vertex {n_verts}\n")
+        f.write("property float x\n")
+        f.write("property float y\n")
+        f.write("property float z\n")
+        f.write("property float nx\n")
+        f.write("property float ny\n")
+        f.write("property float nz\n")
+        f.write(f"element face {n_faces}\n")
+        f.write("property list uchar int vertex_indices\n")
+        f.write("property uchar red\n")
+        f.write("property uchar green\n")
+        f.write("property uchar blue\n")
+        f.write("property uchar alpha\n")
+        f.write("end_header\n")
+
+        # ----- VERTEX DATA -----
+        for _, row in verts.iterrows():
+            f.write(f"{row.x} {row.y} {row.z} {row.nx} {row.ny} {row.nz}\n")
+
+        # ----- FACE DATA -----
+        for _, row in faces.iterrows():
+            indices = row.vertex_indices  # must be list-like
+            f.write(
+                f"{len(indices)} " +
+                " ".join(str(int(i)) for i in indices) + " " +
+                f"{int(row.red)} {int(row.green)} {int(row.blue)} {int(row.alpha)}\n"
+            )
+#example
+#see colorCleanProcess.py

@@ -3,8 +3,8 @@ os.chdir("H:\\schoolFiles\\dissertation\\intraoralSegmentation\\tools")
 import plyFunctions as pf
 os.chdir("H:\\schoolFiles\\dissertation\\intraoralSegmentation\\tools\\colorClean")
 import colorCleanFuns as cc
-trainDir = "P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\train"
-testDir = "P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\test"
+trainDir = "P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\original\\train"
+testDir = "P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\original\\test"
 import pandas as pd
 
 
@@ -46,15 +46,39 @@ os.chdir(testDir)
 cleanTest = cleanApplyer(testNas)
 
 # step 3, check all of these changes
-cc.plotIssue(dat36L)
-dat36L = cc.colorCleaner(dat36L)
-pf.plotPly(dat36L["face"], dat36L["vert"])
 
+# #for training data
+# trainNas
+# os.chdir(trainDir)
+# fileString = "087_L.ply"
+# trainDat = pf.readAndFormat(fileString, arch = "L")
+# #examine issue
+# cc.plotIssue(trainDat)
+# #ensure it is changes to correct color
+# pf.plotPly(face = cleanTrain[fileString]["face"], vertex = cleanTrain[fileString]["vert"])
+# #28L good
+# #35L good
+# #36L good
+# #38L good
+# #45L good
+# #45U good
+# #46L good
+# #53L good
+# #65U good
+# #71U good
+# #87L good
 
-
-list(cleanTrain.values())[1]
-
-cc.colorCleaner(list(cleanTrain.values())[1])
+# #for test data
+# testNas
+# os.chdir(testDir)
+# fileString = "006_L.ply"
+# testDat = pf.readAndFormat(fileString, arch = "L")
+# #examine issue
+# cc.plotIssue(testDat)
+# #ensure it is changes to correct color
+# pf.plotPly(face = cleanTest[fileString]["face"], vertex = cleanTest[fileString]["vert"])
+# #06L good
+# #27L good, biggest change but changed correctly
 
 #functions that test for errors in the plotting and cleaning functions on the 
 #cleaned data, we are looking for these to throw back errors as this means there is 
@@ -91,7 +115,7 @@ for i in range(len(trainNas)):
     trainCheck["fileName"].loc[i] = list(cleanTrain.keys())[i]
     trainCheck["plotResponse"].loc[i] =plotError(list(cleanTrain.values())[i])
     trainCheck["cleanResponse"].loc[i] = cleanError(list(cleanTrain.values())[i])
-    
+   
     
 #checking the test data
 testCheck = pd.DataFrame({
@@ -110,109 +134,24 @@ testCheck
 
 #perfect, everything is how it should be
 
-#
-#now just gotta figure out how to export them lol
-#also check each of the cleaned files to make sure things actually went right
-#
-list(cleanTest.values())[1]["face"][["vertex_indices", "red"]]
-
-
-def faceFormatter(dat):
-    datC = dat.copy()
-    datC["face"] = datC["face"][["vertex_indices", "red", "green", "blue", "alpha"]]
-    return datC
-
-
-
-
-
-aaa = faceFormatter(list(cleanTest.values())[1])
 
 # step 3, export all of those files
 
+# #testing with test 06L
+# test06LForm = cc.faceFormatter(list(cleanTest.values())[0])
+# os.chdir("H:\\schoolFiles\\dissertation\\intraoralSegmentation\\testDir")
+# cc.write_ply("006testPly_test006_L.ply", test06LForm)
+# #this seems to work and can be read in an operated on with previous functions
+# plyTest1 = pf.readAndFormat("006testPly_test006_L.ply", "L")
+# pf.plotPly(face = plyTest1["face"], vertex = plyTest1["vert"])
+# cc.numExtract("006testPly_test006_L.ply")
 
-def write_ply(filename, data):
-    """
-    data["vert"] : pandas DataFrame with columns:
-        x, y, z, nx, ny, nz
-        
-    data["face"] : pandas DataFrame with columns:
-        vertex_indices (list of ints), red, green, blue, alpha
-    """
+cleanTrainDir = "P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\clean\\trainClean"
+cleanTestDir = "P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\clean\\testClean"
 
-    verts = data["vert"]
-    faces = data["face"]
+os.chdir(cleanTrainDir)
 
-    n_verts = len(verts)
-    n_faces = len(faces)
-
-    with open(filename, "w") as f:
-        # ----- HEADER -----
-        f.write("ply\n")
-        f.write("format ascii 1.0\n")
-        f.write("comment VCGLIB generated\n")
-        f.write(f"element vertex {n_verts}\n")
-        f.write("property float x\n")
-        f.write("property float y\n")
-        f.write("property float z\n")
-        f.write("property float nx\n")
-        f.write("property float ny\n")
-        f.write("property float nz\n")
-        f.write(f"element face {n_faces}\n")
-        f.write("property list uchar int vertex_indices\n")
-        f.write("property uchar red\n")
-        f.write("property uchar green\n")
-        f.write("property uchar blue\n")
-        f.write("property uchar alpha\n")
-        f.write("end_header\n")
-
-        # ----- VERTEX DATA -----
-        for _, row in verts.iterrows():
-            f.write(f"{row.x} {row.y} {row.z} {row.nx} {row.ny} {row.nz}\n")
-
-        # ----- FACE DATA -----
-        for _, row in faces.iterrows():
-            indices = row.vertex_indices  # must be list-like
-            f.write(
-                f"{len(indices)} " +
-                " ".join(str(int(i)) for i in indices) + " " +
-                f"{int(row.red)} {int(row.green)} {int(row.blue)} {int(row.alpha)}\n"
-            )
-
-
-
-os.chdir("H:\\schoolFiles\\dissertation\\intraoralSegmentation\\testDir")
-write_ply("testPly.ply", aaa)
-
-#this seems to work, check that it can be read in with your functions
-
-
-
-#note that this will need to be exported and have the same exact format as the ones
-#that are read in. That means getting rid of some of the stuff that we added
-#for exporting, see this example from chatgpt
-from plyfile import PlyData, PlyElement
-import numpy as np
-
-vertex_array = np.array(
-    list(points_df[["x","y","z"]].itertuples(index=False, name=None)),
-    dtype=[ ("x","f4"), ("y","f4"), ("z","f4") ]
-)
-
-# Build faces
-faces_list = []
-for _, row in faces_df.iterrows():
-    faces_list.append( ([int(v) for v in row.tolist()],) )
-
-faces_array = np.array(
-    faces_list,
-    dtype=[ ('vertex_indices', 'i4', (len(faces_df.columns),)) ]
-)
-
-ply = PlyData([PlyElement.describe(vertex_array, "vertex"),
-               PlyElement.describe(faces_array, "face")])
-
-ply.write("output.ply")
+#loop thru all files in cleanTrain and write them out
 
 
 # step 4, move all of the other files over
