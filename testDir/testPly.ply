@@ -1,6 +1,6 @@
 ply
 format ascii 1.0
-comment VCGLIB generated
+comment color corrected via colorCleanProcess.py
 element vertex 8306
 property float x
 property float y
