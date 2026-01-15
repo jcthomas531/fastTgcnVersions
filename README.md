@@ -13,7 +13,11 @@ The same as fastTgcn just updated to run on a smaller set of data.
 My version of fastTgcn with the same changes necessary to run as fastTgcn needed as well as fixing other error. Main idea is the functionization of the process so you can specify filepaths, upper vs lower jaw, ect without actually having to edit the code. Major changes listed in README.md in the directory.
 
 
+# Major plans
 
+* try new loss functions that utilize information we know about the problem, multimodal learning. See notes from 2025-11-07 and 2025-11-14 for specifics. Also need to investigate the loss function they are using.
+* adding in a layer prior to the segmentation that calssifies how many teeth there are, like a unet
+* trying this model on different data set, something without so many "problem" cases
 
 # Known issues
 
