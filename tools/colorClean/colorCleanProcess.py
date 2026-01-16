@@ -137,21 +137,58 @@ testCheck
 
 # step 3, export all of those files
 
-# #testing with test 06L
+#testing with test 06L
 # test06LForm = cc.faceFormatter(list(cleanTest.values())[0])
 # os.chdir("H:\\schoolFiles\\dissertation\\intraoralSegmentation\\testDir")
-# cc.write_ply("006testPly_test006_L.ply", test06LForm)
+# cc.writePly("006Test_L.ply", test06LForm)
+# cc.fullExport("006Test2_L.ply", test06LForm)
 # #this seems to work and can be read in an operated on with previous functions
-# plyTest1 = pf.readAndFormat("006testPly_test006_L.ply", "L")
+# plyTest1 = pf.readAndFormat("006Test2_L.ply", "L")
 # pf.plotPly(face = plyTest1["face"], vertex = plyTest1["vert"])
-# cc.numExtract("006testPly_test006_L.ply")
+# cc.numExtract("006Test2_L.ply")
+
+
+
 
 cleanTrainDir = "P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\clean\\trainClean"
 cleanTestDir = "P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\clean\\testClean"
 
+
+
+#applying cc.fullExport to each element of the cleanTrain and cleanTest dictionaries
+#applying via dictionary comprehension
+#this says create a new dictionary where the indice is k and the value is f(v) for
+#all of the value pairs k, v in the dictionary
+#for training data
 os.chdir(cleanTrainDir)
-
-#loop thru all files in cleanTrain and write them out
-
+{k: cc.fullExport(k, v) for k, v in cleanTrain.items()}
+#for test data
+os.chdir(cleanTestDir)
+{k: cc.fullExport(k, v) for k, v in cleanTest.items()}
 
 # step 4, move all of the other files over
+from pathlib import Path
+import shutil
+#for training data
+trainNoNas = trainDiscrip[trainDiscrip["anyNaTeeth"] == False]
+
+origDir = Path("P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\original\\train")
+newDir = Path("P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\clean\\trainClean")
+
+for i in trainNoNas["fileName"]:
+    origFile = origDir / i
+    newFile = newDir / i
+    shutil.copy2(origFile, newFile)
+    print(i + "moved to new directory")
+
+#for test data
+testNoNas = testDiscrip[testDiscrip["anyNaTeeth"] == False]
+
+origDirTest = Path("P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\original\\test")
+newDirTest = Path("P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\clean\\testClean")
+
+for i in testNoNas["fileName"]:
+    origFile = origDirTest / i
+    newFile = newDirTest / i
+    shutil.copy2(origFile, newFile)
+    print(i + "moved to new directory")

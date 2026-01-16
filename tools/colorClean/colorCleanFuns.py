@@ -8,8 +8,8 @@ import numpy as np
 
 
 #for running exampls
-trainPath = "P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\train"
-os.chdir(trainPath)
+# trainPath = "P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\train"
+# os.chdir(trainPath)
 
 
 
@@ -176,23 +176,25 @@ def faceFormatter(dat):
 
 ###############################################################################
 #exporting the cleaned and formatted files
-
-def write_ply(filename, data):
+#thanks chatgpt
+def writePly(fileName, dat):
     """
-    data["vert"] : pandas DataFrame with columns:
+    dat["vert"] : pandas DataFrame with columns:
         x, y, z, nx, ny, nz
         
-    data["face"] : pandas DataFrame with columns:
+    dat["face"] : pandas DataFrame with columns:
         vertex_indices (list of ints), red, green, blue, alpha
     """
+    #copying for safe keeping
+    datC = dat.copy()
 
-    verts = data["vert"]
-    faces = data["face"]
+    verts = datC["vert"]
+    faces = datC["face"]
 
     n_verts = len(verts)
     n_faces = len(faces)
 
-    with open(filename, "w") as f:
+    with open(fileName, "w") as f:
         # ----- HEADER -----
         f.write("ply\n")
         f.write("format ascii 1.0\n")
@@ -226,3 +228,18 @@ def write_ply(filename, data):
             )
 #example
 #see colorCleanProcess.py
+
+
+
+###############################################################################
+#function for full colorClean exporting all in one go
+def fullExport(fileName, dat):
+    #copying for saftey
+    datC = dat.copy()
+    
+    datC = faceFormatter(dat = datC)
+    writePly(fileName = fileName, dat = datC)
+    #print("export completed")
+    return "export completed"
+    
+    
