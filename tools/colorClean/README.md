@@ -4,6 +4,6 @@ There is an issue with the IOSSeg data. All tooth classification in the model is
 
 # Process in colorCleanProcess.py
 
-* the necessary files have been cleaned, now just need to check them to make sure things look right and then export them as ply files
+ This process has been completed. Running the file colorCleanProcess.py will do it again (which is not harmful) and you may change the output location if you want to save it somewhere else. As of now, all of my data is being stored in one of Grants drives.
 
 
