@@ -217,7 +217,9 @@ def fastTgcnEasy(arch, testPath, trainPath, batch_size = 1, k = 32,
             # print(pred.shape)
             # print(pred_.shape)
 
-
+            
+            ###################################################################
+            #loss
             loss1 = F.nll_loss(pred, label_face)
             # loss2 = dice_loss(pred.max(dim=-1)[0], label_face)
             # print(loss2)
@@ -227,6 +229,10 @@ def fastTgcnEasy(arch, testPath, trainPath, batch_size = 1, k = 32,
             loss.backward()
             optimizer.step()
             his_loss.append(loss.cpu().data.numpy())
+            ###################################################################
+            
+            
+        #this part is just purely outputting stuff
         if epoch % 10 == 0:
             print('Learning rate: %f' % (lr))
             print("loss: %f" % (np.mean(his_loss)))
