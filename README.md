@@ -1,3 +1,15 @@
+# Overview
+
+Various versions of the fastTgcn model taken from https://github.com/MIVRC/Fast-TGCN comprising minor fixes, edits for ease of use, and introduction of new ideas to improve model performance.
+
+The code as written in the original fastTgcn repository does not work out of the box. The directory fastTgcnBase is a minimally updated version that fixes these small issues and gets the model running according to how it is described in the README of the original repository. Details of these changes can be found in the readme of fastTgcnBase. All other versions of fastTgcn in this repository are built up from fastTgcnBase.
+
+fastTgcnBaby is a shrunk-down version of the original model modified to run on my local machine for proof of concept.
+
+fastTgcnEasy is a more use friendly version of fastTgcn formatted as a function with options for changing data direectories, arches, ect.
+
+
+
 # Structure
 
 ## fastTgcn
