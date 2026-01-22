@@ -10,7 +10,7 @@ fastTgcnEasy is a more use friendly version of fastTgcn formatted as a function 
 
 
 
-# Structure
+# Models
 
 ## fastTgcn
 
