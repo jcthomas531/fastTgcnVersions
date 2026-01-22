@@ -62,6 +62,14 @@ import random
 
 def fastTgcnEasy(arch, testPath, trainPath, batch_size = 1, k = 32,
                  numWorkers = 8, epochs = 301):
+    
+    
+    ###########################################################################
+    #timing
+    ###########################################################################
+    startTime = time.time()
+    
+    
     ###########################################################################
     #checking function arguements
     ###########################################################################
@@ -257,6 +265,44 @@ def fastTgcnEasy(arch, testPath, trainPath, batch_size = 1, k = 32,
                 logger.info(cat_iou)
             his_loss.clear()
             # writer.close()
+            
+        if epoch == (epochs - 1):
+            #above needs some work as i think it is outputting the final plys not the best plys
+            #ideally we will output the best plys, i will need to spend more time 
+            #with the above code to ensure that the output model and saved plys
+            #are the best, just not the last, but this is sufficient for the time beings
+            
+            #get final time and format it
+            endTime = time.time()
+            totalTime = endTime - startTime
+            timeHours = int(totalTime // 3600)
+            timeMinutes = int((totalTime % 3600) // 60)
+            timeSeconds = int(totalTime % 60)
+            
+            #output final stats and time
+            print("\n############### FINISHED ###############\n")
+            print("\n")
+            print(f"Arch: {arch:.4f}")
+            print("\n")
+            print(f"Best Accuracy: {best_acc:.4f}")
+            print(f"Best Mean IoU: {best_miou:.4f}")
+            print(f"Best Mean Class Accuracy: {best_macc:.4f}") 
+            print("\n")
+            print(f"Current Epoch: {epoch:.4f}")
+            print(f"Training Epochs: {epochs:.4f}") 
+            print("Best Epoch: ADD LATER")
+            print("Model Output Path: ADD LATER")
+            print("Ply Output Path: ADD LATER")
+            print(f"Total Training Time: {timeHours}h {timeMinutes}m {timeSeconds}s")
+            print("\n########################################\n")
+            
+        
+                
+                
+
+                
+                
+                
             
     #IN THE ORIGINAL CODE THERE WAS A COMMENTED OUT SECTION AFTER THIS WITH 200
     #EPOCHS. NOT SURE WHY THIS WAS LEFT IN, AGAIN, WAS THIS AN OLDER VERSION/SOMETHING

@@ -6,7 +6,8 @@
 #i am going to use the same framework that I had set up in fastTgcn
 
 
-
+runNote = "small note describing the model being run"
+print(runNote)
 #should alredy be in the proper working directory
 import train
 train.fastTgcnEasy(arch = "l",
@@ -16,7 +17,7 @@ train.fastTgcnEasy(arch = "l",
                    k = 32,
                    numWorkers = 8,
                    epochs = 31)
-
+print(runNote)
 
 
 #import os
