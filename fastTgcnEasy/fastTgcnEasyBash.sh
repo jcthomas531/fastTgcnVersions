@@ -1,8 +1,8 @@
 #!/bin/bash
 #$ -l ngpus=3
 #$ -pe smp 64
-#$ -o outputFiles/fastTgcnOut.o
-#$ -e outputFiles/fastTgcnError.e
+#$ -o outputFiles/$JOB_ID_fastTgcnEasyOut.o
+#$ -e outputFiles/$JOB_ID_fastTgcnEasyError.e
 
 
 
