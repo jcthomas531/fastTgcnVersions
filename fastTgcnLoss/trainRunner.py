@@ -7,7 +7,7 @@
 
 
 #
-runNote = "changing nll loss for user defined DICE loss"
+runNote = "changing nll loss for MSE loss"
 #
 
 
