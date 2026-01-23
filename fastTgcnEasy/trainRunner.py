@@ -6,13 +6,17 @@
 #i am going to use the same framework that I had set up in fastTgcn
 
 
-runNote = "small note describing the model being run"
+#
+runNote = "testing new output messages, file storage location, and clean plys"
+#
+
+
 print(runNote)
 #should alredy be in the proper working directory
 import train
 train.fastTgcnEasy(arch = "l",
-                   testPath = "/Users/jthomas48/dissModels/intraoralSegmentation/IOSSegData/test-L-Small",
-                   trainPath = "/Users/jthomas48/dissModels/intraoralSegmentation/IOSSegData/train-L-Small",
+                   testPath = "/Shared/gb_lss/Thomas/IOSSegData/clean/testCleanMiniL",
+                   trainPath = "/Shared/gb_lss/Thomas/IOSSegData/clean/trainCleanMiniL",
                    batch_size = 1,
                    k = 32,
                    numWorkers = 8,
