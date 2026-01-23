@@ -282,7 +282,7 @@ def fastTgcnEasy(arch, testPath, trainPath, batch_size = 1, k = 32,
             #output final stats and time
             print("\n############### FINISHED ###############\n")
             print("\n")
-            print(f"Arch: {arch:.4f}")
+            print(f"Arch: {arch}")
             print("\n")
             print(f"Best Accuracy: {best_acc:.4f}")
             print(f"Best Mean IoU: {best_miou:.4f}")
