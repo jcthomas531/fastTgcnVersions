@@ -228,8 +228,8 @@ def fastTgcnEasy(arch, testPath, trainPath, batch_size = 1, k = 32,
             
             ###################################################################
             #loss
-            loss1 = F.nll_loss(pred, label_face)
-            # loss2 = dice_loss(pred.max(dim=-1)[0], label_face)
+            # loss1 = F.nll_loss(pred, label_face)
+            loss1 = dice_loss(pred.max(dim=-1)[0], label_face)
             # print(loss2)
             loss = loss1
             # loss = F.nll_loss(pred, label_face) + F.l1_loss(iou, iou_label)
