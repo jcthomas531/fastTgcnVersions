@@ -2,9 +2,9 @@
 fastTgcnBaby/__pycache__/
 fastTgcnBaby/experiment/
 fastTgcnBaby/pred_global/
-fastTgcn/__pycache__/
-fastTgcn/experiment/
-fastTgcn/pred_global/
+fastTgcnBase/__pycache__/
+fastTgcnBase/experiment/
+fastTgcnBase/pred_global/
 tools/__pycache__/
 *.o
 *.e
@@ -13,3 +13,6 @@ fastTgcnEasy/experiment/
 fastTgcnEasy/pred_global/
 tools/colorClean/__pycache__/
 testDir/
+fastTgcnLoss/__pycache__/
+fastTgcnLoss/experiment/
+fastTgcnLoss/pred_global/
