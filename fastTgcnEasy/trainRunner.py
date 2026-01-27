@@ -7,7 +7,7 @@
 
 
 #
-runNote = "testing new output messages, file storage location, and clean plys"
+runNote = "testing new output file locations"
 #
 
 

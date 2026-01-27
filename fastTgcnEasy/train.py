@@ -1,6 +1,6 @@
 #for testing
 # import os
-# os.chdir("H:\\schoolFiles\\dissertation\\intraoralSegmentation\\fastTgcnEasy")
+# os.chdir("H:\\schoolFiles\\dissertation\\fastTgcnVersions\\fastTgcnEasy")
 # os.getcwd()
 
 
@@ -90,16 +90,38 @@ def fastTgcnEasy(arch, testPath, trainPath, batch_size = 1, k = 32,
     # k = 32
     
     """--------------------------- create Folder ----------------------------------"""
-    experiment_dir = Path('./experiment/')
+    current_time = str(datetime.datetime.now().strftime('%Y_%m_%d_%H_%M'))
+    #
+    #to include everthing in
+    modelOutDir = Path("./modelOutputs")
+    modelOutDir.mkdir(exist_ok=True)
+    
+    #subfolder for this specific run
+    runDir = Path(str(modelOutDir) + '/run' + current_time)
+    runDir.mkdir(exist_ok=True)
+    
+    #using the old object names but with new locations
+    #a little messy and repetative but requires least rewriting
+    experiment_dir = Path(str(runDir) + '/checkpointsAndLogs/')
     experiment_dir.mkdir(exist_ok=True)
-    pred_dir = Path('./pred_global/')
+    pred_dir = Path(str(runDir) + '/pred_global/')
     pred_dir.mkdir(exist_ok=True)
-    current_time = str(datetime.datetime.now().strftime('%m-%d_%H-%M'))
-    file_dir = Path(str(experiment_dir) + '/test-1')
+    file_dir = experiment_dir
     file_dir.mkdir(exist_ok=True)
     log_dir, checkpoints = file_dir.joinpath('logs/'), file_dir.joinpath('checkpoints')
     log_dir.mkdir(exist_ok=True)
     checkpoints.mkdir(exist_ok=True)
+    
+    #old
+    # experiment_dir = Path('./experiment/')
+    # experiment_dir.mkdir(exist_ok=True)
+    # pred_dir = Path('./pred_global/')
+    # pred_dir.mkdir(exist_ok=True)
+    # file_dir = Path(str(experiment_dir) + '/test-1')
+    # file_dir.mkdir(exist_ok=True)
+    # log_dir, checkpoints = file_dir.joinpath('logs/'), file_dir.joinpath('checkpoints')
+    # log_dir.mkdir(exist_ok=True)
+    # checkpoints.mkdir(exist_ok=True)
 
     formatter = logging.Formatter('%(name)s - %(message)s')
     logger = logging.getLogger("all")
@@ -245,7 +267,7 @@ def fastTgcnEasy(arch, testPath, trainPath, batch_size = 1, k = 32,
             print('Learning rate: %f' % (lr))
             print("loss: %f" % (np.mean(his_loss)))
             # writer.add_scalar("loss", np.mean(his_loss), epoch)
-            metrics, mIoU, cat_iou, mAcc, throwAway = test_semseg(model = model, loader = test_loader, arch = arch,
+            metrics, mIoU, cat_iou, mAcc, throwAway = test_semseg(model = model, loader = test_loader, arch = arch, plyPath=pred_dir,
                                                                   num_classes=17, generate_ply=True)
             print("Epoch %d, accuracy= %f, mIoU= %f, mACC= %f" % (epoch, metrics['accuracy'], mIoU, mAcc))
             logger.info("Epoch: %d, accuracy= %f, mIoU= %f, mACC= %f loss= %f" % (epoch, metrics['accuracy'], mIoU, mAcc, np.mean(his_loss)))

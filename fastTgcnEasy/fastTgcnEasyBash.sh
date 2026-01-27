@@ -1,6 +1,6 @@
 #!/bin/bash
 #$ -l ngpus=3
-#$ -pe smp 64
+#$ -pe smp 32
 #$ -o outputFiles/$JOB_ID_fastTgcnEasyOut.o
 #$ -e outputFiles/$JOB_ID_fastTgcnEasyError.e
 

@@ -63,7 +63,7 @@ def compute_mACC(pred, label_face):
     return s / 17
 
 #added arch arguement
-def test_semseg(model, loader, arch, num_classes = 8, gpu=True, generate_ply=False):
+def test_semseg(model, loader, arch, plyPath, num_classes = 8, gpu=True, generate_ply=False):
     '''
     Input
     :param model:
@@ -91,9 +91,20 @@ def test_semseg(model, loader, arch, num_classes = 8, gpu=True, generate_ply=Fal
     hist_acc = []
     macc = 0
     mdice = 0
-
-    shutil.rmtree('./pred_global')
-    os.mkdir('./pred_global')
+    
+    
+    
+    
+    #getting the ply path ready for each use, this could probably be streamlined
+    plyPathStr = str(plyPath)
+    plyPathStr1 = "./" + plyPathStr.replace("\\", "/")
+    plyPathStr2 = plyPathStr.replace("\\", "/") + "/%s"
+    
+    
+    
+    
+    shutil.rmtree(plyPathStr1)
+    os.mkdir(plyPathStr1)
 
     for batch_id, (index, points, label_face, label_face_onehot, name, raw_points_face, idx_face) in tqdm(enumerate(loader), total=len(loader), smoothing=0.9):
         batchsize, num_point, _ = points.size()
@@ -125,7 +136,7 @@ def test_semseg(model, loader, arch, num_classes = 8, gpu=True, generate_ply=Fal
             #label_face=label_optimization(index_face, label_face)
 
             generate_plyfile(index_face = index_face, point_face = point_face,
-                             label_face = label_face, arch = arch, path=("pred_global/%s") % name)
+                             label_face = label_face, arch = arch, path=(plyPathStr2) % name)
     iou_tabel[:,2] = iou_tabel[:,0] /iou_tabel[:,1]
     # iou = np.where(iou_tabel<=1.)
     hist_acc += metrics['accuracy']

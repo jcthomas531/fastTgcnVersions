@@ -11,6 +11,8 @@ tools/__pycache__/
 fastTgcnEasy/__pycache__/
 fastTgcnEasy/experiment/
 fastTgcnEasy/pred_global/
+fastTgcnEasy/x_archive/
+fastTgcnEasy/modelOutputs/
 tools/colorClean/__pycache__/
 testDir/
 fastTgcnLoss/__pycache__/
