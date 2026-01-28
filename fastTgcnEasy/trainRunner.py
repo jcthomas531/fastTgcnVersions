@@ -7,20 +7,20 @@
 
 
 #
-runNote = "testing new output file locations"
+runNote = "full training, upper arch"
 #
 
 
 print(runNote)
 #should alredy be in the proper working directory
 import train
-train.fastTgcnEasy(arch = "l",
-                   testPath = "/Shared/gb_lss/Thomas/IOSSegData/clean/testCleanMiniL",
-                   trainPath = "/Shared/gb_lss/Thomas/IOSSegData/clean/trainCleanMiniL",
+train.fastTgcnEasy(arch = "u",
+                   testPath = "/Shared/gb_lss/Thomas/IOSSegData/clean/testCleanU",
+                   trainPath = "/Shared/gb_lss/Thomas/IOSSegData/clean/trainCleanU",
                    batch_size = 1,
                    k = 32,
                    numWorkers = 8,
-                   epochs = 31)
+                   epochs = 301)
 print(runNote)
 
 
