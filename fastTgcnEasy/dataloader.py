@@ -192,6 +192,8 @@ def generate_plyfile(index_face, point_face, label_face, arch, path= " "):
         
         
         #labels based on if upper or lower arch
+        #i really dont like the long list of colors here, i have a version in a function
+        #in my tools directory that I would like to pull from instead in the future
         if arch == "l":
             labels_change_color = (
                        [255, 48, 48],[0, 191, 255], [255, 165, 0], [202, 255, 112],
@@ -204,6 +206,7 @@ def generate_plyfile(index_face, point_face, label_face, arch, path= " "):
                 [255, 0, 0],[255, 255, 0], [0, 255, 0], [0, 255, 255],
                       [0, 0, 255], [255, 0, 255], [30, 144, 255], [0, 255, 127], [127, 255, 0],
                       [255, 246, 143],[60, 179, 113], [255, 106, 106], [131, 111, 255], [255, 211, 155], [255, 99, 71],[155, 48, 255],
+                      [255, 255, 255]
                       )
         
         
