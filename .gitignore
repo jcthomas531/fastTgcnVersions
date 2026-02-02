@@ -18,3 +18,6 @@ testDir/
 fastTgcnLoss/__pycache__/
 fastTgcnLoss/experiment/
 fastTgcnLoss/pred_global/
+prediction/__pycache__/
+prediction/x_archive/
+prediction/outputFiles/
