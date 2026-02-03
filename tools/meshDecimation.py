@@ -4,8 +4,8 @@
 import pyvista as pv
 
 def myDecimate(inFile, 
-               nFace,
-               outFile):
+               outFile,
+               nFace = 16000):
     
     #read in file
     meshOrig = pv.read(inFile)
@@ -42,5 +42,4 @@ def myDecimate(inFile,
 # myDecimate("convertedPlyTestU.ply", 16000, "myDecimateFunctionTest.ply")
     
     
-
 
