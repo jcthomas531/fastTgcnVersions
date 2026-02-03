@@ -30,7 +30,7 @@ model.eval()
 
 # 2) Build dataset/loader pointing to folder of new PLYs
 arch = "u" 
-data_dir = "/Shared/gb_lss/Thomas/iowaRme/test1"
+data_dir = "/Shared/gb_lss/Thomas/iowaRme/test2"
 dataset = plydataset(path=data_dir, arch=arch, mode="test", model="meshsegnet")
 loader  = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0)
 
