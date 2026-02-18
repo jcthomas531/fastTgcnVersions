@@ -107,38 +107,36 @@ def getRegistration(source, target, method = "point2point", voxel_size = 2, iter
     
     
 #EXAMPLE
-#iowaRmeData
-os.chdir("K:/iowaRme/fullScans/pat058")
-#second scan will serve as source, what is being transformed
-u058_12 = o3d.io.read_point_cloud("pat058u_12.ply")
-#first scan will serve as target
-u058_01 = o3d.io.read_point_cloud("pat058u_01.ply")
-#plot how it looks prior to transformation (with actual colors)
-o3d.visualization.draw_geometries([u058_12, u058_01])
-monochromePlot(u058_12, u058_01)
-#calculate registration
-reg01_12 = getRegistration(source = u058_12, target=u058_01)
-#look at stats on the registration performance
-reg01_12
-#look at transformation matri
-reg01_12.transformation
-#transform source to align with target
-u058_12Trans = u058_12.transform(reg01_12.transformation)
-#plot registered point clouds
-monochromePlot(u058_12Trans, u058_01)
-
-
-#calculate registration
-reg30 = getRegistration(source = u058_12, target=u058_01, iters = 30)
-print(reg30)
-#calculate registration
-reg50 = getRegistration(source = u058_12, target=u058_01, iters = 50)
-print(reg50)
-#calculate registration
-reg100 = getRegistration(source = u058_12, target=u058_01, iters = 100)
-print(reg100)
-#calculate registration
-reg200 = getRegistration(source = u058_12, target=u058_01, iters = 200)
-print(reg200)    
-#iterations seem to not have a large impac
+# #iowaRmeData
+# os.chdir("K:/iowaRme/fullScans/pat058")
+# #second scan will serve as source, what is being transformed
+# u058_12 = o3d.io.read_point_cloud("pat058u_12.ply")
+# #first scan will serve as target
+# u058_01 = o3d.io.read_point_cloud("pat058u_01.ply")
+# #plot how it looks prior to transformation (with actual colors)
+# o3d.visualization.draw_geometries([u058_12, u058_01])
+# monochromePlot(u058_12, u058_01)
+# #calculate registration
+# reg01_12 = getRegistration(source = u058_12, target=u058_01)
+# #look at stats on the registration performance
+# reg01_12
+# #look at transformation matri
+# reg01_12.transformation
+# #transform source to align with target
+# u058_12Trans = u058_12.transform(reg01_12.transformation)
+# #plot registered point clouds
+# monochromePlot(u058_12Trans, u058_01)
+# #calculate registration
+# reg30 = getRegistration(source = u058_12, target=u058_01, iters = 30)
+# print(reg30)
+# #calculate registration
+# reg50 = getRegistration(source = u058_12, target=u058_01, iters = 50)
+# print(reg50)
+# #calculate registration
+# reg100 = getRegistration(source = u058_12, target=u058_01, iters = 100)
+# print(reg100)
+# #calculate registration
+# reg200 = getRegistration(source = u058_12, target=u058_01, iters = 200)
+# print(reg200)    
+# #iterations seem to not have a large impac
     
