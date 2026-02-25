@@ -6,4 +6,4 @@
 
 
 
-apptainer exec ../../../containers/pytorch2.sif python newObsPred.py
+apptainer exec ../../../containers/pytorch2.sif python predPipe2.py
