@@ -31,8 +31,24 @@ def convertPly(inFile,
                   if name not in ('red', 'green', 'blue')]
     #build new vertex array, create an empty np array with the correct size and the
     #data types of the pieces that we are keeping
-    newVert = np.empty(inVertex.count,
-                       dtype=[(name, inVertex.data.dtype[name]) for name in toKeep])
+    
+    
+    #when registering scans, open3d ouputs the vertices as doubles not floats
+    #the scans the models are trained on have vertices as floats so I am forcing
+    #them to be floats here. I do not believe this will cause problems with data
+    #typing, but i havent looked into it in too much detail. I dont technically 
+    #even need an if statement here bc i always want floats but i am hedging so 
+    #i dont break things that worked previously
+    if inVertex.data.dtype['x'] != np.float32:
+        newVert = np.empty(
+            inVertex.count,
+            dtype=[(name, np.float32) for name in toKeep]
+            )
+    else:
+        newVert = np.empty(inVertex.count,
+                           dtype=[(name, inVertex.data.dtype[name]) for name in toKeep])
+    
+    
     #fill the empty arrat with the data we are keeping
     for name in toKeep:
         newVert[name] = inVertex.data[name]
