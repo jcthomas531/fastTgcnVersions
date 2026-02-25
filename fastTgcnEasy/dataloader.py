@@ -300,6 +300,8 @@ class plydataset(Dataset):
             points_face[:, 15:18] = points_face[:, 15:18].dot(Z.transpose())
             points_face[:, 18:21] = points_face[:, 18:21].dot(Z.transpose())
             points_face[:, 21:24] = points_face[:, 21:24].dot(Z.transpose())
+            
+            #Not sure what this does but it is commented out
             # p = random.uniform(0, 3)
             # if p >= 0 and p < 1:
             #     points_face[:, :3] = points_face[:, :3].dot(X.transpose())
