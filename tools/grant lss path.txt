@@ -1,0 +1,3 @@
+grant lss path
+\\itf-rs-store31.hpc.uiowa.edu\gb_lss\Thomas
+map as K:
