@@ -106,7 +106,7 @@ def getRegistration(source, target, method = "point2point", voxel_size = 2, iter
     
     
     
-#EXAMPLE
+#EXAMPLE WORKFLOW
 # #iowaRmeData
 # os.chdir("K:/iowaRme/fullScans/pat058")
 # #second scan will serve as source, what is being transformed
@@ -126,6 +126,24 @@ def getRegistration(source, target, method = "point2point", voxel_size = 2, iter
 # u058_12Trans = u058_12.transform(reg01_12.transformation)
 # #plot registered point clouds
 # monochromePlot(u058_12Trans, u058_01)
+
+# #applying the transformation to the file as a mesh and then exporting
+# #i will also load in the target as a mesh just to show that the alignment
+# #process works
+# u058_12Mesh = o3d.io.read_triangle_mesh("pat058u_12.ply")
+# u058_01Mesh = o3d.io.read_triangle_mesh("pat058u_01.ply")
+# o3d.visualization.draw_geometries([u058_12Mesh, u058_01Mesh])
+# monochromePlot(u058_12Mesh, u058_01Mesh)
+# #now we apply the transformation that was calculated for the point cloud
+# u058_12MeshTrans = u058_12Mesh.transform(reg01_12.transformation)
+# o3d.visualization.draw_geometries([u058_12MeshTrans, u058_01Mesh])
+# monochromePlot(u058_12MeshTrans, u058_01Mesh)
+# #then it can be exported
+# os.chdir("K:/testDir")
+# o3d.io.write_triangle_mesh("regiOutTest.ply", u058_12MeshTrans, write_ascii = True)
+
+#ILLUSTRATION
+# #looking at how this is effected by various parameters
 # #calculate registration
 # reg30 = getRegistration(source = u058_12, target=u058_01, iters = 30)
 # print(reg30)
