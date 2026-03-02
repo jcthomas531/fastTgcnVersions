@@ -102,6 +102,9 @@ from utils import compute_cat_iou, compute_mACC
 # shutil.rmtree(plyPathStr1)
 # os.mkdir(plyPathStr1)
 print("b")
+#
+#i believe a lot of the stuff in here is unnecessary, we really just need the preds
+#
 for batch_id, (index, points, label_face, label_face_onehot, name, raw_points_face, idx_face) in tqdm(enumerate(loader), total=len(loader), smoothing=0.9):
     batchsize, num_point, _ = points.size()
     point_face = raw_points_face[0].numpy()
