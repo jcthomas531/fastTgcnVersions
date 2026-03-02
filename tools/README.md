@@ -4,6 +4,14 @@ Directory for holding functions and scripts that are useful in the segmentation 
 
 # Files
 
+## colorClean folder
+
+See the .md in that folder for more details. Takes care of a coloring issue that came with the IOSSeg data.
+
+## plyFunctions.py
+
+A catch all for custom functions that are useful in manipulating ply files in python.
+
 ## convertPlyFiles.py
 
 Originally designed to take the ply files of RME scans downloaded from itero and convert them into the same format as the IOSSeg data so they can be used in the modeling process without changing any of the code. This is now morphed into a general purpose function for converting ply files into the IOSSeg format. Currently, it will accept ply files of the following formats and return ply files formatted like the IOSSeg files:
@@ -58,3 +66,8 @@ monochromePlot(u058_12MeshTrans, u058_01Mesh)
 os.chdir("K:/testDir")
 o3d.io.write_triangle_mesh("regiOutTest.ply", u058_12MeshTrans, write_ascii = True)
 ```
+
+
+## meshDecimation.py and decimator.sh
+
+A currently non-functioning pipeline for decimating plys to a desired number of faces.
