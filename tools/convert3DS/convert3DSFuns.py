@@ -252,6 +252,7 @@ def convertAll3DS(path, arch, rng):
     
     #validation on the files in the directory
     validFrame = fileValidate(fullPath = path)
+    print(validFrame)
     #extract the ids of those that ready to be converted
     validId = validFrame.query("proceed == True")["id"].tolist()
     

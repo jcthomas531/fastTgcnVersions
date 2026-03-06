@@ -22,3 +22,4 @@ prediction/__pycache__/
 prediction/x_archive/
 prediction/outputFiles/
 tools/x_archive/
+tools/convert3DS/__pycache__/

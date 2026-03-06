@@ -1,17 +1,20 @@
 import sys
 sys.path.append("/Users/jthomas48/dissModels/fastTgcnVersions/tools/convert3DS")
-import conver3DSFuns as cf_
+import convert3DSFuns as cf_
 import numpy as np
+import pandas as pd
+pd.set_option("display.max_rows", None)
+
 
 #
 runNote = "first attempt on HPC, U arch"
 #
 
-fp = "/Shared/gb_lss/Thomas/teeth3DS/upper/"
+fp = "/Shared/gb_lss/Thomas/teeth3DS/scanData/upper/"
 rng = np.random.default_rng(826)
 
 print(runNote)
 
-cf_.convertAll3DS(path = fp, arch = "U", rng = rng)
+print(cf_.convertAll3DS(path = fp, arch = "U", rng = rng))
 
 print(runNote)
