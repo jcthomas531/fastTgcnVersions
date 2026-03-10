@@ -34,6 +34,7 @@ def myDecimate(inFile,
     
     #output mesh as plyfile
     meshDec.save(outFile, binary = False)
+    return meshDec
 
 
 #testing
@@ -41,5 +42,20 @@ def myDecimate(inFile,
 # os.chdir("K:/iowaRme")
 # myDecimate("convertedPlyTestU.ply", 16000, "myDecimateFunctionTest.ply")
     
-    
 
+
+
+#decimate function specifically designed for use in the tooth3DS conversion process
+#it is essentially just decimate pro with reduction calc and the function accepts
+#a pyvista object instead of a file path so it could be used for other things too
+def decimate3DS(x, nFace = 16000):
+    #number of faces in input mesh
+    nFaceOrig = x.n_faces_strict
+    
+    #get reduction proportion using desired number of faces
+    reduct = 1-(nFace/nFaceOrig)
+    
+    #perform decimation
+    xDec = x.decimate_pro(reduct)
+    
+    return(xDec)

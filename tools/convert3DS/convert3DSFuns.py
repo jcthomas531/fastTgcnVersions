@@ -14,7 +14,9 @@ import sys
 sys.path.append("/Users/jthomas48/dissModels/fastTgcnVersions/tools")
 from plyFunctions import colorNumFrame
 from plyfile import PlyData, PlyElement
-
+sys.path.append("/Users/jthomas48/fastTgcnVersions/tools/decimation")
+import meshDecimation as d
+import pyvista as pv
 
 ###############################################################################
 #VALIDATION FUNCTION
@@ -27,7 +29,9 @@ from plyfile import PlyData, PlyElement
 #validate whether teeth3DS conversion to ply should happen for each subject
 #fullPath argument takes the path to the directory holding subdirectories for 
 #each subject of the form "K:/teeth3DS/scanData/upper/" (including final slash)
-def fileValidate(fullPath):
+
+#this will need to be edited each time it is used to reflect current state
+def fileValidate(fullPath, arch):
     
     #get all subject ids
     fullPathCont = os.listdir(fullPath)
@@ -42,13 +46,29 @@ def fileValidate(fullPath):
         #directory contents for specific subject
         subPathCont = pd.Series(os.listdir(subPath))
         #data frame with validation
-        vali = pd.DataFrame({
-            "id": idi,
-            "twoFiles": [len(subPathCont) == 2],
-            "singleObj": [subPathCont.str.contains(r"\.obj$", regex = True).sum() == 1],
-            "singleJson": [subPathCont.str.contains(r"\.json$", regex = True).sum() == 1],
-            "noPly": [subPathCont.str.contains(r"\.ply$", regex = True).sum() == 0]
-            })
+        if arch == "U":
+            vali = pd.DataFrame({
+                "id": idi,
+                "numFiles": [len(subPathCont) == 3],
+                "singleObj": [subPathCont.str.contains(r"\.obj$", regex = True).sum() == 1],
+                "singleJson": [subPathCont.str.contains(r"\.json$", regex = True).sum() == 1],
+                "fullPly": [subPathCont.str.contains(r"U\.ply$", regex = True).sum() == 1],
+                #Decim016 means decimated to 16000 faces
+                "noDecPly": [subPathCont.str.contains(r"UDecim016\.ply$", regex = True).sum() == 0]
+                })
+        elif arch == "L":
+            vali = pd.DataFrame({
+                "id": idi,
+                "numFiles": [len(subPathCont) == 3],
+                "singleObj": [subPathCont.str.contains(r"\.obj$", regex = True).sum() == 1],
+                "singleJson": [subPathCont.str.contains(r"\.json$", regex = True).sum() == 1],
+                "fullPly": [subPathCont.str.contains(r"\L.ply$", regex = True).sum() == 1],
+                #Decim016 means decimated to 16000 faces
+                "noDecPly": [subPathCont.str.contains(r"\LDecim016.ply$", regex = True).sum() == 0]
+                })
+        else:
+            ValueError("arch must be 'U' or 'L'")
+        
         vali["proceed"] = vali.all(axis=1)
         valiRows.append(vali)
     
@@ -87,8 +107,9 @@ def labelLookup(x, labels):
 #####
 #MAIN FUNCTION
 #####
+#nFace will not matter when decimate = False
 
-def convert3DS(subPath, arch, rng):
+def convert3DS(subPath, arch, rng, decimate = False, nFace = 16000):
     
     
     #extract id string from subPath
@@ -125,18 +146,55 @@ def convert3DS(subPath, arch, rng):
     #ensure that the number of labels match up to the points
     assert len(labelDat["labels"]) == len(mesh.vertices), idStr + "_" + arch + ": label length not equal to number of vertices"
     
-    #make a dataframe of the vertices
-    vert = pd.DataFrame(mesh.vertices, columns=["x", "y", "z"])
-    vert["labels"] = labelDat["labels"]
     
-    #make a data frame of the faces
-    face = pd.DataFrame(mesh.faces, columns=["v1", "v2", "v3"])
-    face[["v1Label", "v2Label", "v3Label", "fdiNum"]] = np.nan
     
-    #use labelLookup function to get the label for each of the vertices in each face
-    face["v1Label"] = labelLookup(face["v1"], labelDat["labels"])
-    face["v2Label"] = labelLookup(face["v2"], labelDat["labels"])
-    face["v3Label"] = labelLookup(face["v3"], labelDat["labels"])
+    if decimate == True:
+        
+        #make mesh pyvista object
+        meshPv = pv.wrap(mesh)
+        #add label data to pyvista object
+        meshPv.point_data["labels"] = labelDat["labels"]
+        #decimate
+        meshPvDec=d.decimate3DS(meshPv, nFace = nFace)
+        #make mesh trimesh object like before
+        meshDec = pv.to_trimesh(meshPvDec)
+        #make vertex data into data frame
+        vert = pd.DataFrame(meshDec.vertices, columns=["x", "y", "z"])
+        vert["labels"] = meshPvDec.point_data["labels"]
+        
+        #make face data into data frame
+        face = pd.DataFrame(meshDec.faces, columns=["v1", "v2", "v3"])
+        face[["v1Label", "v2Label", "v3Label", "fdiNum"]] = np.nan
+        #get labels for each vertex associated with the face
+        face["v1Label"] = labelLookup(face["v1"], vert["labels"])
+        face["v2Label"] = labelLookup(face["v2"], vert["labels"])
+        face["v3Label"] = labelLookup(face["v3"], vert["labels"])
+        
+        #create file name
+        #Decim016 means decimated to 16000 faces
+        outFile = subPath + idStr + "_" + arch + "Decim016.ply"
+        
+    elif decimate == False:
+        
+        #make a dataframe of the vertices
+        vert = pd.DataFrame(mesh.vertices, columns=["x", "y", "z"])
+        vert["labels"] = labelDat["labels"]
+        
+        #make a data frame of the faces
+        face = pd.DataFrame(mesh.faces, columns=["v1", "v2", "v3"])
+        face[["v1Label", "v2Label", "v3Label", "fdiNum"]] = np.nan
+        
+        #use labelLookup function to get the label for each of the vertices in each face
+        face["v1Label"] = labelLookup(face["v1"], labelDat["labels"])
+        face["v2Label"] = labelLookup(face["v2"], labelDat["labels"])
+        face["v3Label"] = labelLookup(face["v3"], labelDat["labels"])
+        
+        #create file name
+        outFile = subPath + idStr + "_" + arch + ".ply"
+        
+    else:
+        raise ValueError("decimate must be True or False")
+    
     
     #get the overall label, majority rules 
     overallLabHolder = []
@@ -225,9 +283,18 @@ def convert3DS(subPath, arch, rng):
     
     #make ply file
     convPly = PlyData([vertReady, faceReady], text = True)
-    outFile = subPath + idStr + "_" + arch + ".ply"
+    #file name create in if statement
     convPly.write(outFile)
-    print(idStr + "_" + arch + " converted")
+    
+    if decimate == True:
+        print(idStr + "_" + arch + " decimated")
+    elif decimate == False:
+        print(idStr + "_" + arch + " converted")
+    else:
+        raise ValueError("print error: decimate must be True or False")
+    
+    
+    
     return(True)
     
 
@@ -244,14 +311,12 @@ def convert3DS(subPath, arch, rng):
 #
 ###############################################################################
 
-path = "K:/teeth3DS/scanData/upper/"
-arch = "U"
-rng = np.random.default_rng(826)
+#nFace will not matter when decimate = False
 
-def convertAll3DS(path, arch, rng):
+def convertAll3DS(path, arch, rng, decimate = False, nFace = 16000):
     
     #validation on the files in the directory
-    validFrame = fileValidate(fullPath = path)
+    validFrame = fileValidate(fullPath = path, arch = arch)
     print(validFrame)
     #extract the ids of those that ready to be converted
     validId = validFrame.query("proceed == True")["id"].tolist()
@@ -267,7 +332,8 @@ def convertAll3DS(path, arch, rng):
         subPath = path + validId[i] + "/"
         #perform conversion and track success (function outputs true when its finished)
         convTrack.loc[convTrack["id"] == validId[i], "convComplete"] = \
-            convert3DS(subPath = subPath, arch = arch, rng = rng)
+            convert3DS(subPath = subPath, arch = arch, rng = rng,
+                       decimate = decimate, nFace = nFace)
     
     #return validation frame and conversion tracker
     return validFrame, convTrack
