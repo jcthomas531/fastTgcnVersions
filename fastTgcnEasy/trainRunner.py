@@ -7,7 +7,7 @@
 
 
 #
-runNote = "full training, upper arch"
+runNote = "teeth3ds training, arbitrary train and test split, 650 to 250"
 #
 
 
@@ -15,8 +15,8 @@ print(runNote)
 #should alredy be in the proper working directory
 import train
 train.fastTgcnEasy(arch = "u",
-                   testPath = "/Shared/gb_lss/Thomas/IOSSegData/clean/testCleanU",
-                   trainPath = "/Shared/gb_lss/Thomas/IOSSegData/clean/trainCleanU",
+                   testPath = "/Shared/gb_lss/Thomas/teeth3DS/scanData/upperPlyDecim016_split/test",
+                   trainPath = "/Shared/gb_lss/Thomas/teeth3DS/scanData/upperPlyDecim016_split/train",
                    batch_size = 1,
                    k = 32,
                    numWorkers = 8,

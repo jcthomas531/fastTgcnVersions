@@ -1,6 +1,6 @@
 
 #
-runNote = "first warm start attempt, using 30 teeth3ds to train and 10 to test, 100 epochs, upper arch"
+runNote = "warmstartTest2, half and half base and no base teeth3ds scans, 100 epochs, upper arch"
 #
 
 
