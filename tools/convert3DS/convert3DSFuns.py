@@ -14,7 +14,7 @@ import sys
 sys.path.append("/Users/jthomas48/dissModels/fastTgcnVersions/tools")
 from plyFunctions import colorNumFrame
 from plyfile import PlyData, PlyElement
-sys.path.append("/Users/jthomas48/fastTgcnVersions/tools/decimation")
+sys.path.append("/Users/jthomas48/dissModels/fastTgcnVersions/tools/decimation")
 import meshDecimation as d
 import pyvista as pv
 
