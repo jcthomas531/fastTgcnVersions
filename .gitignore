@@ -25,3 +25,4 @@ tools/x_archive/
 tools/convert3DS/__pycache__/
 tools/decimation/__pycache__/
 tools/convert3DS/x_archive/
+tools/registration/__pycache__/
