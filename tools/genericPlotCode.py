@@ -5,15 +5,18 @@ import os
 
 
 
-dir1 = "Y:/dissModels/fastTgcnVersions/fastTgcnEasy/modelOutputs/2026_03_12 teeth3dsPartialTrain/pred_global"
+dir1 = "Y:/dissModels/fastTgcnVersions/fastTgcnEasy/modelOutputs/2026_03_18 t3dsTrain1/pred_global"
 os.chdir(dir1)
-pf.readAndPlot("00OMSZGW_UDecim016.ply", "U")
-
-
 aaa = os.listdir()
 for i in range(len(aaa)):
     pf.readAndPlot(aaa[i], "U")
     
+
+
+
+
+
+
 dir2 = "K:/testDir/warmStartTestData/train" 
 os.chdir(dir2)
 aaa = os.listdir()
