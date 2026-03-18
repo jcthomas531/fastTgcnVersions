@@ -72,8 +72,10 @@ import random
 #if this can run fine, it would be nice to be able have the outputs labeled with
 #the arch as well
 
+#modelPath takes a character that is a file path to a saved model instance from
+#a previous training
 
-def fastTgcnWarm(arch, testPath, trainPath, batch_size = 1, k = 32,
+def fastTgcnWarm(arch, testPath, trainPath, modelPath, batch_size = 1, k = 32,
                  numWorkers = 8, epochs = 301):
     
     
@@ -200,7 +202,7 @@ def fastTgcnWarm(arch, testPath, trainPath, batch_size = 1, k = 32,
     model = Baseline(in_channels=12, output_channels=17)
     model.cuda()
     #UPDATES START HERE FOR WARM START
-    modelPath = "/Users/jthomas48/dissModels/fastTgcnVersions/fastTgcnEasy/modelOutputs/2026_01_27 full upper/checkpointsAndLogs/checkpoints/coordinate_220_0.917194.pth"
+    #modelPath = "/Users/jthomas48/dissModels/fastTgcnVersions/fastTgcnEasy/modelOutputs/2026_01_27 full upper/checkpointsAndLogs/checkpoints/coordinate_220_0.917194.pth"
     state = torch.load(modelPath, map_location="cuda", weights_only=True) #difference here from the tutorial is moving this to the gpu
     model.load_state_dict(state, strict=False)
     #UPDATES END HERE FOR WARM START
