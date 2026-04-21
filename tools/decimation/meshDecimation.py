@@ -26,8 +26,11 @@ def myDecimate(inFile,
     #with other methods or settings of decimation
     #heres a good tutorial on decimation with pyvista https://docs.pyvista.org/examples/01-filter/decimate.html
     
+    #changing this to decimate_pro to match what I did with the teeth3ds data
+    
+    
     #perform decimation
-    meshDec = meshOrig.decimate(reduct)
+    meshDec = meshOrig.decimate_pro(reduct)
     print(inFile, ": Mesh decimated from ", nFaceOrig, " to ",
           meshDec.n_faces_strict, " faces.",
           sep="")
@@ -48,6 +51,7 @@ def myDecimate(inFile,
 #decimate function specifically designed for use in the tooth3DS conversion process
 #it is essentially just decimate pro with reduction calc and the function accepts
 #a pyvista object instead of a file path so it could be used for other things too
+#using decimate pro to retain point labels (if i am remembering correctly)
 def decimate3DS(x, nFace = 16000):
     #number of faces in input mesh
     nFaceOrig = x.n_faces_strict
