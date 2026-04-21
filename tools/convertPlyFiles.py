@@ -10,7 +10,7 @@
 
 
 import sys
-sys.path.append("/Users/jthomas48/dissModels/fastTgcnVersions/tools")
+sys.path.append("/Users/jthomas48/dissModels/intraoralSegmentation/tools")
 # import plyFunctions as pf
 import numpy as np
 from  plyfile import PlyData, PlyElement
