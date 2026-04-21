@@ -1,12 +1,12 @@
 #allow imports from other directory
 import sys
-sys.path.append("/Users/jthomas48/dissModels/fastTgcnVersions/fastTgcnEasy/")
+sys.path.append("/Users/jthomas48/dissModels/intraoralSegmentation/fastTgcnEasy/")
 
 
 
-#path to where test ply files stored
-path1 = "/Shared/gb_lss/Thomas/iowaRme/test1"
-#path1 = "/Shared/gb_lss/Thomas/IOSSegData/clean/testCleanU"
+#path to where test ply files stored (SHOULD THIS BE WHERE THE NEW FILES ARE OR WHERE THE ORIGINAL TESTS FILES WHERE)
+path1 = "/Shared/gb_lss/Thomas/iowaRme/testDir/test1"
+#path1 = "/Shared/gb_lss/Thomas/trainTestSets/teeth3dsDecim016/test - Copy"
 
 
 
@@ -21,7 +21,7 @@ loader1 = DataLoader(set1, batch_size=1, shuffle=True, num_workers=8)
 from Baseline import Baseline
 model1 = Baseline(in_channels=12, output_channels=17)
 import torch
-modelPath = "/Users/jthomas48/dissModels/fastTgcnVersions/fastTgcnEasy/modelOutputs/2026_01_27 full upper/checkpointsAndLogs/checkpoints/coordinate_220_0.917194.pth"
+modelPath = "/Users/jthomas48/dissModels/intraoralSegmentation/fastTgcnEasy/modelOutputs/2026_04_21 teeth3dsFullTrainDecim016/checkpointsAndLogs/checkpoints/coordinate_140_0.939648.pth"
 # model1.load_state_dict(torch.load(modelPath, weights_only=True))
 # model1.cuda() #move model to gpu
 # model1.eval()
@@ -64,7 +64,7 @@ from loss import IoULoss, DiceLoss
 model = model1
 loader = loader1
 arch = "u"
-plyPath="/Shared/gb_lss/Thomas/iowaRme/test1PredD/"
+plyPath="/Shared/gb_lss/Thomas/iowaRme/testDir/test1PredD"
 num_classes=17
 generate_ply=True
 
