@@ -1,61 +1,35 @@
 import sys
-sys.path.append("Y:/dissModels/fastTgcnVersions/tools")
+sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
 import plyFunctions as pf
 import os
 
 
 
-
 #RME prediction
-os.chdir("K:/iowaRme/test1PredA/")
-pf.readAndPlot(file = "decimIowa.ply", 
-               arch = "U")
-os.chdir("K:/iowaRme/test1PredA/")
-pf.readAndPlot(file = "001_U.ply", 
+
+os.chdir("K:/iowaRme/testDir/test1")
+pf.readAndPlot(file = "pat058u_01CONV2.ply", 
                arch = "U")
 
-os.chdir("K:/iowaRme/test1PredB/")
-pf.readAndPlot(file = "decimIowa.ply", 
-               arch = "U")
-os.chdir("K:/iowaRme/test1PredB/")
-pf.readAndPlot(file = "001_U.ply", 
+os.chdir("K:/iowaRme/testDir/test1PredD/")
+pf.readAndPlot(file = "pat058u_01CONV2.ply", 
                arch = "U")
 
-
-os.chdir("K:/iowaRme/test1PredC/")
-pf.readAndPlot(file = "decimIowa.ply", 
-               arch = "U")
-os.chdir("K:/iowaRme/test1PredC/")
-pf.readAndPlot(file = "001_U.ply", 
-               arch = "U")
-pf.readAndPlot(file = "Y:/dissModels/fastTgcnVersions/fastTgcnEasy/modelOutputs/2026_01_27 full upper/pred_global/001_U.ply", 
-               arch = "U")
-#not exactly the same but pretty darn close
-
-
-
-os.chdir("K:/iowaRme/test1PredD/")
-pf.readAndPlot(file = "decimIowa.ply", 
-               arch = "U")
-os.chdir("K:/iowaRme/test1PredD/")
-pf.readAndPlot(file = "001_U.ply", 
-               arch = "U")
-os.chdir("K:/iowaRme/test1PredD/")
-pf.readAndPlot(file = "decimIowaRegistered.ply", 
-               arch = "U")
-
-
-#iosSeg prediction
-os.chdir("K:/iowaRme/test1Pred/")
-pf.readAndPlot(file = "001_U.ply", 
+os.chdir("Y:/dissModels/intraoralSegmentation/fastTgcnEasy/modelOutputs/2026_04_21 teeth3dsFullTrainDecim016/pred_global")
+pf.readAndPlot(file = "pat058u_01CONV2.ply", 
                arch = "U")
 
 
 
-#prediction used in modeling process, iosSeg
-os.chdir("Y:/dissModels/fastTgcnVersions/fastTgcnEasy/modelOutputs/2026_01_27 full upper/pred_global")
-pf.readAndPlot(file = "001_U.ply", 
+
+
+
+
+os.chdir("K:/trainTestSets/teeth3dsDecim016/test")
+pf.readAndPlot(file = "0JN50XQR_UDecim016.ply", 
                arch = "U")
+
+
 
 
 import pyvista as pv
