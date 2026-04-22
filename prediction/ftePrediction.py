@@ -4,7 +4,7 @@ import fastTgcnEasyPredictFun as ftep
 
 
 
-ftep.fastTgcnEasyPredict(inDir = "/Shared/gb_lss/Thomas/iowaRme/testDir/test2",
-                         outDir = "/Shared/gb_lss/Thomas/iowaRme/testDir/test2PredD",
-                         modelPath = "/Users/jthomas48/dissModels/intraoralSegmentation/fastTgcnEasy/modelOutputs/2026_04_21 teeth3dsFullTrainDecim016/checkpointsAndLogs/checkpoints/coordinate_140_0.939648.pth"
+ftep.fastTgcnEasyPredict(inDir = "/Shared/gb_lss/Thomas/iowaRme/testDir/segTestInput",
+                         outDir = "/Shared/gb_lss/Thomas/iowaRme/testDir/segTestOutput",
+                         modelPath = "/Users/jthomas48/dissModels/intraoralSegmentation/fastTgcnEasy/modelOutputs/2026_04_21 fullT3dsDec016/checkpointsAndLogs/checkpoints/coordinate_140_0.939648.pth"
                          )

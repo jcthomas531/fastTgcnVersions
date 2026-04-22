@@ -7,23 +7,26 @@ import os
 
 #RME prediction
 
-os.chdir("K:/iowaRme/testDir/test1")
+
+os.listdir()
+os.chdir("K:/iowaRme/testDir/")
+for i in range(5):
+    pathIn = "segTestInput/" + os.listdir("segTestInput")[i]
+    pathOut = "segTestOutput/" + os.listdir("segTestOutput")[i]
+    pf.readAndPlot(file = pathIn, 
+                   arch = "U")
+    pf.readAndPlot(file = pathOut, 
+                   arch = "U")
+
+
+
+os.chdir("K:/iowaRme/testDir/segTestInput")
 pf.readAndPlot(file = "pat058u_01CONV2.ply", 
                arch = "U")
 
-os.chdir("K:/iowaRme/testDir/test1PredD/")
-pf.readAndPlot(file = "pat058u_01CONV2.ply", 
+os.chdir("K:/iowaRme/testDir/segTestOutput/")
+pf.readAndPlot(file = "pat055u_01_dec016Form.ply", 
                arch = "U")
-
-os.chdir("Y:/dissModels/intraoralSegmentation/fastTgcnEasy/modelOutputs/2026_04_21 teeth3dsFullTrainDecim016/pred_global")
-pf.readAndPlot(file = "pat058u_01CONV2.ply", 
-               arch = "U")
-
-
-
-
-
-
 
 os.chdir("K:/trainTestSets/teeth3dsDecim016/test")
 pf.readAndPlot(file = "0JN50XQR_UDecim016.ply", 
