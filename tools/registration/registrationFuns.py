@@ -213,6 +213,46 @@ def registerAndExport(inFile, outFile, trans):
 # pf.readAndPlot(iossegPath, "U")
 
 
+###############################################################################
+#A FUNCTION TO RUN THE WHOLE REGISTRATION PROCESS
+###############################################################################
+
+#source: what is being transformed
+#target: the base for the registration
+#REMEMBER TO SET A SEED, THIS PROCESS DOES NOT APPEAR DETERMINISTIC
+#
+#REALLY IMPORTANT THING TO NOTE: REGISTERED SCAN HAS 6 LESS VERTICES THAN NON_REGISTERED
+#WHERE ARE THEY GOING
+#
+
+#targetFile: path the target mesh
+#sourceFile: path to the source mesh
+#registerFile: where the registered source file should be saved to
+def fullRegistFlow(targetFile, sourceFile, registerFile):
+    #bring in the meshs as point clouds
+    targetCloud = o3d.io.read_point_cloud(targetFile)
+    sourceCloud = o3d.io.read_point_cloud(sourceFile)
+    #obtrain the registration transformation
+    reg = getRegistration(source = sourceCloud, target=targetCloud)
+    #register as meshes and export
+    registerAndExport(inFile = sourceFile, outFile = registerFile, trans = reg.transformation)
 
 
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
