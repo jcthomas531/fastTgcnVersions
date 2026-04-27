@@ -57,26 +57,45 @@ for i in range(len(allPats)):
     #input files
     #paths and file names for original stls
     #directory of original files for the patient
-    patDir = "K:/iowaRme/preDelivAndFinalScans/originalStl/" +  pati +"/"
-    #find file name of upper scan for pre delivery scan
-    preDInNameList = [i for i in os.listdir(patDir) if re.search("u\.stl$", i)]
-    #find file name of upper scan for final scane
-    finInNameList = [i for i in os.listdir(patDir + "final/") if re.search("u\.stl$", i)]
+    patPreDDir = "K:/iowaRme/preDelivAndFinalScans/originalStl/" +  pati +"/"
+    patFinDir = patPreDDir + "final/"
+    
     
     ##########
     #perform the conversion
     ##########
+    
+    ###
+    #for pre delivery conversion
+    ###
+    
+    #if the directory doesnt exist, we want to move to the next iteration
+    #if this directory doesnt exist, then the sub dir "final" will not exist so
+    #this will not cause problems downstream
+    if not os.path.isdir(patPreDDir):
+        logging.warning(pati + ": directory does not exist")
+        continue
+    
+    #find file name of upper scan for pre delivery scan
+    preDInNameList = [i for i in os.listdir(patPreDDir) if re.search("u\.stl$", i)]
     
     #for pre delivery scan
     if len(preDInNameList) == 1:
         #extract file name
         preDInName = preDInNameList[0]
         #append to file path
-        preDInFilePath = patDir + preDInName
-        #perform conversion to ply
-        csp.convertRmeStlToPly(inFile = preDInFilePath,
-                               outFile = preDOutFilePath)
-        logging.warning(".")
+        preDInFilePath = patPreDDir + preDInName
+        #check to make sure ply file doesnt already exist here
+        #this really should be governed by a function arguement for overwritting 
+        #but we can add that at a later time if this needs to be done again
+        if not os.path.isfile(preDOutFilePath):
+            #perform conversion to ply
+            csp.convertRmeStlToPly(inFile = preDInFilePath,
+                                   outFile = preDOutFilePath)
+            logging.warning(".")
+        else:
+            logging.warning(pati + ": pre-delivery upper scan conversion already performed")
+        
     elif len(preDInNameList) == 0:
         logging.warning(pati + ": pre-delivery upper scan not found")
     elif len(preDInNameList) > 1:
@@ -84,19 +103,40 @@ for i in range(len(allPats)):
     else:
         logging.warning(pati + ": pre-delivery upper scan, unknown file issue")
         
+    
+    
+    
+    
+    ###
+    #for final scan conversion
+    ###
+    #if the "final" directory doesnt exist, we want to move on to the next iteration
+    if not os.path.isdir(patFinDir):
+        logging.warning(pati + ": 'final' subdirectory does not exist")
+        continue
+    
+    #find file name of upper scan for final scan
+    finInNameList = [i for i in os.listdir(patFinDir) if re.search("u\.stl$", i)]
+        
     #for final scan
     if len(finInNameList) == 1:
         #extract file name
         finInName = finInNameList[0]
         #append to file path
-        finInFilePath = patDir + "final/" + finInName
-        #perform conversion to ply
-        csp.convertRmeStlToPly(inFile = finInFilePath,
-                               outFile = finOutFilePath)
-        logging.warning(".")
-    elif len(preDInNameList) == 0:
+        finInFilePath = patFinDir + finInName
+        #check to make sure ply file doesnt already exist here
+        #this really should be governed by a function arguement for overwritting 
+        #but we can add that at a later time if this needs to be done again
+        if not os.path.isfile(finOutFilePath):
+            #perform conversion to ply
+            csp.convertRmeStlToPly(inFile = finInFilePath,
+                                   outFile = finOutFilePath)
+            logging.warning(".")
+        else:
+            logging.warning(pati + ": final upper scan conversion already performed")
+    elif len(finInNameList) == 0:
         logging.warning(pati + ": final upper scan not found")
-    elif len(preDInNameList) > 1:
+    elif len(finInNameList) > 1:
         logging.warning(pati + ": multiple final upper scans found")
     else:
         logging.warning(pati + ": final upper scan, unknown file issue")
