@@ -4,7 +4,7 @@
 A lot of this stuff was created before I had a unified method for converting files so there are things that are a bit of a mess. To help with that, I have tried to reorganize to only have the most important and general function in the front but this comes at the cost of probably breaking some old file paths. 
 
 Generally, all formatting and exporting should be handled by the formatAndExport.py file
-Generally, all the decimation should be handled by the decim function in decimation/meshDecimation.py
+Generally, all the decimation should be handled by the decim function in decimation/decimationFuns.py
 
 Directory for holding functions and scripts that are useful in the segmentation and measurement process.
 

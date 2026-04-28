@@ -14,6 +14,7 @@ import numpy as np
 #NOTE
 #there seems to be something non-deterministic about this process, set seed when using
 
+#see some previous work in tools/x_archive/registration
 
 
 ###############################################################################
