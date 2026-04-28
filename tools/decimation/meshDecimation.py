@@ -2,6 +2,8 @@
 
 
 import pyvista as pv
+import trimesh
+
 
 def myDecimate(inFile, 
                outFile,
@@ -63,3 +65,55 @@ def decimate3DS(x, nFace = 16000):
     xDec = x.decimate_pro(reduct)
     
     return(xDec)
+
+
+
+#this deimate function is designed to supercede the two above decimate functions
+#it will read in a ply file, decimate it, and return a trimesh object that can then 
+#either be exported or worked with further
+#
+#inFile, the ply file to be decimated
+#nFace, the number of faces to decimate to
+def decim(inFile, nFace = 16000):
+    #read in file
+    meshOrig = pv.read(inFile)
+    
+    #number of faces in input mesh
+    nFaceOrig = meshOrig.n_faces_strict
+    
+    #get reduction proportion using desired number of faces
+    reduct = 1-(nFace/nFaceOrig)
+    
+    #perform decimation
+    meshDec = meshOrig.decimate_pro(reduct)
+    
+    #transform to a trimesh
+    trimeshDec = pv.to_trimesh(meshDec)
+    
+    return trimeshDec
+
+#example
+# mesh1 = decim("K:/iowaRme/preDelivAndFinalScans/preDelivScanU/fullScans/pat001u_preD.ply")
+# import sys
+# sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+# import formatAndExport as fe
+# m1Vert, m1Face = fe.trimeshToDfNoLabels(mesh1)
+# fe.dfToPlyExport(vertDf = m1Vert,
+#                  faceDf = m1Face,
+#                  outFile = "K:/iowaRme/testDir/decimTest.ply")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
