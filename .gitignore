@@ -26,3 +26,5 @@ tools/decimation/__pycache__/
 tools/convert3DS/x_archive/
 tools/registration/__pycache__/
 .snakemake/
+dag.png
+rulegraph.png
