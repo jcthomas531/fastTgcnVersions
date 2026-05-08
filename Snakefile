@@ -128,9 +128,9 @@ rule all:
         #iowaRme fin upper scan plys decimated to 16000 faces
         expand(finDec016ScanDir + "{finPat}u_fin_dec016.ply", finPat = patNamesFin),
         #iowaRme preD upper decimated scans oriented to teeth3ds training data
-        expand(preDDec016OriScanDir + "{preDPat}u_preD_dec016Ori.ply", preDPat = patNamesPreD)
+        expand(preDDec016OriScanDir + "{preDPat}u_preD_dec016Ori.ply", preDPat = patNamesPreD),
         #iowaRme fin upper decimated scans oriented to teeth3ds training data
-        
+        expand(finDec016OriScanDir + "{finPat}u_fin_dec016Ori.ply", finPat = patNamesFin)
 
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
@@ -194,14 +194,30 @@ rule produceFinDec016Scans:
 
 
 #iowaRme
-#orient iowaRme scans in direction of teeth3ds training data
+#orient preD iowaRme scans in direction of teeth3ds training data
 rule orientPreDDec016Scans:
     input:
-        infile = preDDec016ScanDir + "{preDPat}u_preD_dec016.ply",
+        inFile = preDDec016ScanDir + "{preDPat}u_preD_dec016.ply",
         script = "tools/processes/orientToTeeth3DS.py",
         deps = orientTeeth3DSDepends
     output:
         outFile = preDDec016OriScanDir + "{preDPat}u_preD_dec016Ori.ply"
+    shell:
+        """
+        python {input.script} "{input.inFile}" "{output.outFile}"
+        """
+
+
+
+#iowaRme
+#orient fin iowaRme scans in direction of teeth3ds training data
+rule orientFinDec016Scans:
+    input:
+        inFile = finDec016ScanDir + "{finPat}u_fin_dec016.ply",
+        script = "tools/processes/orientToTeeth3DS.py",
+        deps = orientTeeth3DSDepends
+    output:
+        outFile = finDec016OriScanDir + "{finPat}u_fin_dec016Ori.ply"
     shell:
         """
         python {input.script} "{input.inFile}" "{output.outFile}"
