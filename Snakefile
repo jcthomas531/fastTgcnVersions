@@ -100,11 +100,21 @@ finFullScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/fullScans/"
 finDec016ScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016Scans/"
 finDec016OriScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016OriScans/"
 
+
+#dependency lists
+stlConvertNoLabsDepends = ["tools/stlToPlyFuns.py"]
+decimNoLabsDepends = ["tools/decimationFuns.py", "tools/formatAndExportFuns.py"]
+
+
+###############################################################################
+##################################BEGIN RULES##################################
+###############################################################################
+
 #rule specifying what is required to exist
 rule all:
     input:
-		#require the following things to exist
-		#the wildcard {name} and what it stands for (given by the second expant arg) is passed
+        #require the following things to exist
+        #the wildcard {name} and what it stands for (given by the second expant arg) is passed
         #to any rule associated with this file
         #iowaRme:
         #upper scans converted from the original stls
@@ -116,8 +126,6 @@ rule all:
         expand(preDDec016ScanDir + "{preDPat}u_preD_dec016.ply", preDPat = patNamesPreD),
         #iowaRme fin upper scan plys decimated to 16000 faces
         expand(finDec016ScanDir + "{finPat}u_fin_dec016.ply", finPat = patNamesFin)
-        
-
 
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
@@ -127,7 +135,8 @@ rule convertPreDStlToPly:
     input: 
         #using preD stl helper function which makes use of wildcards
         inFile = getOrigStlPreD,
-        script = "tools/processes/stlToPly_noLabs.py"
+        script = "tools/processes/stlToPly_noLabs.py",
+        deps = stlConvertNoLabsDepends
     output:
         outFile = preDFullScanDir + "{preDPat}u_preD.ply"
     shell:
@@ -139,7 +148,8 @@ rule convertPreDStlToPly:
 rule convertFinStlToPly:
     input:
         inFile = getOrigStlFin,
-        script = "tools/processes/stlToPly_noLabs.py"
+        script = "tools/processes/stlToPly_noLabs.py",
+        deps = stlConvertNoLabsDepends
     output:
         outFile = finFullScanDir + "{finPat}u_fin.ply"
     shell:
@@ -151,15 +161,16 @@ rule convertFinStlToPly:
 #iowaRme
 #decimate preD scans
 rule producePreDDec016Scans:
-	input:
-		inFile = preDFullScanDir + "{preDPat}u_preD.ply",
-		script = "tools/processes/fullScanDecim_noLabs.py"
-	output:
-		outFile = preDDec016ScanDir + "{preDPat}u_preD_dec016.ply"
-	shell:
-		"""
-		python {input.script} "{input.inFile}" "{output.outFile}"
-		"""
+    input:
+        inFile = preDFullScanDir + "{preDPat}u_preD.ply",
+        script = "tools/processes/fullScanDecim_noLabs.py",
+        deps = decimNoLabsDepends
+    output:
+        outFile = preDDec016ScanDir + "{preDPat}u_preD_dec016.ply"
+    shell:
+        """
+        python {input.script} "{input.inFile}" "{output.outFile}"
+        """
 
 
 #iowaRme
@@ -167,7 +178,8 @@ rule producePreDDec016Scans:
 rule produceFinDec016Scans:
     input:
         inFile = finFullScanDir + "{finPat}u_fin.ply",
-        script = "tools/processes/fullScanDecim_noLabs.py"
+        script = "tools/processes/fullScanDecim_noLabs.py",
+        deps = decimNoLabsDepends
     output:
         outFile = finDec016ScanDir + "{finPat}u_fin_dec016.ply"
     shell:
