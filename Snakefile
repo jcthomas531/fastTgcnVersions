@@ -95,19 +95,29 @@ def getOrigStlFin(wildcards):
 preDFullScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/fullScans/"
 preDDec016ScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016Scans/"
 preDDec016OriScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016OriScans/"
+#fin files and directories
+finFullScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/fullScans/"
+finDec016ScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016Scans/"
+finDec016OriScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016OriScans/"
 
-
-
-#iowaRme: require all full scans converted from stl files
+#rule specifying what is required to exist
 rule all:
     input:
 		#require the following things to exist
-		#the wildcard /{name} and what it stands for (given by names) is passed to any rule associated with this file
-        #iowaRme preD upper scan plys converted from original stls
-        expand(preDFullScanDir + "/{preDPat}u_preD.ply", preDPat = patNamesPreD),
+		#the wildcard {name} and what it stands for (given by the second expant arg) is passed
+        #to any rule associated with this file
+        #iowaRme:
+        #upper scans converted from the original stls
+        #preD
+        expand(preDFullScanDir + "{preDPat}u_preD.ply", preDPat = patNamesPreD),
+        #fin
+        expand(finFullScanDir + "{finPat}u_fin.ply", finPat = patNamesFin),
         #iowaRme preD upper scan plys decimated to 16000 faces
-        expand(preDDec016ScanDir + "/{preDPat}u_preD_dec016.ply", preDPat = patNamesPreD)
+        expand(preDDec016ScanDir + "{preDPat}u_preD_dec016.ply", preDPat = patNamesPreD),
+        #iowaRme fin upper scan plys decimated to 16000 faces
+        expand(finDec016ScanDir + "{finPat}u_fin_dec016.ply", finPat = patNamesFin)
         
+
 
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
@@ -119,23 +129,50 @@ rule convertPreDStlToPly:
         inFile = getOrigStlPreD,
         script = "tools/processes/stlToPly_noLabs.py"
     output:
-        outFile = preDFullScanDir + "/{preDPat}u_preD.ply"
+        outFile = preDFullScanDir + "{preDPat}u_preD.ply"
     shell:
         """
         python {input.script} "{input.inFile}" "{output.outFile}"
         """
 
-
+#iowaRme: convert original final scan stls to plys
+rule convertFinStlToPly:
+    input:
+        inFile = getOrigStlFin,
+        script = "tools/processes/stlToPly_noLabs.py"
+    output:
+        outFile = finFullScanDir + "{finPat}u_fin.ply"
+    shell:
+        """
+        python {input.script} "{input.inFile}" "{output.outFile}"
+        """
+        
+        
+#iowaRme
+#decimate preD scans
 rule producePreDDec016Scans:
 	input:
-		inFile = preDFullScanDir + "/{preDPat}u_preD.ply",
+		inFile = preDFullScanDir + "{preDPat}u_preD.ply",
 		script = "tools/processes/fullScanDecim_noLabs.py"
 	output:
-		outFile = preDDec016ScanDir + "/{preDPat}_dec016.ply"
+		outFile = preDDec016ScanDir + "{preDPat}u_preD_dec016.ply"
 	shell:
 		"""
 		python {input.script} "{input.inFile}" "{output.outFile}"
 		"""
 
+
+#iowaRme
+#decimate fin scans
+rule produceFinDec016Scans:
+    input:
+        inFile = finFullScanDir + "{finPat}u_fin.ply",
+        script = "tools/processes/fullScanDecim_noLabs.py"
+    output:
+        outFile = finDec016ScanDir + "{finPat}u_fin_dec016.ply"
+    shell:
+        """
+        python {input.script} "{input.inFile}" "{output.outFile}"
+        """
 
 
