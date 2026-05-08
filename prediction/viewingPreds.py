@@ -8,15 +8,14 @@ import os
 #RME prediction
 
 
-os.listdir()
-os.chdir("K:/iowaRme/testDir/")
-for i in range(5):
-    pathIn = "segTestInput/" + os.listdir("segTestInput")[i]
-    pathOut = "segTestOutput/" + os.listdir("segTestOutput")[i]
-    pf.readAndPlot(file = pathIn, 
-                   arch = "U")
-    pf.readAndPlot(file = pathOut, 
-                   arch = "U")
+
+os.chdir("K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016Seg/")
+segFiles = os.listdir()
+for i in range(len(segFiles)):
+    filei = segFiles[i]
+    if filei.endswith("Ori.ply"):
+        pf.readAndPlot(file = filei, 
+                       arch = "U")
 
 
 
