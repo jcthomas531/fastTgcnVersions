@@ -1,8 +1,8 @@
 #!/bin/bash
 #$ -l ngpus=3
 #$ -pe smp 16
-#$ -o outputFiles/$JOB_ID_predOut3.o
-#$ -e outputFiles/$JOB_ID_predError3.e
+#$ -o outputFiles/$JOB_ID_predOut.o
+#$ -e outputFiles/$JOB_ID_predError.e
 
 
 
