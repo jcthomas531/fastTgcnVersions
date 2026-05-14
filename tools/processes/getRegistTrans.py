@@ -1,6 +1,6 @@
 import sys
 sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
-import plyToRegistTransfromation as prt
+import plyToRegistTransformation as prt
 import random
 import pickle
 random.seed(826)
@@ -8,14 +8,14 @@ random.seed(826)
 #pull variables from snakemake
 preDPath = sys.argv[1] #the preD scan, the target
 finPath = sys.argv[2] #the fin scan, the source
-outPath = sys.argv[3] #where to output the transformation
+outFile = sys.argv[3] #where to output the transformation
 
 #this registration will register on the entire arch
 regResult = prt.plyToRegistTransformation(targetFile = preDPath, sourceFile = finPath)
 
 #cannot export the entire object easily, just exporting transformation now but
 #can return here later to export more pieces of the object if they become necessary
-filePath = open(outPath, "wb")
+filePath = open(outFile, "wb")
 pickle.dump(obj = regResult.transformation,
             file = filePath)
 filePath.close()

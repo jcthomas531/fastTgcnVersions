@@ -11,6 +11,23 @@ import re
 origStlDir = "K:/iowaRme/preDelivAndFinalScans/originalStl/"
 allPats = os.listdir(origStlDir)
 
+#iowaRme:
+#preD files and directories
+preDFullScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/fullScans/"
+preDDec016ScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016Scans/"
+preDDec016OriScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016OriScans/"
+PreDDec016OriSegDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016OriSeg/"
+#fin files and directories
+finFullScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/fullScans/"
+finDec016ScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016Scans/"
+finDec016OriScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016OriScans/"
+finDec016OriSegDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016OriSeg/"
+#transformations for registering final scan to preD scan
+preDFinDec016TransDir = "K:/iowaRme/registTrans/preDFin_dec016/"
+
+
+
+
 ###############################################################################
 #iowRme
 #some patients may not have all of the files we need
@@ -45,6 +62,9 @@ for i in allPatsFinStlDir:
         finStlProper.append(finDirExists)
 #list of patient fin scans with upper files
 patNamesFin = [pats for pats, logic in zip(allPats, finStlProper) if logic]
+
+#finding the patients that have both a preD scan and a fin scan
+patNamesBoth = list(set(patNamesPreD) & set(patNamesFin))
 ###############################################################################
 
 
@@ -90,21 +110,47 @@ def getOrigStlFin(wildcards):
     return origStlFinFilePathDict[wildcards.finPat]
 ###############################################################################
 
-#iowaRme:
-#preD files and directories
-preDFullScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/fullScans/"
-preDDec016ScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016Scans/"
-preDDec016OriScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016OriScans/"
-#fin files and directories
-finFullScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/fullScans/"
-finDec016ScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016Scans/"
-finDec016OriScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016OriScans/"
+
+###############################################################################
+#iowaRme
+#i do not currently have a set up to make snake make run the actual segmentation process
+#because that involves using the HPC and i need to make an updated container 
+#for this that contains snake make. In the mean time, I will take care of the 
+#segementation manually 
+#since that is the case, we need to use a bit of a work around since we cannot require
+#the segmented plys to exist bc there is not rule that is able to make them
+#i am going to use a similar process to what is used in the first step with
+#the original stls
+
+#we will no longer need this when i have snakemake working on hpc
+
+#for preD scans
+#dictionary for segmented file paths
+preDDec016OriSegPath = [PreDDec016OriSegDir + i + "u_preD_dec016Ori_seg.ply" for i in patNamesPreD]
+preDDec016OriSegDict = dict(zip(patNamesPreD, preDDec016OriSegPath))
+#creating helper function to use with wildcards in rules section
+def getPreDDec016OriSeg(wildcards):
+    return preDDec016OriSegDict[wildcards.bothPat]
+
+
+#for fin scans
+#dictionary for segmented file paths
+finDec016OriSegPath = [finDec016OriSegDir + i + "u_fin_dec016Ori_seg.ply" for i in patNamesFin]
+finDec016OriSegDict = dict(zip(patNamesFin, finDec016OriSegPath))
+#creating helper function to use with wildcards in rules section
+def getFinDec016OriSeg(wildcards):
+    return finDec016OriSegDict[wildcards.bothPat]
+###############################################################################
+
+
+
 
 
 #dependency lists
 stlConvertNoLabsDepends = ["tools/stlToPlyFuns.py"]
 decimNoLabsDepends = ["tools/decimationFuns.py", "tools/formatAndExportFuns.py"]
 orientTeeth3DSDepends = ["tools/registrationFuns.py"]
+getRegistTransDepends = ["tools/plyToRegistTransformation.py", "tools/registrationFuns.py"]
 
 
 ###############################################################################
@@ -130,7 +176,9 @@ rule all:
         #iowaRme preD upper decimated scans oriented to teeth3ds training data
         expand(preDDec016OriScanDir + "{preDPat}u_preD_dec016Ori.ply", preDPat = patNamesPreD),
         #iowaRme fin upper decimated scans oriented to teeth3ds training data
-        expand(finDec016OriScanDir + "{finPat}u_fin_dec016Ori.ply", finPat = patNamesFin)
+        expand(finDec016OriScanDir + "{finPat}u_fin_dec016Ori.ply", finPat = patNamesFin),
+        #iowaRme transformations for registering fin scan to preD scan
+        expand(preDFinDec016TransDir + "{bothPat}u_registTrans_dec016.pkl", bothPat = patNamesBoth)
 
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
@@ -221,4 +269,21 @@ rule orientFinDec016Scans:
     shell:
         """
         python {input.script} "{input.inFile}" "{output.outFile}"
+        """
+
+
+
+#iowaRme
+#get transformations that register fin scan to preD scan
+rule getPreDFinRegistTrans:
+    input:
+        preDPath = getPreDDec016OriSeg,
+        finPath = getFinDec016OriSeg,
+        script = "tools/processes/getRegistTrans.py",
+        deps = getRegistTransDepends
+    output:
+        outFile = preDFinDec016TransDir + "{bothPat}u_registTrans_dec016.pkl"
+    shell:
+        """
+        python {input.script} {input.preDPath} {input.finPath} {output.outFile}
         """
