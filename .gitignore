@@ -28,3 +28,4 @@ tools/registration/__pycache__/
 .snakemake/
 dag.png
 rulegraph.png
+fastTgcnEasy/trainedModels/
