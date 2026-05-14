@@ -174,7 +174,7 @@ def registerAndExport(inFile, outFile, trans):
     mesh = trimesh.load(inFile)
     
     #apply transformation
-    meshTrans = mesh.apply_transform(trans)
+    meshTrans = mesh.apply_transform(trans) #this operation actually occurs in place so mesh is not longer usable as you might think it would be
     
     #attach face colors in a way that trimesh will export
     colors = meshTrans.visual.face_colors.astype(np.uint8)
