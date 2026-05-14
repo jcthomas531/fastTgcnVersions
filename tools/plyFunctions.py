@@ -308,103 +308,10 @@ def toothHigh(face, vertex, toothNums):
 
 ###############################################################################
 
-#function that calculates the centroids for all teethtype in the face data
-#its output is a dataframe and it includes "gum" centroid as well
-#designed to work in the workflow established by previous functions
-def toothCentroids(face, vertex):
-    #make a copy of the data sets so we dont edit in place
-    faceC = face.copy()
-    vertexC = vertex.copy()
-    #first we get all of the unique teeth in the face data
-    #i am going to keep "gum" in here, we can discard it later
-    uTeeth = faceC["toothNum"].unique()
-    #make a data frame to hold all of the centroids
-    centHolder = pd.DataFrame(np.nan, index=range(len(uTeeth)),
-                              columns=["toothNum", "x", "y", "z"])
-    centHolder["toothNum"] = uTeeth
-    #loop through all uTeeth values
-    for i in range(len(centHolder)):
-        toothi = centHolder["toothNum"][i]
-        #subset to only include observations with specified tooth num, then take just the vertex
-        #indices column, then "explode" the lists into individual values, then get just 
-        #the unique ones, then make it into a list
-        vertInd = faceC[faceC["toothNum"] == toothi]["vertex_indices"].explode().unique().tolist()
-        #now we want to take those indices and subset the vertex information to only 
-        #include those, also take only the x,y,z coordinate
-        vertVals = vertexC.iloc[vertInd,][["x", "y", "z"]]
-        #calculate and store the centriods
-        centHolder.iloc[i,range(1, 4)] = vertVals.mean()
-    
-    return centHolder
-
-#example
-# import os
-# os.chdir("P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\train")
-# l76 = plyRead("076_L.ply")
-# l76["face"] = toothVars(l76["face"], arch = "L")
-# tc = toothCentroids(face = l76["face"], vertex = l76["vert"])
-# #can then be visualized via
-# s1 = giveSurf(face = l76["face"], vertex = l76["vert"])
-# plotTest = pv.Plotter()
-# plotTest.add_mesh(s1, scalars = "rgba", rgb = True)
-# plotTest.add_points(np.array(tc.iloc[:,range(1,4)]),
-#                     color = "black", point_size=10,
-#                     render_points_as_spheres=True)
-# plotTest.show()
 
 
 
-###############################################################################
-#GET CENTROIDS FOR TWO SCANS
-###############################################################################
 
-#scan1File, scan2File are file paths to segmented (and ideally registered) meshes
-def  twoScanCentroids(scan1File, scan2File):
-    
-    #hard coding arch to U, can change later
-    scan1 = readAndFormat(scan1File, arch = "U")
-    scan2 = readAndFormat(scan2File, arch = "U")
-    
-    #calculate each scans centroids
-    scan1Cent = toothCentroids(face = scan1["face"], vertex = scan1["vert"])
-    scan2Cent = toothCentroids(face = scan2["face"], vertex = scan2["vert"])
-    
-    #give the two time points suffixes for their centroid location columns
-    toModify = scan1Cent.columns[range(1,4)] #this will be the same for both data frames
-    scan1Cent = scan1Cent.rename(columns={i: f"{i}_pre" for i in toModify})
-    scan2Cent = scan2Cent.rename(columns={i: f"{i}_post" for i in toModify})
-    
-    #it is possible based on incorrect segmentation that one scan will have a different
-    #number of segmented classes than another, i believe the arithmatic below will
-    #be able to handle missing values
-    
-    #since it is possible to have a different number of classes in the two data 
-    #frames, we must set the join up so that all of the classes are represented
-    if (len(scan1Cent) >=  len(scan1Cent)):
-        joinDirection = "left"
-    elif (len(scan1Cent) <  len(scan1Cent)):
-        joinDirection = "right"
-    else:
-        raise ValueError("Error in determining data frame lenghts prior to join")
-    
-    #join the two time points together
-    #pat055uBothCent = pat055u_01Cent.merge(pat055u_16Cent, on = "toothNum", how = "left")
-    scanBothCent = scan1Cent.merge(scan2Cent, on = "toothNum", how = joinDirection)
-    
-    #calculate the values for the distance vector between the two time points
-    scanBothCent["xDiff"] = scanBothCent["x_pre"] - scanBothCent["x_post"]
-    scanBothCent["yDiff"] = scanBothCent["y_pre"] - scanBothCent["y_post"]
-    scanBothCent["zDiff"] = scanBothCent["z_pre"] - scanBothCent["z_post"]
-    
-    #find the l2 norm of the distance vector
-    scanBothCent["l2Norm"] = (scanBothCent["xDiff"]**2 + scanBothCent["yDiff"]**2 + scanBothCent["zDiff"]**2) ** (1/2)
-    
-    #unit vector values for the distance vector
-    scanBothCent["xDiffUnit"] = scanBothCent["xDiff"]/scanBothCent["l2Norm"]
-    scanBothCent["yDiffUnit"] = scanBothCent["yDiff"]/scanBothCent["l2Norm"]
-    scanBothCent["zDiffUnit"] = scanBothCent["zDiff"]/scanBothCent["l2Norm"]
-    
-    return scanBothCent
 
 
 
