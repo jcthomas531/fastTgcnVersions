@@ -22,9 +22,10 @@ finFullScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/fullScans/"
 finDec016ScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016Scans/"
 finDec016OriScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016OriScans/"
 finDec016OriSegDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016OriSeg/"
-#transformations for registering final scan to preD scan
+#directories for transformations for registering final scan to preD scan
 preDFinDec016TransDir = "K:/iowaRme/registTrans/preDFin_dec016/"
-
+#centroid and distance directories
+preDFunDec016DistDir = "K:/iowaRme/movement/preDFin_dec016/"
 
 
 
@@ -151,7 +152,7 @@ stlConvertNoLabsDepends = ["tools/stlToPlyFuns.py"]
 decimNoLabsDepends = ["tools/decimationFuns.py", "tools/formatAndExportFuns.py"]
 orientTeeth3DSDepends = ["tools/registrationFuns.py"]
 getRegistTransDepends = ["tools/plyToRegistTransformation.py", "tools/registrationFuns.py"]
-
+centroidAndMeasureDepends = ["tools/trimeshToDf_labels.py", "tools/plyFunctions.py", "tools/centroidDistance.py", "tools/toothCentroids.py"]
 
 ###############################################################################
 ##################################BEGIN RULES##################################
@@ -178,7 +179,9 @@ rule all:
         #iowaRme fin upper decimated scans oriented to teeth3ds training data
         expand(finDec016OriScanDir + "{finPat}u_fin_dec016Ori.ply", finPat = patNamesFin),
         #iowaRme transformations for registering fin scan to preD scan
-        expand(preDFinDec016TransDir + "{bothPat}u_registTrans_dec016.pkl", bothPat = patNamesBoth)
+        expand(preDFinDec016TransDir + "{bothPat}u_registTrans_dec016.pkl", bothPat = patNamesBoth),
+        #iowaRme centroid and distance data
+        expand(preDFunDec016DistDir + "{bothPat}u_dist_dec016.csv", bothPat = patNamesBoth)
 
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
@@ -286,4 +289,22 @@ rule getPreDFinRegistTrans:
     shell:
         """
         python {input.script} {input.preDPath} {input.finPath} {output.outFile}
+        """
+
+
+
+#iowaRme
+#get distance and centroid data for preD and fin scans
+rule getPreDFinDist:
+    input:
+        preDPath = getPreDDec016OriSeg,
+        finPath = getFinDec016OriSeg,
+        transPath = preDFinDec016TransDir + "{bothPat}u_registTrans_dec016.pkl",
+        script = "tools/processes/centroidAndMeasure.py",
+        deps = centroidAndMeasureDepends
+    output:
+        outFile = preDFunDec016DistDir + "{bothPat}u_dist_dec016.csv"
+    shell:
+        """
+        python {input.script} {input.preDPath} {input.finPath} {input.transPath} {output.outFile}
         """
