@@ -1,0 +1,242 @@
+---
+title: "GP sandbox"
+author: "J. C. Thomas"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document:
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+here::i_am("gaussianProcess/1dimGp/1dGpTrial.Rmd")
+library(here)
+dir1Dim <- here("gaussianProcess/1dimGp/")
+knitr::opts_chunk$set(echo = TRUE, comment = NULL)
+set.seed(826)
+library(rstan)
+library(simstudy)
+#https://cran.r-project.org/web/packages/simstudy/vignettes/corelationmat.html
+library(mvtnorm)
+library(corrplot)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(invgamma)
+```
+
+Trial of using Gaussian process on simulated 1d tooth movement data with simple proximity-based correlation. Correlation is based on tooth order (ie 1-16) not literal proximity in 3d space. Ignoring symmetry based correlation.
+
+Ideas:
+
+* Would be interested to see how these models that fit using a covariance function compare to using just the identity matrix. The hope is that they will be better, however, if they are not, then we are estimating too many parameters. If this is done for the simulated data here, the covariance may be overshadowed by the high amount of signal, potentially leading to the covariance not being as important as it would be in a true setting.
+
+
+
+\newpage
+
+# Data generation
+
+Starting by setting up the true correlation matrix, 16x16, describing the relationship of each tooth in the upper arch with each other tooth in the upper arch. To describe the decaying proximity-based correlation, will use AR1.
+
+See https://cran.r-project.org/web/packages/simstudy/vignettes/corelationmat.html for information of generating the covariance matrix.
+
+Drawing 100 samples of 16 teeth, ie 100 patients
+
+Plotting true correlation matrix with the observed correlation matrix to ensure it is as expected
+
+```{r}
+#true cor matrix
+cor1 <- genCorMat(16, rho = .7, corstr = "ar1")
+
+#draw 100 samples of 16 teeth, ie 100 patients
+#sigma matrix is just cor matrix here, is sd multiplier is 1
+aaa <- rmvnorm(100, mean = c(8:1, 1:8), sigma = cor1)
+#another way the data could be generated
+#genCorGen(100, nvars = 16, dist = "normal", params1 = c(8:1, 1:8), params2 = 1, corMatrix = cor1)
+
+par(mfrow=c(1, 2))
+corrplot(cor(aaa), main = "observed", mar=c(5,4,4,2))
+corrplot(cor1, main = "True", mar=c(5,4,4,2))
+par(mfrow=c(1, 1))
+```
+
+Setting up the data in a reasonable format. Plot of patient trends for a small subset of the data.
+
+```{r}
+#giving ids and making into long format
+aaa <- as.data.frame(aaa)
+aaa$id <- 1:nrow(aaa)
+longDat <- aaa |>
+  tidyr::pivot_longer(names_to = "tooth",
+                      cols = !id,
+                      values_to = "dist") |>
+  mutate(tooth = str_extract(tooth, "[0-9]+$") |> as.numeric())
+#example of entire observed data
+#plot(dist ~ tooth, data = longDat, main = "all observed data")
+
+#subset to a few observations
+sampIds <- sample(1:nrow(aaa), 10)
+datSmall <- longDat |>
+  filter(id %in% sampIds)
+#scatter plot of smaller sample of data
+#plot(dist ~ tooth, data = datSmall, main = "subset of observed data")
+
+#plot of patient trends in smaller sample of data
+datSmall |> 
+  ggplot(aes(x = tooth, y = dist, color = as.character(id))) +
+  geom_line() +
+  guides(color="none") +
+  labs(title = "patient trends, subset of observed data") +
+  theme_bw()
+```
+
+In the Betancourt tutorial, he works with what seems to be the equivalent of a single sample/paitent. I will start here and extend to more samples later.
+
+```{r}
+datSingle <- longDat |>
+  filter(id== 1)
+```
+
+
+# Gaussian process for 1 patient, exp. quad. covariance function
+
+From here, I will be following section 3.2.3 from the Betancourt tutorial. The tutorial uses the exponentiated quadratic covariance function, which seems like a fine place to start.
+
+We will create an informative prior on $\rho$ like was done in the tutorial. The informativeness of $\rho$ was based on the max and min distance measurements from domain specific knowledge. In this case, there can be no distance less than 1 and no distance greater than 15. To represent that, I will mirror what was done in the Betancourt tutorial and find an inverse gamma prior for $\rho$ such that $P(\rho > 15) \approx 0.01$ and $P(\rho < 1) \approx 0.01$. 
+
+In terms of informativeness of other priors, the Betancourt tutorial did not consider this. It is worth thinking about what the parameters represent. The tutorial just selects reasonable sd values for the normal priors. I will use these same values to start and update them given the results observed.
+
+To get the hyperparameters for the inverse gamma prior, I will use the same stan set up as was used in the tutorial. Stan code printed below and solved.
+
+\textbf{ISSUE:} In the optimization for the shape and rate parameter, needed to add a buffer to the estimates in the optimization process to avoid inputting param values of 0 into the cdf function. Thus, these param estimates wont be perfect. They don't need to be as this is just a prior and this isnt something I want to spend a lot of time on, but this is good to keep an eye on. Perhaps this optimization would be easier done outside of stan via the optim() function or similar.
+
+```{r}
+writeLines(readLines(here(dir1Dim, "invGamRhoTune.stan")))
+#the optimization step takes a moment so i have hard coded the value in as they 
+#will only change if the distance values we are interested in change
+# fitInvGam <- stan(file=here(dir1Dim, "invGamRhoTune.stan"), iter=1, warmup=0, chains=1,
+#             seed=826, algorithm="Fixed_param") 
+hyperShape <- 3.89783
+hyperRate <- 11.8582
+#checking to make sure these values accomplish what we want
+pinvgamma(1, hyperShape, rate = hyperRate)
+pinvgamma(15, hyperShape, rate = hyperRate, lower.tail = FALSE)
+```
+
+
+Setting up the data to be passed to the stan model. The chosen values for the informative inverse gamma prior are hard coded into the stan file.
+
+```{r}
+predGran <- 500
+xVals <- seq(0, 16, length.out = predGran)
+datList <- list(
+  #observed data
+  N_obs = nrow(datSingle),
+  x_obs = datSingle$tooth,
+  y_obs = datSingle$dist,
+  #where to predict
+  x_predict = xVals,
+  N_predict = predGran
+)
+```
+
+## Using conjugacy model
+
+First I will try to fit the model using the script that takes advantage of the conjugacy.
+
+```{r}
+writeLines(readLines(here(dir1Dim, "gpFitConj.stan")))
+#the fitting process takes a couple of minutes so Im going to just save
+#and input the fit object
+# fitConj1 <- stan(file=here(dir1Dim, 'gpFitConj.stan'), data=datList,
+#             seed=826, refresh=1000) #verbose = TRUE
+# save(fitConj1, file = here(dir1Dim, "fitCong1.RData"))
+load(here(dir1Dim, "fitCong1.RData"))
+drawConj1 <- extract(fitConj1)
+```
+
+Looking at parameter estimates. In one of the seeds that I ran there was a bit of a pattern in the rho vs sigma, but nothing as extreme as the issues that were presented in the Betancourt tutorial. Ignoring for now.
+
+```{r}
+par(mfrow=c(1, 3))
+plot(log(drawConj1$rho), log(drawConj1$alpha))
+plot(log(drawConj1$rho), log(drawConj1$sigma))
+plot(log(drawConj1$alpha), log(drawConj1$sigma))
+par(mfrow=c(1, 1))
+```
+
+Looking at draws of the posterior function. Looks pretty good. I am not going to mess around with getting my data in the correct format to use the nice functions used in the Betancourt tutorial but at some point it would be nice to use those.
+
+```{r}
+plot(drawConj1$f_predict[1,]~xVals, type = "l", xlim=c(0, 17), ylim = c(-2,15), 
+     main = "conj. model, some function realizations",
+     xlab = "tooth position",
+     ylab = "distance")
+for(i in 2:200) {
+  lines(xVals, drawConj1$f_predict[i,])
+}
+lines(dist~tooth, data = datSingle, col = "red", lwd = 2)
+points(dist~tooth, data = datSingle, col = "red", lwd = 2)
+```
+
+
+## Using MCMC model
+
+Using the MCMC version of the model. Using low iterations and a single chain for time purposes, will likely end without convergence, but gives a good idea.
+
+```{r}
+#as this stan code is written, it requires a variable named "observed_idx" which
+#was used in the betancourt tutorial to indicate which point sampled from the true
+#process was being used as the observed data, however, in this case, our observed
+#data was generated differently and that indexing was not needed. Giving this variable
+#just the numbers 1:16. The stan file could be reworked to not include this later
+datList$observed_idx <- 1:16
+#fit the model
+writeLines(readLines(here(dir1Dim, "gpFitMcmc.stan")))
+#takes a few minutes, saving and loading in
+# fitMcmc1 <- stan(file = here(dir1Dim, "gpFitMcmc.stan"),
+#                  data = datList, seed = 826, refresh = 1000,
+#                  chains = 1, iter = 1000)
+# save(fitMcmc1, file = "fitMcmc1.RData")
+load(here(dir1Dim, "fitMcmc1.RData"))
+drawMcmc1 <- extract(fitMcmc1)
+```
+
+Looking at parameter estimates. 
+
+```{r}
+par(mfrow=c(1, 3))
+plot(log(drawMcmc1$rho), log(drawMcmc1$alpha))
+plot(log(drawMcmc1$rho), log(drawMcmc1$sigma))
+plot(log(drawMcmc1$alpha), log(drawMcmc1$sigma))
+par(mfrow=c(1, 1))
+```
+
+Looking at convergence. Sigma is not too bad, ideally we would have a tighter window but 1.5 units isnt too crazy. Rho and alpha are not good.
+
+```{r}
+ind <- 1:length(drawMcmc1$rho)
+plot(drawMcmc1$rho ~ ind, type = "l")
+plot(drawMcmc1$alpha ~ ind, type = "l")
+plot(drawMcmc1$sigma ~ ind, type = "l")
+```
+
+
+Looking at draws of the posterior function. Definitely leaves something to be desired.
+
+```{r}
+plot(drawMcmc1$f_predict[1,]~xVals, type = "l", xlim=c(0, 17), ylim = c(-2,15), 
+     main = "mcmc model, some function realizations",
+     xlab = "tooth position",
+     ylab = "distance")
+for(i in 2:nrow(drawMcmc1$f_predict)) {
+  lines(xVals, drawMcmc1$f_predict[i,])
+}
+lines(dist~tooth, data = datSingle, col = "red", lwd = 2)
+points(dist~tooth, data = datSingle, col = "red", lwd = 2)
+```
+
+
+
+
+

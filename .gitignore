@@ -29,3 +29,7 @@ tools/registration/__pycache__/
 dag.png
 rulegraph.png
 fastTgcnEasy/trainedModels/
+*.RData
+*.pdf
+*.rds
+movement/gaussianProcess/betancourtTutorial/originalTutorial/
