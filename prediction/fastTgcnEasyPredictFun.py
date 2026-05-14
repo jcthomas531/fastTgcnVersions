@@ -129,9 +129,14 @@ def fastTgcnEasyPredict(inDir, outDir, modelPath):
         if generate_ply:
 
             #label_face=label_optimization(index_face, label_face)
+            
+            #making output name
+            #using this odd form bc thats what the name object is like and 
+            #this is easy to deal with for the moment.
+            nameSeg = (name[0].replace(".ply", "_seg.ply"),)
 
             generate_plyfile(index_face = index_face, point_face = point_face,
-                             label_face = label_face, arch = arch, path=(plyPathStr2) % name)
+                             label_face = label_face, arch = arch, path=(plyPathStr2) % nameSeg)
     print("f")
     iou_tabel[:,2] = iou_tabel[:,0] /iou_tabel[:,1]
     # iou = np.where(iou_tabel<=1.)
