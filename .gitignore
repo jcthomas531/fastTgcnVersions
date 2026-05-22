@@ -33,3 +33,5 @@ fastTgcnEasy/trainedModels/
 *.pdf
 *.rds
 movement/gaussianProcess/betancourtTutorial/originalTutorial/
+.Rproj.user
+.positai

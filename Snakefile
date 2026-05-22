@@ -181,7 +181,12 @@ rule all:
         #iowaRme transformations for registering fin scan to preD scan
         expand(preDFinDec016TransDir + "{bothPat}u_registTrans_dec016.pkl", bothPat = patNamesBoth),
         #iowaRme centroid and distance data
-        expand(preDFunDec016DistDir + "{bothPat}u_dist_dec016.csv", bothPat = patNamesBoth)
+        expand(preDFunDec016DistDir + "{bothPat}u_dist_dec016.csv", bothPat = patNamesBoth),
+        #visualizations
+        #iowaRme centroid movement line plot
+        "movement/visualization/centroidMovement/centMovePatLines.html",
+        #iowaRme cetroid movement bee swarm
+        "movement/visualization/centroidMovement/centMoveBeeSwarm.png"
 
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
@@ -308,3 +313,19 @@ rule getPreDFinDist:
         """
         python {input.script} {input.preDPath} {input.finPath} {input.transPath} {output.outFile}
         """
+
+#iowaRme
+#basic visualizations for the centroid movement data
+#this relies on an entire directory of files, using expand() functionality
+rule makeCentroidVis:
+    input:
+        inFiles = expand(preDFunDec016DistDir + "{bothPat}u_dist_dec016.csv", bothPat = patNamesBoth),
+        script = "movement/visualization/centroidMovement/centroidMoveVis.R"
+    output:
+        patLines = "movement/visualization/centroidMovement/centMovePatLines.html",
+        beePlot = "movement/visualization/centroidMovement/centMoveBeeSwarm.png"
+    shell:
+        """
+        Rscript {input.script} {output.patLines} {output.beePlot}
+        """
+
