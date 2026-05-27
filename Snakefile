@@ -183,10 +183,11 @@ rule all:
         #iowaRme centroid and distance data
         expand(preDFunDec016DistDir + "{bothPat}u_dist_dec016.csv", bothPat = patNamesBoth),
         #visualizations
+        # COMMENTING OUT FOR NOW UNTIL I FIGURE OUT THE RSCRIPT ISSUE
         #iowaRme centroid movement line plot
-        "movement/visualization/centroidMovement/centMovePatLines.html",
+        #"movement/visualization/centroidMovement/centMovePatLines.html",
         #iowaRme cetroid movement bee swarm
-        "movement/visualization/centroidMovement/centMoveBeeSwarm.png"
+        #"movement/visualization/centroidMovement/centMoveBeeSwarm.png"
 
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
@@ -317,15 +318,16 @@ rule getPreDFinDist:
 #iowaRme
 #basic visualizations for the centroid movement data
 #this relies on an entire directory of files, using expand() functionality
-rule makeCentroidVis:
-    input:
-        inFiles = expand(preDFunDec016DistDir + "{bothPat}u_dist_dec016.csv", bothPat = patNamesBoth),
-        script = "movement/visualization/centroidMovement/centroidMoveVis.R"
-    output:
-        patLines = "movement/visualization/centroidMovement/centMovePatLines.html",
-        beePlot = "movement/visualization/centroidMovement/centMoveBeeSwarm.png"
-    shell:
-        """
-        Rscript {input.script} {output.patLines} {output.beePlot}
-        """
+# COMMENTING OUT FOR NOW UNTIL I FIGURE OUT THE RSCRIPT ISSUE
+#rule makeCentroidVis:
+#    input:
+#        inFiles = expand(preDFunDec016DistDir + "{bothPat}u_dist_dec016.csv", bothPat = patNamesBoth),
+#        script = "movement/visualization/centroidMovement/centroidMoveVis.R"
+#    output:
+#        patLines = "movement/visualization/centroidMovement/centMovePatLines.html",
+#        beePlot = "movement/visualization/centroidMovement/centMoveBeeSwarm.png"
+#    shell:
+#        """
+#        Rscript {input.script} {output.patLines} {output.beePlot}
+#        """
 
