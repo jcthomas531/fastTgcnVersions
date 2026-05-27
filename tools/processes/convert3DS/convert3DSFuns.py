@@ -15,7 +15,7 @@ sys.path.append("/Users/jthomas48/dissModels/fastTgcnVersions/tools")
 from plyFunctions import colorNumFrame
 from plyfile import PlyData, PlyElement
 sys.path.append("/Users/jthomas48/dissModels/fastTgcnVersions/tools/decimation")
-import meshDecimation as d
+import decim as d
 import pyvista as pv
 
 ###############################################################################
@@ -155,7 +155,7 @@ def convert3DS(subPath, arch, rng, decimate = False, nFace = 16000):
         #add label data to pyvista object
         meshPv.point_data["labels"] = labelDat["labels"]
         #decimate
-        meshPvDec=d.decimate3DS(meshPv, nFace = nFace)
+        meshPvDec=d.decim(meshPv, nFace = nFace)
         #make mesh trimesh object like before
         meshDec = pv.to_trimesh(meshPvDec)
         #make vertex data into data frame
