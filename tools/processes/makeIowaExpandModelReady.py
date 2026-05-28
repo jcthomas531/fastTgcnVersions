@@ -1,6 +1,7 @@
 import sys
 sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
 import pyvista as pv
+import pyacvd  
 import trimesh
 import open3d as o3d
 import numpy as np
