@@ -32,6 +32,7 @@ import  preprocess_point_cloud as ppc
 #REGISTER POINT CLOUDS AND OBTAIN TRANSFORMATION
 ###############################################################################
 #registration of source onto target
+#both the soure and target should be open3d point cloud objects
 #source is what will be moving
 #target is what we are wanting to match to
 def getRegistration(source, target, method = "point2point", voxel_size = 2, iters = 30):
