@@ -10,14 +10,14 @@ import re
 #helper functions
 ##########
 #for getting the directory dictionaries used in the initial helper functions for raw data
-def patNamesAndPathDict(dir_):
+def patNamesAndPathDict(dir_, pattern = r'^pat[0-9]{3}', captureGroup = 0):
     
     #get files and make file paths
     files = os.listdir(dir_)
     paths = [dir_ + file_ for file_ in files]
     
     #extract patient names
-    patNames = [re.search(r'pat[0-9]{3}', i).group() for i in files]
+    patNames = [re.search(pattern, i).group(captureGroup) for i in files]
     
     #create path dictionary
     pathDict = dict(zip(patNames, paths))
@@ -60,6 +60,11 @@ iowaExpFullAnnotPostDir = "K:/iowaExpansion/fullRugaeAnnotScans/post/"
 #segmentation model ready scans
 iowaExpModelReadyPreDir = "K:/iowaExpansion/segModelReadyScans/pre/"
 iowaExpModelReadyPostDir = "K:/iowaExpansion/segModelReadyScans/post/"
+
+#teeth3ds
+#full plys
+teeth3dsFullDir = "K:/teeth3DS/scanData/upperPly/"
+teeth3dsRemeshDir = "K:/teeth3DS/scanData/upperPlyRemesh/"
 ###############################################################################
 
 
@@ -192,6 +197,16 @@ def getIowaExpFullAnnotPost(wildcards):
     return iowaExpFullAnnotPathDictPost[wildcards.iowaExpPostPat]
 ###############################################################################
 
+
+###############################################################################
+#teeth3ds
+#get patient names and create directory dictionary
+teeth3dsFullPlyNames, teeth3dsFullPlyPathDict = patNamesAndPathDict(dir_ = teeth3dsFullDir,  pattern = r'^(.+)_', captureGroup = 1)
+#create helper functions for using the raw data
+def getTeeth3dsFullPly(wildcards):
+    return teeth3dsFullPlyPathDict[wildcards.teeth3dsName]
+###############################################################################
+
 #dependency lists
 stlConvertNoLabsDepends = ["tools/stlToPlyFuns.py"]
 decimNoLabsDepends = ["tools/decimationFuns.py", "tools/formatAndExportFuns.py"]
@@ -199,7 +214,7 @@ orientTeeth3DSDepends = ["tools/registrationFuns.py"]
 getRegistTransDepends = ["tools/plyToRegistTransformation.py", "tools/registrationFuns.py"]
 centroidAndMeasureDepends = ["tools/trimeshToDf_labels.py", "tools/plyFunctions.py", "tools/centroidDistance.py", "tools/toothCentroids.py"]
 makeIowaExpFullAnnotModelReadyDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
-
+remeshTeeth3dsFullPlysDeps = ["tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 
 ###############################################################################
 ##################################BEGIN RULES##################################
@@ -239,7 +254,9 @@ rule all:
         #pre
         expand(iowaExpModelReadyPreDir + "{iowaExpPrePat}Pre_modelReady.ply", iowaExpPrePat = iowaExpPatsPre),
         #post
-        expand(iowaExpModelReadyPostDir + "{iowaExpPostPat}Post_modelReady.ply", iowaExpPostPat = iowaExpPatsPost)
+        expand(iowaExpModelReadyPostDir + "{iowaExpPostPat}Post_modelReady.ply", iowaExpPostPat = iowaExpPatsPost),
+        #teeth3ds, full plys remeshed
+        expand(teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply", teeth3dsName = teeth3dsFullPlyNames)
 
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
@@ -414,4 +431,17 @@ rule makeIowaExpFullAnnotPostModelReady:
         python {input.script} {input.inFile} {output.outFile}
         """
 
-
+#teeth3ds
+#remesh full plys
+rule remeshTeeth3dsFullPlys:
+    input:
+        #using the helper function
+        inFile = getTeeth3dsFullPly,
+        script = "tools/processes/remeshFullPlyTeeth3Ds.py",
+        deps = remeshTeeth3dsFullPlysDeps
+    output:
+        outFile = teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply"
+    shell:
+        """
+        python {input.script} {input.inFile} {output.outFile}
+        """
