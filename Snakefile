@@ -6,10 +6,36 @@ import re
 #some rules
 #cannot have empty lines in a rule
 
+###############################################################################
+#helper functions
+##########
+#for getting the directory dictionaries used in the initial helper functions for raw data
+def patNamesAndPathDict(dir_):
+    
+    #get files and make file paths
+    files = os.listdir(dir_)
+    paths = [dir_ + file_ for file_ in files]
+    
+    #extract patient names
+    patNames = [re.search(r'pat[0-9]{3}', i).group() for i in files]
+    
+    #create path dictionary
+    pathDict = dict(zip(patNames, paths))
+    
+    return patNames, pathDict
+
+
+
+###############################################################################
+
+
+###############################################################################
+#directories
+##########
+
 #iowaRme
-#original stl directory and patient list
+#original stl directory
 origStlDir = "K:/iowaRme/preDelivAndFinalScans/originalStl/"
-allPats = os.listdir(origStlDir)
 
 #iowaRme:
 #preD files and directories
@@ -27,6 +53,14 @@ preDFinDec016TransDir = "K:/iowaRme/registTrans/preDFin_dec016/"
 #centroid and distance directories
 preDFunDec016DistDir = "K:/iowaRme/movement/preDFin_dec016/"
 
+#iowaExpansion
+#full, rugae annotated scans
+iowaExpFullAnnotPreDir = "K:/iowaExpansion/fullRugaeAnnotScans/pre/"
+iowaExpFullAnnotPostDir = "K:/iowaExpansion/fullRugaeAnnotScans/post/"
+#segmentation model ready scans
+iowaExpModelReadyPreDir = "K:/iowaExpansion/segModelReadyScans/pre/"
+iowaExpModelReadyPostDir = "K:/iowaExpansion/segModelReadyScans/post/"
+###############################################################################
 
 
 ###############################################################################
@@ -37,6 +71,9 @@ preDFunDec016DistDir = "K:/iowaRme/movement/preDFin_dec016/"
 #respectively have original stls for upper scans. these should be used throughout
 #the rest of the logic as they represent the base truth of the scans that exist
 ##########
+
+#original patient list
+allPats = os.listdir(origStlDir)
 
 #for preD
 allPatsPreDStlDir = [origStlDir + i + "/" for i in allPats]
@@ -143,9 +180,17 @@ def getFinDec016OriSeg(wildcards):
     return finDec016OriSegDict[wildcards.bothPat]
 ###############################################################################
 
-
-
-
+###############################################################################
+#iowaExpansion
+#get patient names and create directory dictionary
+iowaExpPatsPre, iowaExpFullAnnotPathDictPre = patNamesAndPathDict(iowaExpFullAnnotPreDir)
+iowaExpPatsPost, iowaExpFullAnnotPathDictPost = patNamesAndPathDict(iowaExpFullAnnotPostDir)
+#create helper functions for using the raw data
+def getIowaExpFullAnnotPre(wildcards):
+    return iowaExpFullAnnotPathDictPre[wildcards.iowaExpPrePat]
+def getIowaExpFullAnnotPost(wildcards):
+    return iowaExpFullAnnotPathDictPost[wildcards.iowaExpPostPat]
+###############################################################################
 
 #dependency lists
 stlConvertNoLabsDepends = ["tools/stlToPlyFuns.py"]
@@ -153,6 +198,8 @@ decimNoLabsDepends = ["tools/decimationFuns.py", "tools/formatAndExportFuns.py"]
 orientTeeth3DSDepends = ["tools/registrationFuns.py"]
 getRegistTransDepends = ["tools/plyToRegistTransformation.py", "tools/registrationFuns.py"]
 centroidAndMeasureDepends = ["tools/trimeshToDf_labels.py", "tools/plyFunctions.py", "tools/centroidDistance.py", "tools/toothCentroids.py"]
+makeIowaExpFullAnnotModelReadyDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
+
 
 ###############################################################################
 ##################################BEGIN RULES##################################
@@ -188,6 +235,11 @@ rule all:
         #"movement/visualization/centroidMovement/centMovePatLines.html",
         #iowaRme cetroid movement bee swarm
         #"movement/visualization/centroidMovement/centMoveBeeSwarm.png"
+        #iowaExpansion, segmentation model ready data
+        #pre
+        expand(iowaExpModelReadyPreDir + "{iowaExpPrePat}Pre_modelReady.ply", iowaExpPrePat = iowaExpPatsPre),
+        #post
+        expand(iowaExpModelReadyPostDir + "{iowaExpPostPat}Post_modelReady.ply", iowaExpPostPat = iowaExpPatsPost)
 
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
@@ -330,4 +382,36 @@ rule getPreDFinDist:
 #        """
 #        Rscript {input.script} {output.patLines} {output.beePlot}
 #        """
+
+
+#iowaExpansion
+#make pre full annotated scans ready for the segmentation model
+rule makeIowaExpFullAnnotPreModelReady:
+    input:
+        #using helper function
+        inFile = getIowaExpFullAnnotPre,
+        script = "tools/processes/makeIowaExpandModelReady.py",
+        deps = makeIowaExpFullAnnotModelReadyDeps
+    output:
+        outFile = iowaExpModelReadyPreDir + "{iowaExpPrePat}Pre_modelReady.ply"
+    shell:
+        """
+        python {input.script} {input.inFile} {output.outFile}
+        """
+
+#iowaExpansion
+#make post full annotated scans ready for the segmentation model
+rule makeIowaExpFullAnnotPostModelReady:
+    input:
+        #using helper function
+        inFile = getIowaExpFullAnnotPost,
+        script = "tools/processes/makeIowaExpandModelReady.py",
+        deps = makeIowaExpFullAnnotModelReadyDeps
+    output:
+        outFile = iowaExpModelReadyPostDir + "{iowaExpPostPat}Post_modelReady.ply"
+    shell:
+        """
+        python {input.script} {input.inFile} {output.outFile}
+        """
+
 
