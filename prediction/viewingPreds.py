@@ -5,15 +5,15 @@ import os
 
 
 
-#RME prediction
 
 
+dir1 = "K:/iowaExpansion/remeshSegResults_t3dsDec016Epoch140/post/"
 
-os.chdir("K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016Seg/")
+os.chdir(dir1)
 segFiles = os.listdir()
 for i in range(len(segFiles)):
     filei = segFiles[i]
-    if filei.endswith("Ori.ply"):
+    if filei.endswith("seg.ply"):
         pf.readAndPlot(file = filei, 
                        arch = "U")
 
