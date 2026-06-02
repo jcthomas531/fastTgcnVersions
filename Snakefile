@@ -63,8 +63,10 @@ iowaExpModelReadyPostDir = "K:/iowaExpansion/segModelReadyScans/post/"
 
 #teeth3ds
 #full plys
-teeth3dsFullDir = "K:/teeth3DS/scanData/upperPly/"
+teeth3dsFullDir = "K:/teeth3DS/scanData/upperPly/" #NOT CURRENTLY IN USE
 teeth3dsRemeshDir = "K:/teeth3DS/scanData/upperPlyRemesh/"
+#original files
+teeth3dsOrigFilesDir = "K:/teeth3DS/scanData/upper/"
 ###############################################################################
 
 
@@ -199,12 +201,55 @@ def getIowaExpFullAnnotPost(wildcards):
 
 
 ###############################################################################
+#NOT CURRENTLY IN USE
 #teeth3ds
 #get patient names and create directory dictionary
 teeth3dsFullPlyNames, teeth3dsFullPlyPathDict = patNamesAndPathDict(dir_ = teeth3dsFullDir,  pattern = r'^(.+)_', captureGroup = 1)
 #create helper functions for using the raw data
 def getTeeth3dsFullPly(wildcards):
-    return teeth3dsFullPlyPathDict[wildcards.teeth3dsName]
+    return teeth3dsFullPlyPathDict[wildcards.teeth3dsPlyName]
+###############################################################################
+
+###############################################################################
+#teeth3ds
+#original obj and json files
+#original patient list
+allPats3ds = os.listdir(teeth3dsOrigFilesDir)
+#directory for all patients
+allPats3dsDir = [teeth3dsOrigFilesDir + i + "/" for i in allPats3ds]
+#ensure the an obj and stl file exists in each directory
+hasBoth3ds = []
+for i in allPats3dsDir:
+    filesi = os.listdir(i)
+    isObj = any(j.endswith(".obj") for j in filesi)
+    isJson = any(j.endswith(".json") for j in filesi)
+    hasBoth3ds.append(isObj and isJson)
+#take only those meeting this criteria
+patNames3ds = [pats for pats, logic in zip(allPats3ds, hasBoth3ds) if logic]
+#file paths for original obj and json files
+pat3dsDir = [teeth3dsOrigFilesDir + i + "/" for i in patNames3ds]
+orig3dsObjFile = []
+orig3dsJsonFile = []
+for i in pat3dsDir:
+    filesi = os.listdir(i)
+    #taking first one bc there should only be one, this isnt perfect logic, but it will 
+    #get us started
+    objFilenamei = [j for j in filesi if re.search(".obj$", j)][0] 
+    orig3dsObjFile.append(objFilenamei)
+    jsonFilenamei = [j for j in filesi if re.search(".json$", j)][0] 
+    orig3dsJsonFile.append(jsonFilenamei)
+orig3dsObjPath = [dir_ + file_ for dir_, file_ in zip(pat3dsDir, orig3dsObjFile)]
+orig3dsJsonPath = [dir_ + file_ for dir_, file_ in zip(pat3dsDir, orig3dsJsonFile)]
+#make this into a dictionary so snakemake can use it easily
+orig3dsObjPathDict = dict(zip(patNames3ds, orig3dsObjPath))
+orig3dsJsonPathDict = dict(zip(patNames3ds, orig3dsJsonPath))
+
+#create helper function
+#this calls into the snakemake wildcards
+def getOrig3dsObj(wildcards):
+    return orig3dsObjPathDict[wildcards.teeth3dsName]
+def getOrig3dsJson(wildcards):
+    return orig3dsJsonPathDict[wildcards.teeth3dsName]
 ###############################################################################
 
 #dependency lists
@@ -214,7 +259,7 @@ orientTeeth3DSDepends = ["tools/registrationFuns.py"]
 getRegistTransDepends = ["tools/plyToRegistTransformation.py", "tools/registrationFuns.py"]
 centroidAndMeasureDepends = ["tools/trimeshToDf_labels.py", "tools/plyFunctions.py", "tools/centroidDistance.py", "tools/toothCentroids.py"]
 makeIowaExpFullAnnotModelReadyDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
-remeshTeeth3dsFullPlysDeps = ["tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
+remeshTeeth3dsFullPlysDeps = ["tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py", "tools/colorNumFrame.py"]
 
 ###############################################################################
 ##################################BEGIN RULES##################################
@@ -256,7 +301,7 @@ rule all:
         #post
         expand(iowaExpModelReadyPostDir + "{iowaExpPostPat}Post_modelReady.ply", iowaExpPostPat = iowaExpPatsPost),
         #teeth3ds, full plys remeshed
-        expand(teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply", teeth3dsName = teeth3dsFullPlyNames)
+        expand(teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply", teeth3dsName = patNames3ds)
 
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
@@ -436,12 +481,13 @@ rule makeIowaExpFullAnnotPostModelReady:
 rule remeshTeeth3dsFullPlys:
     input:
         #using the helper function
-        inFile = getTeeth3dsFullPly,
+        objFile = getOrig3dsObj,
+        jsonFile = getOrig3dsJson,
         script = "tools/processes/remeshFullPlyTeeth3Ds.py",
         deps = remeshTeeth3dsFullPlysDeps
     output:
         outFile = teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply"
     shell:
         """
-        python {input.script} {input.inFile} {output.outFile}
+        python {input.script} {input.objFile} {input.jsonFile} {output.outFile}
         """
