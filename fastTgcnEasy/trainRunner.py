@@ -7,7 +7,7 @@
 
 
 #
-runNote = "full training on teeth3ds data, 720 train 180 test"
+runNote = "training on remeshed teeth3ds data, 720 train 180 test"
 #
 
 
@@ -15,8 +15,8 @@ print(runNote)
 #should alredy be in the proper working directory
 import train
 train.fastTgcnEasy(arch = "u",
-                   testPath = "/Shared/gb_lss/Thomas/trainTestSets/teeth3dsBase/test",
-                   trainPath = "/Shared/gb_lss/Thomas/trainTestSets/teeth3dsBase/train",
+                   testPath = "/Shared/gb_lss/Thomas/trainTestSets/teeth3dsRemesh/test",
+                   trainPath = "/Shared/gb_lss/Thomas/trainTestSets/teeth3dsRemesh/train",
                    batch_size = 1,
                    k = 32,
                    numWorkers = 8,
