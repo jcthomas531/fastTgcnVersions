@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 
 
 #function that takes a trimesh object and creates the vertex and face information
@@ -9,17 +9,33 @@ import pandas as pd
 #do not use this with labeled scans, this sets each face rgba value to 255 which
 #is what we are using in the unlabeled scans
 #
+#arguement pointLabCol accepts the name for the column in the trimesh vertex information
+#that contains the point labels
+#see "Y:\dissModels\intraoralSegmentation\superimposition\rugaeAnnotRegistartion.py" for specifics on pointLabCol usage
+#
 #x is a trimesh object
-def trimeshToDfNoLabels(x):
+def trimeshToDfNoLabels(x, pointLab = None):
     
-    #create vertex data frame
-    vertDf = pd.DataFrame(x.vertices, columns = ["x", "y", "z"])
-    #add vertex normal information
-    vertNorms = x.vertex_normals
-    vertDf["nx"] = vertNorms[:, 0]
-    vertDf["ny"] = vertNorms[:, 1]
-    vertDf["nz"] = vertNorms[:, 2]
-    
+    #vertex information
+    if pointLab is None:
+        #create vertex data frame
+        vertDf = pd.DataFrame(x.vertices, columns = ["x", "y", "z"])
+        #add vertex normal information
+        vertNorms = x.vertex_normals
+        vertDf["nx"] = vertNorms[:, 0]
+        vertDf["ny"] = vertNorms[:, 1]
+        vertDf["nz"] = vertNorms[:, 2]
+    else:
+        #create vertex data frame
+        vertDf = pd.DataFrame(x.vertices, columns = ["x", "y", "z"])
+        #add vertex normal information
+        vertNorms = x.vertex_normals
+        vertDf["nx"] = vertNorms[:, 0]
+        vertDf["ny"] = vertNorms[:, 1]
+        vertDf["nz"] = vertNorms[:, 2]
+        #add in column for scalar label
+        vertDf["scalar_Classification"] = np.asarray(pointLab)
+
     #create unlabeled face data frame
     faceDf = pd.DataFrame(x.faces, columns=["v1", "v2", "v3"])
     faceDf[["red", "green", "blue", "alpha"]] = 255
