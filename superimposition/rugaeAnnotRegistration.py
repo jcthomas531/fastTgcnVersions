@@ -11,12 +11,27 @@ import numpy as np
 import pickle
 import trimesh
 import copy
+import random
+
+
+#this as well as the os.environ statemetn up top is necessary for reproducing randomness
+seed = 826
+random.seed(seed)
+np.random.seed(seed)
+o3d.utility.random.seed(seed)
+
+#pull variables from snakemake
+prePath = sys.argv[1]
+postPath = sys.argv[2]
+transPath = sys.argv[3]
+outPlyPath = sys.argv[4]
+
 
 #testing
-prePath = "K:/iowaExpansion/fullRugaeAnnotScans/pre/pat001Pre_annot.ply"
-postPath = "K:/iowaExpansion/fullRugaeAnnotScans/post/pat001Post_annot.ply"
-transPath = "Y:/dissModels/intraoralSegmentation/superimposition/testPickle.pkl"
-outPlyPath = "K:/iowaExpansion/testDir/testPly.ply"
+# prePath = "K:/iowaExpansion/fullRugaeAnnotScans/pre/pat001Pre_annot.ply"
+# postPath = "K:/iowaExpansion/fullRugaeAnnotScans/post/pat001Post_annot.ply"
+# transPath = "Y:/dissModels/intraoralSegmentation/superimposition/testPickle.pkl"
+# outPlyPath = "K:/iowaExpansion/testDir/testPly.ply"
 
 
 ####

@@ -24,11 +24,6 @@ def patNamesAndPathDict(dir_, pattern = r'^pat[0-9]{3}', captureGroup = 0):
     
     return patNames, pathDict
 
-
-
-###############################################################################
-
-
 ###############################################################################
 #directories
 ##########
@@ -60,6 +55,14 @@ iowaExpFullAnnotPostDir = "K:/iowaExpansion/fullRugaeAnnotScans/post/"
 #segmentation model ready scans
 iowaExpModelReadyPreDir = "K:/iowaExpansion/segModelReadyScans/pre/"
 iowaExpModelReadyPostDir = "K:/iowaExpansion/segModelReadyScans/post/"
+#directories for superimposition transformations
+iowaExpRugaeTransDir = "K:/iowaExpansion/superimposition/transformations/annotRugaeTrans/"
+#directory for post scans with superimposition transformation applied
+iowaExpRugaeSuperimpPostScanDir = "K:/iowaExpansion/superimposition/transPostScan/annotRugaeTransPostScan/"
+#directory for html visuals of pre and post scans without superimposition
+iowaExpNoSuperimpVisDir = "K:/iowaExpansion/superimposition/visuals/noSuperimp/"
+#directory for html visuals of pre and post scans with annoted rugae superimposition
+iowaExpAnnotRugaeSuperimpVisDir = "K:/iowaExpansion/superimposition/visuals/annotRugaeSuperimp/"
 
 #teeth3ds
 #full plys
@@ -67,8 +70,6 @@ teeth3dsFullDir = "K:/teeth3DS/scanData/upperPly/" #NOT CURRENTLY IN USE
 teeth3dsRemeshDir = "K:/teeth3DS/scanData/upperPlyRemesh/"
 #original files
 teeth3dsOrigFilesDir = "K:/teeth3DS/scanData/upper/"
-###############################################################################
-
 
 ###############################################################################
 #iowRme
@@ -110,9 +111,6 @@ patNamesFin = [pats for pats, logic in zip(allPats, finStlProper) if logic]
 
 #finding the patients that have both a preD scan and a fin scan
 patNamesBoth = list(set(patNamesPreD) & set(patNamesFin))
-###############################################################################
-
-
 
 ###############################################################################
 #iowaRme
@@ -153,8 +151,6 @@ origStlFinFilePathDict = dict(zip(patNamesFin, origStlFinFilepath))
 #represent fin patient names 
 def getOrigStlFin(wildcards):
     return origStlFinFilePathDict[wildcards.finPat]
-###############################################################################
-
 
 ###############################################################################
 #iowaRme
@@ -185,7 +181,6 @@ finDec016OriSegDict = dict(zip(patNamesFin, finDec016OriSegPath))
 #creating helper function to use with wildcards in rules section
 def getFinDec016OriSeg(wildcards):
     return finDec016OriSegDict[wildcards.bothPat]
-###############################################################################
 
 ###############################################################################
 #iowaExpansion
@@ -197,8 +192,18 @@ def getIowaExpFullAnnotPre(wildcards):
     return iowaExpFullAnnotPathDictPre[wildcards.iowaExpPrePat]
 def getIowaExpFullAnnotPost(wildcards):
     return iowaExpFullAnnotPathDictPost[wildcards.iowaExpPostPat]
-###############################################################################
 
+###############################################################################
+#iowaExpansion
+#patient names for just the patients with both a pre and a post
+iowaExpPatsBoth = list(set(iowaExpPatsPre) & set(iowaExpPatsPost))
+#create helper functions for using the raw data
+#these are the same as above but using a different wildcard
+#this is repetative and there is likely a better way to do this
+def getIowaExpFullAnnotPre_both(wildcards):
+    return iowaExpFullAnnotPathDictPre[wildcards.iowaExpPats]
+def getIowaExpFullAnnotPost_both(wildcards):
+    return iowaExpFullAnnotPathDictPost[wildcards.iowaExpPats]
 
 ###############################################################################
 #NOT CURRENTLY IN USE
@@ -208,7 +213,6 @@ teeth3dsFullPlyNames, teeth3dsFullPlyPathDict = patNamesAndPathDict(dir_ = teeth
 #create helper functions for using the raw data
 def getTeeth3dsFullPly(wildcards):
     return teeth3dsFullPlyPathDict[wildcards.teeth3dsPlyName]
-###############################################################################
 
 ###############################################################################
 #teeth3ds
@@ -250,8 +254,8 @@ def getOrig3dsObj(wildcards):
     return orig3dsObjPathDict[wildcards.teeth3dsName]
 def getOrig3dsJson(wildcards):
     return orig3dsJsonPathDict[wildcards.teeth3dsName]
-###############################################################################
 
+###############################################################################
 #dependency lists
 stlConvertNoLabsDepends = ["tools/stlToPlyFuns.py"]
 decimNoLabsDepends = ["tools/decimationFuns.py", "tools/formatAndExportFuns.py"]
@@ -260,6 +264,7 @@ getRegistTransDepends = ["tools/plyToRegistTransformation.py", "tools/registrati
 centroidAndMeasureDepends = ["tools/trimeshToDf_labels.py", "tools/plyFunctions.py", "tools/centroidDistance.py", "tools/toothCentroids.py"]
 makeIowaExpFullAnnotModelReadyDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 remeshTeeth3dsFullPlysDeps = ["tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py", "tools/colorNumFrame.py"]
+superimpIowaExpAnnotRugaeDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 
 ###############################################################################
 ##################################BEGIN RULES##################################
@@ -301,7 +306,30 @@ rule all:
         #post
         expand(iowaExpModelReadyPostDir + "{iowaExpPostPat}Post_modelReady.ply", iowaExpPostPat = iowaExpPatsPost),
         #teeth3ds, full plys remeshed
-        expand(teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply", teeth3dsName = patNames3ds)
+        expand(teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply", teeth3dsName = patNames3ds),
+        #iowaExpansion annotated rugae superimposition transformations
+        expand(iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl", iowaExpPats = iowaExpPatsBoth),
+        #iowaExpansion post scans with annotated rugae superimposition transformation applied
+        expand(iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply", iowaExpPats = iowaExpPatsBoth),
+        #iowaExpansion pre and post scan visualization htmls with no superimposition
+        expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
+        #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
+        expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth)
+
+
+
+
+#rule for just superimposition work
+rule superimp:
+    input:
+        #iowaExpansion annotated rugae superimposition transformations
+        expand(iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl", iowaExpPats = iowaExpPatsBoth),
+        #iowaExpansion post scans with annotated rugae superimposition transformation applied
+        expand(iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply", iowaExpPats = iowaExpPatsBoth),
+        #iowaExpansion pre and post scan visualization htmls with no superimposition
+        expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
+        #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
+        expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth)
 
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
@@ -490,4 +518,55 @@ rule remeshTeeth3dsFullPlys:
     shell:
         """
         python {input.script} {input.objFile} {input.jsonFile} {output.outFile}
+        """
+
+
+#iowaExpansion
+#superimposition on annotated rugae region
+rule superimpIowaExpAnnotRugae:
+    input:
+        #using the helper function
+        prePath = getIowaExpFullAnnotPre_both,
+        postPath = getIowaExpFullAnnotPost_both,
+        script = "superimposition/rugaeAnnotRegistration.py",
+        deps = superimpIowaExpAnnotRugaeDeps
+    output:
+        transPath = iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl",
+        outPlyPath = iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply"
+    shell:
+        """
+        python {input.script} {input.prePath} {input.postPath} {output.transPath} {output.outPlyPath}
+        """
+
+
+#iowaExpansion
+#html visuals for pre and post scans with no superimposition
+rule makePrePostScanVisNoSuperimp:
+    input:
+        prePath = getIowaExpFullAnnotPre_both,
+        postPath = getIowaExpFullAnnotPost_both,
+        script = "superimposition/createSuperimpHtmlVisuals.py"
+    params:
+        color_ = "red",
+    output:
+        visHtml = iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html"
+    shell:
+        """
+        python {input.script} {input.prePath} {input.postPath} {params.color_} {output.visHtml}
+        """
+
+#iowaExpansion
+#html visuals for pre and post scans with annotated rugae superimposition
+rule makePrePostScanVisAnnotRugaeSuperimp:
+    input:
+        prePath = getIowaExpFullAnnotPre_both,
+        postPath = iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply",
+        script = "superimposition/createSuperimpHtmlVisuals.py"
+    params:
+        color_ = "green",
+    output:
+        visHtml = iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html"
+    shell:
+        """
+        python {input.script} {input.prePath} {input.postPath} {params.color_} {output.visHtml}
         """
