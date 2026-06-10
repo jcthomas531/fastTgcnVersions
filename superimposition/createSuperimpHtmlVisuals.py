@@ -28,7 +28,7 @@ superimpPlot.add_mesh(postMesh, color=color_, opacity = .6)
 #superimpPlot.show() #do not run show() this prior to using export_html()
 #export
 superimpPlot.export_html(visHtml)
-
+print("superimposition html exported")
 
 
 
