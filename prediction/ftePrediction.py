@@ -3,13 +3,13 @@ sys.path.append("/Users/jthomas48/dissModels/intraoralSegmentation/prediction/")
 import fastTgcnEasyPredictFun as ftep
 
 
-predNote = "using t3ds model that was trained on decimated data to predict on remeshed data"
+predNote = "iowaExp pre scans, using t3ds model trained on remeshed data, some pred scans not corrently oriented"
 print(predNote)
 
 
-ftep.fastTgcnEasyPredict(inDir = "/Shared/gb_lss/Thomas/iowaExpansion/segModelReadyScans/post",
-                         outDir = "/Shared/gb_lss/Thomas/iowaExpansion/remeshSegResults_t3dsDec016Epoch140/post",
-                         modelPath = "/Users/jthomas48/dissModels/intraoralSegmentation/fastTgcnEasy/trainedModels/2026_04_21 fullT3dsDec016Epoch140.pth"
+ftep.fastTgcnEasyPredict(inDir = "/Shared/gb_lss/Thomas/iowaExpansion/segModelReadyScans/pre",
+                         outDir = "/Shared/gb_lss/Thomas/iowaExpansion/segResults/segResults_remeshT3dsEpoch270/pre",
+                         modelPath = "/Users/jthomas48/dissModels/intraoralSegmentation/fastTgcnEasy/trainedModels/2026_16_12 remeshT3dsEpoch270.pth"
                          )
 
 
