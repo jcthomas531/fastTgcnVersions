@@ -38,11 +38,13 @@ preDFullScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/fullScans/"
 preDDec016ScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016Scans/"
 preDDec016OriScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016OriScans/"
 PreDDec016OriSegDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016OriSeg/"
+preDSegReadyScansDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/segReadyScans/"
 #fin files and directories
 finFullScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/fullScans/"
 finDec016ScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016Scans/"
 finDec016OriScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016OriScans/"
 finDec016OriSegDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016OriSeg/"
+finSegReadyScansDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/segReadyScans/"
 #directories for transformations for registering final scan to preD scan
 preDFinDec016TransDir = "K:/iowaRme/registTrans/preDFin_dec016/"
 #centroid and distance directories
@@ -53,8 +55,8 @@ preDFunDec016DistDir = "K:/iowaRme/movement/preDFin_dec016/"
 iowaExpFullAnnotPreDir = "K:/iowaExpansion/fullRugaeAnnotScans/pre/"
 iowaExpFullAnnotPostDir = "K:/iowaExpansion/fullRugaeAnnotScans/post/"
 #segmentation model ready scans
-iowaExpModelReadyPreDir = "K:/iowaExpansion/segModelReadyScans/pre/"
-iowaExpModelReadyPostDir = "K:/iowaExpansion/segModelReadyScans/post/"
+iowaExpSegReadyPreDir = "K:/iowaExpansion/segReadyScans/pre/"
+iowaExpSegReadyPostDir = "K:/iowaExpansion/segReadyScans/post/"
 #directories for superimposition transformations
 iowaExpRugaeTransDir = "K:/iowaExpansion/superimposition/transformations/annotRugaeTrans/"
 #directory for post scans with superimposition transformation applied
@@ -262,7 +264,7 @@ decimNoLabsDepends = ["tools/decimationFuns.py", "tools/formatAndExportFuns.py"]
 orientTeeth3DSDepends = ["tools/registrationFuns.py"]
 getRegistTransDepends = ["tools/plyToRegistTransformation.py", "tools/registrationFuns.py"]
 centroidAndMeasureDepends = ["tools/trimeshToDf_labels.py", "tools/plyFunctions.py", "tools/centroidDistance.py", "tools/toothCentroids.py"]
-makeIowaExpFullAnnotModelReadyDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
+makeSegReadyDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 remeshTeeth3dsFullPlysDeps = ["tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py", "tools/colorNumFrame.py"]
 superimpIowaExpAnnotRugaeDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 
@@ -290,6 +292,10 @@ rule all:
         expand(preDDec016OriScanDir + "{preDPat}u_preD_dec016Ori.ply", preDPat = patNamesPreD),
         #iowaRme fin upper decimated scans oriented to teeth3ds training data
         expand(finDec016OriScanDir + "{finPat}u_fin_dec016Ori.ply", finPat = patNamesFin),
+        #iowaRme preD segmentation ready
+        expand(preDSegReadyScansDir + "{preDPat}u_preD_segReady.ply", preDPat = patNamesPreD),
+        #iowaRme fin segmentationReady
+        expand(finSegReadyScansDir + "{finPat}u_fin_segReady.ply", finPat = patNamesFin),
         #iowaRme transformations for registering fin scan to preD scan
         expand(preDFinDec016TransDir + "{bothPat}u_registTrans_dec016.pkl", bothPat = patNamesBoth),
         #iowaRme centroid and distance data
@@ -302,9 +308,9 @@ rule all:
         #"movement/visualization/centroidMovement/centMoveBeeSwarm.png"
         #iowaExpansion, segmentation model ready data
         #pre
-        expand(iowaExpModelReadyPreDir + "{iowaExpPrePat}Pre_modelReady.ply", iowaExpPrePat = iowaExpPatsPre),
+        expand(iowaExpSegReadyPreDir + "{iowaExpPrePat}Pre_segReady.ply", iowaExpPrePat = iowaExpPatsPre),
         #post
-        expand(iowaExpModelReadyPostDir + "{iowaExpPostPat}Post_modelReady.ply", iowaExpPostPat = iowaExpPatsPost),
+        expand(iowaExpSegReadyPostDir + "{iowaExpPostPat}Post_segReady.ply", iowaExpPostPat = iowaExpPatsPost),
         #teeth3ds, full plys remeshed
         expand(teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply", teeth3dsName = patNames3ds),
         #iowaExpansion annotated rugae superimposition transformations
@@ -330,7 +336,6 @@ rule superimp:
         expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
         expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth)
-
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
 #function that snakemake will not be able to understand without the context of the rule all
@@ -360,8 +365,7 @@ rule convertFinStlToPly:
         """
         python {input.script} "{input.inFile}" "{output.outFile}"
         """
-        
-        
+
 #iowaRme
 #decimate preD scans
 rule producePreDDec016Scans:
@@ -375,7 +379,6 @@ rule producePreDDec016Scans:
         """
         python {input.script} "{input.inFile}" "{output.outFile}"
         """
-
 
 #iowaRme
 #decimate fin scans
@@ -391,7 +394,6 @@ rule produceFinDec016Scans:
         python {input.script} "{input.inFile}" "{output.outFile}"
         """
 
-
 #iowaRme
 #orient preD iowaRme scans in direction of teeth3ds training data
 rule orientPreDDec016Scans:
@@ -406,8 +408,6 @@ rule orientPreDDec016Scans:
         python {input.script} "{input.inFile}" "{output.outFile}"
         """
 
-
-
 #iowaRme
 #orient fin iowaRme scans in direction of teeth3ds training data
 rule orientFinDec016Scans:
@@ -421,8 +421,6 @@ rule orientFinDec016Scans:
         """
         python {input.script} "{input.inFile}" "{output.outFile}"
         """
-
-
 
 #iowaRme
 #get transformations that register fin scan to preD scan
@@ -439,8 +437,6 @@ rule getPreDFinRegistTrans:
         python {input.script} {input.preDPath} {input.finPath} {output.outFile}
         """
 
-
-
 #iowaRme
 #get distance and centroid data for preD and fin scans
 rule getPreDFinDist:
@@ -456,6 +452,35 @@ rule getPreDFinDist:
         """
         python {input.script} {input.preDPath} {input.finPath} {input.transPath} {output.outFile}
         """
+
+#iowaRme
+#make preD iowaRme scans ready for segmentation model via remeshing and orientation
+rule makeIowaRmePreDSegmentationReady:
+    input:
+        inFile = preDFullScanDir + "{preDPat}u_preD.ply",
+        script = "tools/processes/makeSegmentationReady.py",
+        deps = makeSegReadyDeps
+    output:
+        outFile = preDSegReadyScansDir + "{preDPat}u_preD_segReady.ply"
+    shell:
+        """
+        python {input.script} {input.inFile} {output.outFile}
+        """
+
+#iowaRme
+#make fin iowaRme scans ready for segmentation model via remeshing and orientation
+rule makeIowaRmeFinSegmentationReady:
+    input:
+        inFile = finFullScanDir + "{finPat}u_fin.ply",
+        script = "tools/processes/makeSegmentationReady.py",
+        deps = makeSegReadyDeps
+    output:
+        outFile = finSegReadyScansDir + "{finPat}u_fin_segReady.ply"
+    shell:
+        """
+        python {input.script} {input.inFile} {output.outFile}
+        """
+
 
 #iowaRme
 #basic visualizations for the centroid movement data
@@ -476,14 +501,14 @@ rule getPreDFinDist:
 
 #iowaExpansion
 #make pre full annotated scans ready for the segmentation model
-rule makeIowaExpFullAnnotPreModelReady:
+rule makeIowaExpFullAnnotPreSegReady:
     input:
         #using helper function
         inFile = getIowaExpFullAnnotPre,
-        script = "tools/processes/makeIowaExpandModelReady.py",
-        deps = makeIowaExpFullAnnotModelReadyDeps
+        script = "tools/processes/makeSegmentationReady.py",
+        deps = makeSegReadyDeps
     output:
-        outFile = iowaExpModelReadyPreDir + "{iowaExpPrePat}Pre_modelReady.ply"
+        outFile = iowaExpSegReadyPreDir + "{iowaExpPrePat}Pre_segReady.ply"
     shell:
         """
         python {input.script} {input.inFile} {output.outFile}
@@ -491,14 +516,14 @@ rule makeIowaExpFullAnnotPreModelReady:
 
 #iowaExpansion
 #make post full annotated scans ready for the segmentation model
-rule makeIowaExpFullAnnotPostModelReady:
+rule makeIowaExpFullAnnotPostSegReady:
     input:
         #using helper function
         inFile = getIowaExpFullAnnotPost,
-        script = "tools/processes/makeIowaExpandModelReady.py",
-        deps = makeIowaExpFullAnnotModelReadyDeps
+        script = "tools/processes/makeSegmentationReady.py",
+        deps = makeSegReadyDeps
     output:
-        outFile = iowaExpModelReadyPostDir + "{iowaExpPostPat}Post_modelReady.ply"
+        outFile = iowaExpSegReadyPostDir + "{iowaExpPostPat}Post_segReady.ply"
     shell:
         """
         python {input.script} {input.inFile} {output.outFile}
