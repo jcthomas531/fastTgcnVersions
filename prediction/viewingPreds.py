@@ -7,7 +7,7 @@ import os
 
 
 
-dir1 = "K:/iowaExpansion/remeshSegResults_t3dsDec016Epoch140/post/"
+dir1 = "K:/iowaExpansion/segResults/segResults_remeshT3dsEpoch270/post/"
 
 os.chdir(dir1)
 segFiles = os.listdir()
