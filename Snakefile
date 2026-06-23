@@ -75,6 +75,14 @@ teeth3dsRemeshCSRotDir = "K:/teeth3DS/scanData/upperPlyRemeshCSRot/"
 #original files
 teeth3dsOrigFilesDir = "K:/teeth3DS/scanData/upper/"
 
+#iosseg
+#plys
+iossegAllCleanUDir = "K:/IOSSegData/clean/allCleanU/"
+iossegCleanCSRotUpperDir = "K:/IOSSegData/cleanCSRot/upper/"
+#random rotations
+iossegRandRotDir = "K:/IOSSegData/randomRotations/"
+
+
 ###############################################################################
 #iowRme
 #some patients may not have all of the files we need
@@ -260,6 +268,16 @@ def getOrig3dsJson(wildcards):
     return orig3dsJsonPathDict[wildcards.teeth3dsName]
 
 ###############################################################################
+#iosseg
+
+#iowaExpansion
+#get patient names and create directory dictionary
+allIossegCleanUPats, iossegCleanUPathDict = patNamesAndPathDict(iossegAllCleanUDir, pattern = r'^[0-9]{3}')
+#create helper functions for using the raw data
+def getIossegCleanU(wildcards):
+    return iossegCleanUPathDict[wildcards.iossegCleanUPat]
+
+###############################################################################
 #dependency lists
 stlConvertNoLabsDepends = ["tools/stlToPlyFuns.py"]
 decimNoLabsDepends = ["tools/decimationFuns.py", "tools/formatAndExportFuns.py"]
@@ -316,7 +334,7 @@ rule all:
         expand(iowaExpSegReadyPostDir + "{iowaExpPostPat}Post_segReady.ply", iowaExpPostPat = iowaExpPatsPost),
         #teeth3ds, full plys remeshed
         expand(teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply", teeth3dsName = patNames3ds),
-        #teeth3ds, creating random rotations which is monitored via a sentinal file
+        #teeth3ds, creating random rotations which is monitored via a sentinel file
         teeth3dsRandRotDir + "allRotationsCreated.complete",
         #teeth3ds, remeshed files that are centered scaled and randomly rotated
         expand(teeth3dsRemeshCSRotDir + "{teeth3dsName}_U_remeshCSRot.ply", teeth3dsName = patNames3ds),
@@ -327,7 +345,13 @@ rule all:
         #iowaExpansion pre and post scan visualization htmls with no superimposition
         expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
-        expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth)
+        expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
+        #iosseg, creating random rotations which is monitored via a sentinel file
+        iossegRandRotDir + "allRotationsCreated.complete",
+        #iosseg, clean files that are cetnered scaled and randomly rotated
+        expand(iossegCleanCSRotUpperDir + "{iossegCleanUPat}_U_cSRot.ply", iossegCleanUPat = allIossegCleanUPats),
+        #train and test split for teeth3dsIosseg_cSRot
+        "K:/trainTestSets/teeth3dsIosseg_cSRot/trainTestSplit.complete"
 
 
 
@@ -624,9 +648,57 @@ rule cSRotTeeth3dsRemeshed:
         rotSentinel = teeth3dsRandRotDir + "allRotationsCreated.complete",
         script = "tools/processes/centerScaleRotatePly.py",
         deps = centerScaleRotatePlyDeps
+    params:
+        fileSuffix = "_remesh.ply"
     output:
         outPath = teeth3dsRemeshCSRotDir + "{teeth3dsName}_U_remeshCSRot.ply"
     shell:
         """
-        python {input.script} {input.inPath} "K:/teeth3DS/randomRotations/" {output.outPath}
+        python {input.script} {input.inPath} "K:/teeth3DS/randomRotations/" {params.fileSuffix} {output.outPath}
+        """
+
+#iosseg, create random rotations
+rule createRandomRotIosseg:
+    input:
+        dirPath = iossegAllCleanUDir,
+        script = "tools/processes/getRandRotationsForDir.py"
+    output:
+        #monitoring done be sentinel file
+        touch(iossegRandRotDir + "allRotationsCreated.complete")
+    shell:
+        """
+        python {input.script} {input.dirPath} "K:/IOSSegData/randomRotations/"
+        """
+
+#iosseg, center scale and randomly rotate the clean files
+rule cSRotIossegCleanU:
+    input:
+        inPath = getIossegCleanU,
+        #rotation matrices monitored by sentinel file
+        rotSentinel = iossegRandRotDir + "allRotationsCreated.complete",
+        script = "tools/processes/centerScaleRotatePly.py",
+        deps = centerScaleRotatePlyDeps
+    params:
+        fileSuffix = ".ply"
+    output:
+        outPath = iossegCleanCSRotUpperDir + "{iossegCleanUPat}_U_cSRot.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} "K:/IOSSegData/randomRotations/" {params.fileSuffix} {output.outPath}
+        """
+
+#tain test set for teeth3dsIosseg_cSRot
+rule trainTestSplit_Teeth3dsIosseg_cSRot:
+    input:
+        #require all remeshCSRot teeth3ds files, but they are not input into the script
+        t3ds_remeshCSRot = expand(teeth3dsRemeshCSRotDir + "{teeth3dsName}_U_remeshCSRot.ply", teeth3dsName = patNames3ds),
+        #require all cSRot teeth3ds files, but they are not input into the script
+        ios_cSRot = expand(iossegCleanCSRotUpperDir + "{iossegCleanUPat}_U_cSRot.ply", iossegCleanUPat = allIossegCleanUPats),
+        script = "tools/processes/trainTestSets/split_teeth3dsIosseg_cSRot.py"
+    output:
+        #monitoring done by sentinel file
+        touch("K:/trainTestSets/teeth3dsIosseg_cSRot/trainTestSplit.complete")
+    shell:
+        """
+        python {input.script}
         """

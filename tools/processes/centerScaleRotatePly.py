@@ -12,18 +12,20 @@ import dfToPlyExport as dtpe
 #pull variables from snakemake
 inPath = sys.argv[1]
 rotDir = sys.argv[2]
-outPath = sys.argv[3]
+fileSuffix = sys.argv[3]
+outPath = sys.argv[4]
 
 #testing
-# inPath = "K:/teeth3DS/scanData/upperPlyRemesh/00OMSZGW_U_remesh.ply"
-# rotDir = "K:/teeth3DS/randomRotations/"
-# outPath = "K:/teeth3DS/scanData/upperPlyRemeshCSRot/00OMSZGW_U_remeshCSRot.ply"
+# inPath = "K:/IOSSeg/clean/allCleanU/002_U.ply"
+# rotDir = "K:/IOSSeg/randomRotations/"
+# fileSuffix = ".ply"
+# outPath = "K:/aaa.ply"
 
 
 
 
 #extract name
-name = Path(inPath).name.replace("_remesh.ply", "")
+name = Path(inPath).name.replace(fileSuffix, "")
 
 #find random roation associated with this mesh
 allRots = os.listdir(rotDir)
