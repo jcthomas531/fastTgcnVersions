@@ -68,8 +68,10 @@ iowaExpAnnotRugaeSuperimpVisDir = "K:/iowaExpansion/superimposition/visuals/anno
 
 #teeth3ds
 #full plys
-teeth3dsFullDir = "K:/teeth3DS/scanData/upperPly/" #NOT CURRENTLY IN USE
+teeth3dsFullDir = "K:/teeth3DS/scanData/upperPly/"
 teeth3dsRemeshDir = "K:/teeth3DS/scanData/upperPlyRemesh/"
+teeth3dsRandRotDir = "K:/teeth3DS/randomRotations/"
+teeth3dsRemeshCSRotDir = "K:/teeth3DS/scanData/upperPlyRemeshCSRot/"
 #original files
 teeth3dsOrigFilesDir = "K:/teeth3DS/scanData/upper/"
 
@@ -267,6 +269,7 @@ centroidAndMeasureDepends = ["tools/trimeshToDf_labels.py", "tools/plyFunctions.
 makeSegReadyDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 remeshTeeth3dsFullPlysDeps = ["tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py", "tools/colorNumFrame.py"]
 superimpIowaExpAnnotRugaeDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
+centerScaleRotatePlyDeps = ["tools/trimeshExtractFaceLabels.py", "tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py"]
 
 ###############################################################################
 ##################################BEGIN RULES##################################
@@ -313,6 +316,10 @@ rule all:
         expand(iowaExpSegReadyPostDir + "{iowaExpPostPat}Post_segReady.ply", iowaExpPostPat = iowaExpPatsPost),
         #teeth3ds, full plys remeshed
         expand(teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply", teeth3dsName = patNames3ds),
+        #teeth3ds, creating random rotations which is monitored via a sentinal file
+        teeth3dsRandRotDir + "allRotationsCreated.complete",
+        #teeth3ds, remeshed files that are centered scaled and randomly rotated
+        expand(teeth3dsRemeshCSRotDir + "{teeth3dsName}_U_remeshCSRot.ply", teeth3dsName = patNames3ds),
         #iowaExpansion annotated rugae superimposition transformations
         expand(iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl", iowaExpPats = iowaExpPatsBoth),
         #iowaExpansion post scans with annotated rugae superimposition transformation applied
@@ -594,4 +601,32 @@ rule makePrePostScanVisAnnotRugaeSuperimp:
     shell:
         """
         python {input.script} {input.prePath} {input.postPath} {params.color_} {output.visHtml}
+        """
+
+#teeth3ds, create random rotations
+rule createRandomRotTeeth3ds:
+    input:
+        dirPath = teeth3dsFullDir,
+        script = "tools/processes/getRandRotationsForDir.py"
+    output:
+        #monitoring done be sentinel file
+        touch(teeth3dsRandRotDir + "allRotationsCreated.complete")
+    shell:
+        """
+        python {input.script} {input.dirPath} "K:/teeth3DS/randomRotations/"
+        """
+
+#teeth3ds, center scale and randomly rotate the remeshed files
+rule cSRotTeeth3dsRemeshed:
+    input:
+        inPath = teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply",
+        #rotation matrices monitored by sentinel file
+        rotSentinel = teeth3dsRandRotDir + "allRotationsCreated.complete",
+        script = "tools/processes/centerScaleRotatePly.py",
+        deps = centerScaleRotatePlyDeps
+    output:
+        outPath = teeth3dsRemeshCSRotDir + "{teeth3dsName}_U_remeshCSRot.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} "K:/teeth3DS/randomRotations/" {output.outPath}
         """
