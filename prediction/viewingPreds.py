@@ -1,34 +1,35 @@
 import sys
 sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
-import plyFunctions as pf
+#import plyFunctions as pf
+import readAndPlot as rap
 import os
 
 
 
 
 
-dir1 = "K:/iowaExpansion/segResults/segResults_remeshT3dsEpoch270/post/"
+dir1 = "K:/iowaExpansion/segResults/TEMP/post/"
 
 os.chdir(dir1)
 segFiles = os.listdir()
 for i in range(len(segFiles)):
     filei = segFiles[i]
     if filei.endswith("seg.ply"):
-        pf.readAndPlot(file = filei, 
+        rap.readAndPlot(file = filei, 
                        arch = "U")
 
 
 
 os.chdir("K:/iowaRme/testDir/segTestInput")
-pf.readAndPlot(file = "pat058u_01CONV2.ply", 
+rap.readAndPlot(file = "pat058u_01CONV2.ply", 
                arch = "U")
 
 os.chdir("K:/iowaRme/testDir/segTestOutput/")
-pf.readAndPlot(file = "pat055u_01_dec016Form.ply", 
+rap.readAndPlot(file = "pat055u_01_dec016Form.ply", 
                arch = "U")
 
 os.chdir("K:/trainTestSets/teeth3dsDecim016/test")
-pf.readAndPlot(file = "0JN50XQR_UDecim016.ply", 
+rap.readAndPlot(file = "0JN50XQR_UDecim016.ply", 
                arch = "U")
 
 
