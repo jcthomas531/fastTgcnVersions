@@ -57,6 +57,10 @@ iowaExpFullAnnotPostDir = "K:/iowaExpansion/fullRugaeAnnotScans/post/"
 #segmentation model ready scans
 iowaExpSegReadyPreDir = "K:/iowaExpansion/segReadyScans/pre/"
 iowaExpSegReadyPostDir = "K:/iowaExpansion/segReadyScans/post/"
+#TEMP
+iowaExpSegReadyPreDir2 = "K:/iowaExpansion/segReadyScans2/pre/"
+iowaExpSegReadyPostDir2 = "K:/iowaExpansion/segReadyScans2/post/"
+
 #directories for superimposition transformations
 iowaExpRugaeTransDir = "K:/iowaExpansion/superimposition/transformations/annotRugaeTrans/"
 #directory for post scans with superimposition transformation applied
@@ -351,7 +355,12 @@ rule all:
         #iosseg, clean files that are cetnered scaled and randomly rotated
         expand(iossegCleanCSRotUpperDir + "{iossegCleanUPat}_U_cSRot.ply", iossegCleanUPat = allIossegCleanUPats),
         #train and test split for teeth3dsIosseg_cSRot
-        "K:/trainTestSets/teeth3dsIosseg_cSRot/trainTestSplit.complete"
+        "K:/trainTestSets/teeth3dsIosseg_cSRot/trainTestSplit.complete",
+        #iowaExpansion, CENTER SCALE AND NO ORIENTATION, SEGREADY2, TEMPORARY
+        #pre
+        expand(iowaExpSegReadyPreDir2 + "{iowaExpPrePat}Pre_segReady2.ply", iowaExpPrePat = iowaExpPatsPre),
+        #post
+        expand(iowaExpSegReadyPostDir2 + "{iowaExpPostPat}Post_segReady2.ply", iowaExpPostPat = iowaExpPatsPost)
 
 
 
@@ -701,4 +710,35 @@ rule trainTestSplit_Teeth3dsIosseg_cSRot:
     shell:
         """
         python {input.script}
+        """
+
+#THIS IS TEMPORARY
+#iowaExpansion
+#pre full annotated scans CENTER SCALE AND NO ORIENTATION, SEGREADY2
+rule makeIowaExpFullAnnotPreSegReady2:
+    input:
+        #using helper function
+        inFile = getIowaExpFullAnnotPre,
+        script = "tools/processes/makeSegmentationReady2.py",
+        deps = makeSegReadyDeps
+    output:
+        outFile = iowaExpSegReadyPreDir2 + "{iowaExpPrePat}Pre_segReady2.ply"
+    shell:
+        """
+        python {input.script} {input.inFile} {output.outFile}
+        """
+
+#iowaExpansion
+#post full annotated scans CENTER SCALE AND NO ORIENTATION, SEGREADY2
+rule makeIowaExpFullAnnotPostSegReady2:
+    input:
+        #using helper function
+        inFile = getIowaExpFullAnnotPost,
+        script = "tools/processes/makeSegmentationReady2.py",
+        deps = makeSegReadyDeps
+    output:
+        outFile = iowaExpSegReadyPostDir2 + "{iowaExpPostPat}Post_segReady2.ply"
+    shell:
+        """
+        python {input.script} {input.inFile} {output.outFile}
         """
