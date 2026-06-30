@@ -71,3 +71,13 @@ pdata.glyph(orient='vectors', scale='mag').plot()
 
 
 
+#testing
+p = regDeform.P
+p
+import pandas as pd
+pDf = pd.DataFrame(p)
+pDf.max(axis=0)
+pDf.max(axis=1)
+max(pDf.max(axis=0))
+max(pDf.max(axis=1))
+#it seems we can extract the P matrix but it seems to be a matrix of 0s
