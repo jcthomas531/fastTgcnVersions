@@ -4,7 +4,7 @@
 # os.getcwd()
 
 
-from dataloader import plydataset
+from dataloader2 import plydataset
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -18,14 +18,14 @@ import torch.nn.functional as F
 import datetime
 import logging
 from sklearn.model_selection import StratifiedKFold
-from utils import test_semseg
-from loss import IoULoss, DiceLoss
+from utils2 import test_semseg
+from loss2 import IoULoss, DiceLoss
 #from TSGCNet import TSGCNet
 #from TestModel import TestModel
 #from PointNet import PointNetDenseCls
 #from PointNetplus import PointNet2
 #from MeshSegNet import MeshSegNet
-from Baseline import Baseline
+from Baseline2 import Baseline
 #from ablation import ablation
 #from OurMethod import SGNet
 #from pct import PointTransformerSeg
@@ -183,6 +183,7 @@ def fastTgcnEasy(arch, testPath, trainPath, batch_size = 1, k = 32,
     #note 3
     #i dont know much about in_channels, can this be vaired or is it set?
     """--------------------------- Build Network and optimizer----------------------"""
+    #https://docs.pytorch.org/docs/2.12/optim.html
     model = Baseline(in_channels=12, output_channels=17)
     model.cuda()
     optimizer = torch.optim.Adam(
@@ -191,8 +192,11 @@ def fastTgcnEasy(arch, testPath, trainPath, batch_size = 1, k = 32,
         betas=(0.9, 0.999),
         weight_decay=1e-5
     )
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
-    
+    #original
+    #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
+    #attempting a non moving learning rate
+    scheduler = torch.optim.lr_scheduler.ConstantLR(optimizer, factor = 1, total_iters=150)
+    #try ReduceLROnPlateau
     
     
     
@@ -263,12 +267,15 @@ def fastTgcnEasy(arch, testPath, trainPath, batch_size = 1, k = 32,
             
             
         #this part is just purely outputting stuff
-        if epoch % 10 == 0:
+        #INFORMATION OUTPUT AT EVERY EPOCH
+        #TURNED OFF GENERAT PLY
+        #ADDED FURTHER IF TO OUTPUT MODEL AT EVERY 10 LIKE BEFORE
+        if epoch % 1 == 0:
             print('Learning rate: %f' % (lr))
             print("loss: %f" % (np.mean(his_loss)))
             # writer.add_scalar("loss", np.mean(his_loss), epoch)
             metrics, mIoU, cat_iou, mAcc, throwAway = test_semseg(model = model, loader = test_loader, arch = arch, plyPath=pred_dir,
-                                                                  num_classes=17, generate_ply=True)
+                                                                  num_classes=17, generate_ply=False)
             print("Epoch %d, accuracy= %f, mIoU= %f, mACC= %f" % (epoch, metrics['accuracy'], mIoU, mAcc))
             logger.info("Epoch: %d, accuracy= %f, mIoU= %f, mACC= %f loss= %f" % (epoch, metrics['accuracy'], mIoU, mAcc, np.mean(his_loss)))
             # writer.add_scalar("accuracy", metrics['accuracy'], epoch)
@@ -282,8 +289,9 @@ def fastTgcnEasy(arch, testPath, trainPath, batch_size = 1, k = 32,
                     best_macc = mAcc
                 print("best accuracy: %f best mIoU :%f, mACC: %f" % (best_acc, best_miou, mAcc))
                 print(cat_iou)
-                torch.save(model.state_dict(), '%s/coordinate_%d_%f.pth' % (checkpoints, epoch, best_acc))
-                best_pth = '%s/coordinate_%d_%f.pth' % (checkpoints, epoch, best_acc)
+                if epoch % 10 == 0:
+                    torch.save(model.state_dict(), '%s/coordinate_%d_%f.pth' % (checkpoints, epoch, best_acc))
+                    best_pth = '%s/coordinate_%d_%f.pth' % (checkpoints, epoch, best_acc)
                 logger.info(cat_iou)
             his_loss.clear()
             # writer.close()

@@ -8,8 +8,8 @@ from tqdm import tqdm
 from collections import defaultdict
 import pandas as pd
 
-from dataloader import generate_plyfile, plydataset
-from loss import IoULoss, DiceLoss
+from dataloader2 import generate_plyfile, plydataset
+from loss2 import IoULoss, DiceLoss
 
 
 

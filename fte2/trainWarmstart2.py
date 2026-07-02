@@ -17,7 +17,7 @@ Created on Wed Mar 11 15:35:31 2026
 
 
 
-from dataloader import plydataset
+from dataloader2 import plydataset
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -31,14 +31,14 @@ import torch.nn.functional as F
 import datetime
 import logging
 from sklearn.model_selection import StratifiedKFold
-from utils import test_semseg
-from loss import IoULoss, DiceLoss
+from utils2 import test_semseg
+from loss2 import IoULoss, DiceLoss
 #from TSGCNet import TSGCNet
 #from TestModel import TestModel
 #from PointNet import PointNetDenseCls
 #from PointNetplus import PointNet2
 #from MeshSegNet import MeshSegNet
-from Baseline import Baseline
+from Baseline2 import Baseline
 #from ablation import ablation
 #from OurMethod import SGNet
 #from pct import PointTransformerSeg

@@ -6,7 +6,7 @@ runNote = "warmstartTest5_2, same test data as model trained on, new train data 
 print("warmstart")
 print(runNote)
 #should alredy be in the proper working directory
-import trainWarmstart as tws
+import trainWarmstart2 as tws
 tws.fastTgcnWarm(arch = "u",
                    testPath = "/Shared/gb_lss/Thomas/IOSSegData/clean/testCleanU",
                    trainPath = "/Shared/gb_lss/Thomas/testDir/warmstartTestDataReg/train",

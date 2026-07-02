@@ -6,4 +6,4 @@
 
 
 
-apptainer exec ../../../containers/pytorch2.sif python trainRunner.py
+apptainer exec ../../../containers/lorwyn.sif python trainRunner2.py

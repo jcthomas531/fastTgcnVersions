@@ -6,4 +6,4 @@
 
 
 
-apptainer exec ../../../containers/pytorch2.sif python trainWarmstartRunner.py
+apptainer exec ../../../containers/lorwyn.sif python trainWarmstartRunner2.py

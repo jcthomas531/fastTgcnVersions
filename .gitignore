@@ -35,3 +35,7 @@ fastTgcnEasy/trainedModels/
 movement/gaussianProcess/betancourtTutorial/originalTutorial/
 .Rproj.user
 .positai
+*.ply
+*.pyc
+*.pth
+*log.txt

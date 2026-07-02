@@ -7,20 +7,20 @@
 
 
 #
-runNote = "training on remeshed teeth3dsIosseg_cSRot data, proportional 80/20 split from both teeth3ds and iosseg sets"
+runNote = "attempting constant learning rate"
 #
 
 
 print(runNote)
 #should alredy be in the proper working directory
-import train
-train.fastTgcnEasy(arch = "u",
-                   testPath = "/Shared/gb_lss/Thomas/trainTestSets/teeth3dsIosseg_cSRot/test",
-                   trainPath = "/Shared/gb_lss/Thomas/trainTestSets/teeth3dsIosseg_cSRot/train",
+import train2
+train2.fastTgcnEasy(arch = "u",
+                   testPath = "/Shared/gb_lss/Thomas/trainTestSets/remeshT3dsIos_csRot_smaller/test",
+                   trainPath = "/Shared/gb_lss/Thomas/trainTestSets/remeshT3dsIos_csRot_smaller/train",
                    batch_size = 1,
                    k = 32,
                    numWorkers = 8,
-                   epochs = 301)
+                   epochs = 101)
 print(runNote)
 
 
