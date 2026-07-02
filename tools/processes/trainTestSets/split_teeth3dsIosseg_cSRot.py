@@ -7,7 +7,7 @@ seed = 826
 np.random.seed(seed)
 
 #directory for new test and train set
-newDir = "K:/trainTestSets/teeth3dsIosseg_cSRot/"
+newDir = "K:/trainTestSets/remeshT3dsIos_cSRot/"
 
 
 ###############################################################################

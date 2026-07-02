@@ -86,6 +86,9 @@ iossegCleanCSRotUpperDir = "K:/IOSSegData/cleanCSRot/upper/"
 #random rotations
 iossegRandRotDir = "K:/IOSSegData/randomRotations/"
 
+#master arches
+masterArchesDir = "K:/masterArches/"
+
 
 ###############################################################################
 #iowRme
@@ -291,7 +294,7 @@ centroidAndMeasureDepends = ["tools/trimeshToDf_labels.py", "tools/plyFunctions.
 makeSegReadyDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 remeshTeeth3dsFullPlysDeps = ["tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py", "tools/colorNumFrame.py"]
 superimpIowaExpAnnotRugaeDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
-centerScaleRotatePlyDeps = ["tools/trimeshExtractFaceLabels.py", "tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py"]
+manipulateAndFormatPack = ["tools/trimeshExtractFaceLabels.py", "tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py"]
 
 ###############################################################################
 ##################################BEGIN RULES##################################
@@ -355,12 +358,14 @@ rule all:
         #iosseg, clean files that are cetnered scaled and randomly rotated
         expand(iossegCleanCSRotUpperDir + "{iossegCleanUPat}_U_cSRot.ply", iossegCleanUPat = allIossegCleanUPats),
         #train and test split for teeth3dsIosseg_cSRot
-        "K:/trainTestSets/teeth3dsIosseg_cSRot/trainTestSplit.complete",
+        "K:/trainTestSets/remeshT3dsIos_cSRot/remeshT3dsIos_cSRot_trainTestSplit.complete",
         #iowaExpansion, CENTER SCALE AND NO ORIENTATION, SEGREADY2, TEMPORARY
         #pre
         expand(iowaExpSegReadyPreDir2 + "{iowaExpPrePat}Pre_segReady2.ply", iowaExpPrePat = iowaExpPatsPre),
         #post
-        expand(iowaExpSegReadyPostDir2 + "{iowaExpPostPat}Post_segReady2.ply", iowaExpPostPat = iowaExpPatsPost)
+        expand(iowaExpSegReadyPostDir2 + "{iowaExpPostPat}Post_segReady2.ply", iowaExpPostPat = iowaExpPatsPost),
+        #master arches
+        masterArchesDir + "masterArch1/mA1Full.ply"
 
 
 
@@ -656,7 +661,7 @@ rule cSRotTeeth3dsRemeshed:
         #rotation matrices monitored by sentinel file
         rotSentinel = teeth3dsRandRotDir + "allRotationsCreated.complete",
         script = "tools/processes/centerScaleRotatePly.py",
-        deps = centerScaleRotatePlyDeps
+        deps = manipulateAndFormatPack
     params:
         fileSuffix = "_remesh.ply"
     output:
@@ -686,7 +691,7 @@ rule cSRotIossegCleanU:
         #rotation matrices monitored by sentinel file
         rotSentinel = iossegRandRotDir + "allRotationsCreated.complete",
         script = "tools/processes/centerScaleRotatePly.py",
-        deps = centerScaleRotatePlyDeps
+        deps = manipulateAndFormatPack
     params:
         fileSuffix = ".ply"
     output:
@@ -706,7 +711,7 @@ rule trainTestSplit_Teeth3dsIosseg_cSRot:
         script = "tools/processes/trainTestSets/split_teeth3dsIosseg_cSRot.py"
     output:
         #monitoring done by sentinel file
-        touch("K:/trainTestSets/teeth3dsIosseg_cSRot/trainTestSplit.complete")
+        touch("K:/trainTestSets/remeshT3dsIos_cSRot/remeshT3dsIos_cSRot_trainTestSplit.complete")
     shell:
         """
         python {input.script}
@@ -741,4 +746,16 @@ rule makeIowaExpFullAnnotPostSegReady2:
     shell:
         """
         python {input.script} {input.inFile} {output.outFile}
+        """
+
+#create master arches
+rule createMasterArches:
+    input:
+        script = "tools/processes/createMasterArches.py",
+        deps = manipulateAndFormatPack
+    output:
+        m1OutPath = masterArchesDir + "masterArch1/mA1Full.ply"
+    shell:
+        """
+        python {input.script} {output.m1OutPath}
         """
