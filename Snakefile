@@ -73,6 +73,12 @@ iowaExpAnnotRugaeSuperimpVisDir = "K:/iowaExpansion/superimposition/visuals/anno
 #teeth3ds
 #full plys
 teeth3dsFullDir = "K:/teeth3DS/scanData/upperPly/"
+teeth3dsFullCSDir = "K:/teeth3DS/scanData/upperPly_cS/"
+teeth3dsCSMastRotMatDir = "K:/teeth3DS/rotationMatrices/upperPly_cS_mastRotMat/"
+teeth3dsFullCSOriMastDir = "K:/teeth3DS/scanData/upperPly_cSOriMast/"
+teeth3dsCSOriMastRemeshDir = "K:/teeth3DS/scanData/upperPly_cSOriMastRemesh/"
+
+
 teeth3dsRemeshDir = "K:/teeth3DS/scanData/upperPlyRemesh/"
 teeth3dsRandRotDir = "K:/teeth3DS/randomRotations/"
 teeth3dsRemeshCSRotDir = "K:/teeth3DS/scanData/upperPlyRemeshCSRot/"
@@ -295,6 +301,10 @@ makeSegReadyDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", 
 remeshTeeth3dsFullPlysDeps = ["tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py", "tools/colorNumFrame.py"]
 superimpIowaExpAnnotRugaeDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 manipulateAndFormatPack = ["tools/trimeshExtractFaceLabels.py", "tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py"]
+manipulateAndFormatPack2 = ["tools/trimeshExtractFaceLabels.py", "tools/trimeshToDf_labels.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
+convertTeeth3dsObjToPlyDeps = ["tools/colorNumFrame.py", "tools/trimeshToDf_labels.py", "tools/objJsonToDataFrames.py", "tools/dfToPlyExport.py"]
+getRotToMastDeps = ["tools/getRotToMaster.py", "tools/preprocess_point_cloud.py"]
+remeshDeps = ["tools/trimeshExtractFaceLabels.py", "tools/colorNumFrame.py", "tools/trimeshToDf_labels.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 
 ###############################################################################
 ##################################BEGIN RULES##################################
@@ -381,6 +391,14 @@ rule superimp:
         expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
         expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth)
+
+rule processTeeth3ds:
+    input:
+        expand(teeth3dsFullDir + "{teeth3dsName}_U.ply", teeth3dsName = patNames3ds),
+        expand(teeth3dsFullCSDir + "{teeth3dsName}_U_cS.ply", teeth3dsName = patNames3ds),
+        expand(teeth3dsCSMastRotMatDir + "{teeth3dsName}_U_cS_mastRotMat.pkl", teeth3dsName = patNames3ds),
+        expand(teeth3dsFullCSOriMastDir + "{teeth3dsName}_U_cSOriMast.ply", teeth3dsName = patNames3ds),
+        expand(teeth3dsCSOriMastRemeshDir + "{teeth3dsName}_U_cSOriMastRemesh.ply", teeth3dsName = patNames3ds)
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
 #function that snakemake will not be able to understand without the context of the rule all
@@ -590,6 +608,87 @@ rule remeshTeeth3dsFullPlys:
         python {input.script} {input.objFile} {input.jsonFile} {output.outFile}
         """
 
+##########################################
+#teeth3ds
+#convert obj/json combos into plys
+rule convertTeeth3dsObjToPly:
+    input:
+        #using the helper function
+        objFile = getOrig3dsObj,
+        jsonFile = getOrig3dsJson,
+        script = "tools/processes/convertTeeth3dsObjToPly.py",
+        deps = convertTeeth3dsObjToPlyDeps
+    output:
+        outFile = teeth3dsFullDir + "{teeth3dsName}_U.ply"
+    shell:
+        """
+        python {input.script} {input.objFile} {input.jsonFile} {output.outFile}
+        """
+
+#teeth3ds
+#center and scaled
+rule centerAndScaleTeeth3ds:
+    input:
+        inPath = teeth3dsFullDir + "{teeth3dsName}_U.ply",
+        script = "tools/processes/centerAndScale.py",
+        deps = manipulateAndFormatPack2
+    params:
+        labs = True
+    output:
+        outPath = teeth3dsFullCSDir + "{teeth3dsName}_U_cS.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath} {params.labs}
+        """
+
+#teeth3ds
+#get rotation matrix to master arch
+rule getRotToMastTeeth3ds:
+    input:
+        inPath = teeth3dsFullCSDir + "{teeth3dsName}_U_cS.ply",
+        script = "tools/processes/getRotMatToMasterArch.py",
+        deps = getRotToMastDeps
+    output:
+        outPath = teeth3dsCSMastRotMatDir + "{teeth3dsName}_U_cS_mastRotMat.pkl"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath}
+        """
+
+#teeth3ds
+#apply rotation matrix to center and scaled teeth3ds data
+rule orientToMastTeeth3ds:
+    input:
+        inPly = teeth3dsFullCSDir + "{teeth3dsName}_U_cS.ply",
+        inMat = teeth3dsCSMastRotMatDir + "{teeth3dsName}_U_cS_mastRotMat.pkl",
+        script = "tools/processes/orientToMasterArch.py",
+        deps = manipulateAndFormatPack2
+    params:
+        labs = True
+    output:
+        outPath = teeth3dsFullCSOriMastDir + "{teeth3dsName}_U_cSOriMast.ply"
+    shell:
+        """
+        python {input.script} {input.inPly} {input.inMat} {output.outPath} {params.labs}
+        """
+
+#teeth3ds
+#remesh scans that are rotated, centered, and scaled
+rule remeshTeeth3ds:
+    input:
+        inPath = teeth3dsFullCSOriMastDir + "{teeth3dsName}_U_cSOriMast.ply",
+        script = "tools/processes/remesh.py",
+        deps = remeshDeps
+    params:
+        labs = True
+    output:
+        outPath = teeth3dsCSOriMastRemeshDir + "{teeth3dsName}_U_cSOriMastRemesh.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath} {params.labs}
+        """
+
+################################################
 
 #iowaExpansion
 #superimposition on annotated rugae region
