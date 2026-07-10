@@ -7,7 +7,7 @@
 
 
 #
-runNote = "training on remeshed teeth3dsIosseg_cSRot data, proportional 80/20 split from both teeth3ds and iosseg sets"
+runNote = "training on remeshed teeth3dsIosseg_cSOriMast data, proportional 80/20 split from both teeth3ds and iosseg sets"
 #
 
 
@@ -15,8 +15,8 @@ print(runNote)
 #should alredy be in the proper working directory
 import train
 train.fastTgcnEasy(arch = "u",
-                   testPath = "/Shared/gb_lss/Thomas/trainTestSets/teeth3dsIosseg_cSRot/test",
-                   trainPath = "/Shared/gb_lss/Thomas/trainTestSets/teeth3dsIosseg_cSRot/train",
+                   testPath = "/Shared/gb_lss/Thomas/trainTestSets/t3dsIosseg_cSOriMast/test",
+                   trainPath = "/Shared/gb_lss/Thomas/trainTestSets/t3dsIosseg_cSOriMast/train",
                    batch_size = 1,
                    k = 32,
                    numWorkers = 8,

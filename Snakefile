@@ -60,6 +60,12 @@ iowaExpSegReadyPostDir = "K:/iowaExpansion/segReadyScans/post/"
 #TEMP
 iowaExpSegReadyPreDir2 = "K:/iowaExpansion/segReadyScans2/pre/"
 iowaExpSegReadyPostDir2 = "K:/iowaExpansion/segReadyScans2/post/"
+#iowaExpTest
+#original scans from itero
+iowaExpTestOrigPreDir = "K:/iowaExpTest/scanData/orig/pre/"
+iowaExpTestOrigPostDir = "K:/iowaExpTest/scanData/orig/post/"
+iowaExpTestOrigFormPreDir = "K:/iowaExpTest/scanData/origForm/pre/"
+iowaExpTestOrigFormPostDir = "K:/iowaExpTest/scanData/origForm/post/"
 
 #directories for superimposition transformations
 iowaExpRugaeTransDir = "K:/iowaExpansion/superimposition/transformations/annotRugaeTrans/"
@@ -87,13 +93,20 @@ teeth3dsOrigFilesDir = "K:/teeth3DS/scanData/upper/"
 
 #iosseg
 #plys
-iossegAllCleanUDir = "K:/IOSSegData/clean/allCleanU/"
+iossegCleanUDir = "K:/IOSSegData/scanData/cleanU/"
+iossegCleanUCSDir = "K:/IOSSegData/scanData/cleanU_cS/"
+iossegCleanUCSMastRotMatDir = "K:/IOSSegData/rotationMatrices/cleanU_cS_mastRotMat/"
+iossegCleanUCSOriMastDir = "K:/IOSSegData/scanData/cleanU_cSOriMast/"
+
 iossegCleanCSRotUpperDir = "K:/IOSSegData/cleanCSRot/upper/"
 #random rotations
 iossegRandRotDir = "K:/IOSSegData/randomRotations/"
 
 #master arches
 masterArchesDir = "K:/masterArches/"
+
+#train test sets
+trainTestDir_t3dsIosseg_cSOriMast = "K:/trainTestSets/t3dsIosseg_cSOriMast/"
 
 
 ###############################################################################
@@ -210,25 +223,36 @@ def getFinDec016OriSeg(wildcards):
 ###############################################################################
 #iowaExpansion
 #get patient names and create directory dictionary
-iowaExpPatsPre, iowaExpFullAnnotPathDictPre = patNamesAndPathDict(iowaExpFullAnnotPreDir)
-iowaExpPatsPost, iowaExpFullAnnotPathDictPost = patNamesAndPathDict(iowaExpFullAnnotPostDir)
+#iowaExpPatsPre, iowaExpFullAnnotPathDictPre = patNamesAndPathDict(iowaExpFullAnnotPreDir)
+#iowaExpPatsPost, iowaExpFullAnnotPathDictPost = patNamesAndPathDict(iowaExpFullAnnotPostDir)
 #create helper functions for using the raw data
-def getIowaExpFullAnnotPre(wildcards):
-    return iowaExpFullAnnotPathDictPre[wildcards.iowaExpPrePat]
-def getIowaExpFullAnnotPost(wildcards):
-    return iowaExpFullAnnotPathDictPost[wildcards.iowaExpPostPat]
+#def getIowaExpFullAnnotPre(wildcards):
+#    return iowaExpFullAnnotPathDictPre[wildcards.iowaExpPrePat]
+#def getIowaExpFullAnnotPost(wildcards):
+#    return iowaExpFullAnnotPathDictPost[wildcards.iowaExpPostPat]
+
+###############################################################################
+#iowaExpTest
+#get patient names and create directory dictionary
+iowaExpTestPatsPre, iowaExpTestOrigPathDictPre = patNamesAndPathDict(iowaExpTestOrigPreDir)
+iowaExpTestPatsPost, iowaExpTestOrigPathDictPost = patNamesAndPathDict(iowaExpTestOrigPostDir)
+#create helper functions for using the raw data
+def getIowaExpTestOrigPre(wildcards):
+    return iowaExpTestOrigPathDictPre[wildcards.iowaExpTestPrePat]
+def getIowaExpTestOrigPost(wildcards):
+    return iowaExpTestOrigPathDictPost[wildcards.iowaExpTestPostPat]
 
 ###############################################################################
 #iowaExpansion
 #patient names for just the patients with both a pre and a post
-iowaExpPatsBoth = list(set(iowaExpPatsPre) & set(iowaExpPatsPost))
+#iowaExpPatsBoth = list(set(iowaExpPatsPre) & set(iowaExpPatsPost))
 #create helper functions for using the raw data
 #these are the same as above but using a different wildcard
 #this is repetative and there is likely a better way to do this
-def getIowaExpFullAnnotPre_both(wildcards):
-    return iowaExpFullAnnotPathDictPre[wildcards.iowaExpPats]
-def getIowaExpFullAnnotPost_both(wildcards):
-    return iowaExpFullAnnotPathDictPost[wildcards.iowaExpPats]
+#def getIowaExpFullAnnotPre_both(wildcards):
+#    return iowaExpFullAnnotPathDictPre[wildcards.iowaExpPats]
+#def getIowaExpFullAnnotPost_both(wildcards):
+#    return iowaExpFullAnnotPathDictPost[wildcards.iowaExpPats]
 
 ###############################################################################
 #NOT CURRENTLY IN USE
@@ -285,7 +309,7 @@ def getOrig3dsJson(wildcards):
 
 #iowaExpansion
 #get patient names and create directory dictionary
-allIossegCleanUPats, iossegCleanUPathDict = patNamesAndPathDict(iossegAllCleanUDir, pattern = r'^[0-9]{3}')
+allIossegCleanUPats, iossegCleanUPathDict = patNamesAndPathDict(iossegCleanUDir, pattern = r'^[0-9]{3}')
 #create helper functions for using the raw data
 def getIossegCleanU(wildcards):
     return iossegCleanUPathDict[wildcards.iossegCleanUPat]
@@ -305,6 +329,7 @@ manipulateAndFormatPack2 = ["tools/trimeshExtractFaceLabels.py", "tools/trimeshT
 convertTeeth3dsObjToPlyDeps = ["tools/colorNumFrame.py", "tools/trimeshToDf_labels.py", "tools/objJsonToDataFrames.py", "tools/dfToPlyExport.py"]
 getRotToMastDeps = ["tools/getRotToMaster.py", "tools/preprocess_point_cloud.py"]
 remeshDeps = ["tools/trimeshExtractFaceLabels.py", "tools/colorNumFrame.py", "tools/trimeshToDf_labels.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
+formatRawIteroPlyDeps = ["tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 
 ###############################################################################
 ##################################BEGIN RULES##################################
@@ -346,23 +371,17 @@ rule all:
         #"movement/visualization/centroidMovement/centMoveBeeSwarm.png"
         #iowaExpansion, segmentation model ready data
         #pre
-        expand(iowaExpSegReadyPreDir + "{iowaExpPrePat}Pre_segReady.ply", iowaExpPrePat = iowaExpPatsPre),
+        #expand(iowaExpSegReadyPreDir + "{iowaExpPrePat}Pre_segReady.ply", iowaExpPrePat = iowaExpPatsPre),
         #post
-        expand(iowaExpSegReadyPostDir + "{iowaExpPostPat}Post_segReady.ply", iowaExpPostPat = iowaExpPatsPost),
-        #teeth3ds, full plys remeshed
-        expand(teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply", teeth3dsName = patNames3ds),
-        #teeth3ds, creating random rotations which is monitored via a sentinel file
-        teeth3dsRandRotDir + "allRotationsCreated.complete",
-        #teeth3ds, remeshed files that are centered scaled and randomly rotated
-        expand(teeth3dsRemeshCSRotDir + "{teeth3dsName}_U_remeshCSRot.ply", teeth3dsName = patNames3ds),
+        #expand(iowaExpSegReadyPostDir + "{iowaExpPostPat}Post_segReady.ply", iowaExpPostPat = iowaExpPatsPost),
         #iowaExpansion annotated rugae superimposition transformations
-        expand(iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl", iowaExpPats = iowaExpPatsBoth),
+        #expand(iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl", iowaExpPats = iowaExpPatsBoth),
         #iowaExpansion post scans with annotated rugae superimposition transformation applied
-        expand(iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply", iowaExpPats = iowaExpPatsBoth),
+        #expand(iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply", iowaExpPats = iowaExpPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with no superimposition
-        expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
+        #expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
-        expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
+        #expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
         #iosseg, creating random rotations which is monitored via a sentinel file
         iossegRandRotDir + "allRotationsCreated.complete",
         #iosseg, clean files that are cetnered scaled and randomly rotated
@@ -371,9 +390,9 @@ rule all:
         "K:/trainTestSets/remeshT3dsIos_cSRot/remeshT3dsIos_cSRot_trainTestSplit.complete",
         #iowaExpansion, CENTER SCALE AND NO ORIENTATION, SEGREADY2, TEMPORARY
         #pre
-        expand(iowaExpSegReadyPreDir2 + "{iowaExpPrePat}Pre_segReady2.ply", iowaExpPrePat = iowaExpPatsPre),
+        #expand(iowaExpSegReadyPreDir2 + "{iowaExpPrePat}Pre_segReady2.ply", iowaExpPrePat = iowaExpPatsPre),
         #post
-        expand(iowaExpSegReadyPostDir2 + "{iowaExpPostPat}Post_segReady2.ply", iowaExpPostPat = iowaExpPatsPost),
+        #expand(iowaExpSegReadyPostDir2 + "{iowaExpPostPat}Post_segReady2.ply", iowaExpPostPat = iowaExpPatsPost),
         #master arches
         masterArchesDir + "masterArch1/mA1Full.ply"
 
@@ -381,16 +400,16 @@ rule all:
 
 
 #rule for just superimposition work
-rule superimp:
-    input:
-        #iowaExpansion annotated rugae superimposition transformations
-        expand(iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl", iowaExpPats = iowaExpPatsBoth),
-        #iowaExpansion post scans with annotated rugae superimposition transformation applied
-        expand(iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply", iowaExpPats = iowaExpPatsBoth),
-        #iowaExpansion pre and post scan visualization htmls with no superimposition
-        expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
-        #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
-        expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth)
+#rule superimp:
+#    input:
+#        #iowaExpansion annotated rugae superimposition transformations
+#        expand(iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl", iowaExpPats = iowaExpPatsBoth),
+#        #iowaExpansion post scans with annotated rugae superimposition transformation applied
+#        expand(iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply", iowaExpPats = iowaExpPatsBoth),
+#        #iowaExpansion pre and post scan visualization htmls with no superimposition
+#        expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
+#        #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
+#        expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth)
 
 rule processTeeth3ds:
     input:
@@ -399,6 +418,21 @@ rule processTeeth3ds:
         expand(teeth3dsCSMastRotMatDir + "{teeth3dsName}_U_cS_mastRotMat.pkl", teeth3dsName = patNames3ds),
         expand(teeth3dsFullCSOriMastDir + "{teeth3dsName}_U_cSOriMast.ply", teeth3dsName = patNames3ds),
         expand(teeth3dsCSOriMastRemeshDir + "{teeth3dsName}_U_cSOriMastRemesh.ply", teeth3dsName = patNames3ds)
+
+rule processIosseg:
+    input:
+        expand(iossegCleanUCSDir + "{iossegCleanUPat}_U_cS.ply", iossegCleanUPat = allIossegCleanUPats),
+        expand(iossegCleanUCSMastRotMatDir + "{iossegCleanUPat}_U_cS_mastRotMat.pkl", iossegCleanUPat = allIossegCleanUPats),
+        expand(iossegCleanUCSOriMastDir + "{iossegCleanUPat}_U_cSOriMast.ply", iossegCleanUPat = allIossegCleanUPats)
+
+rule trainTestSplits:
+    input:
+        trainTestDir_t3dsIosseg_cSOriMast + "t3dsIosseg_cSOriMast_trainTestSplit.complete"
+
+rule processIowaExpTest:
+    input:
+        expand(iowaExpTestOrigFormPreDir + "{iowaExpTestPrePat}Pre_form.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormPostDir + "{iowaExpTestPostPat}Post_form.ply", iowaExpTestPostPat = iowaExpTestPatsPost)
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
 #function that snakemake will not be able to understand without the context of the rule all
@@ -564,51 +598,38 @@ rule makeIowaRmeFinSegmentationReady:
 
 #iowaExpansion
 #make pre full annotated scans ready for the segmentation model
-rule makeIowaExpFullAnnotPreSegReady:
-    input:
-        #using helper function
-        inFile = getIowaExpFullAnnotPre,
-        script = "tools/processes/makeSegmentationReady.py",
-        deps = makeSegReadyDeps
-    output:
-        outFile = iowaExpSegReadyPreDir + "{iowaExpPrePat}Pre_segReady.ply"
-    shell:
-        """
-        python {input.script} {input.inFile} {output.outFile}
-        """
+#rule makeIowaExpFullAnnotPreSegReady:
+#    input:
+#        #using helper function
+#        inFile = getIowaExpFullAnnotPre,
+#        script = "tools/processes/makeSegmentationReady.py",
+#        deps = makeSegReadyDeps
+#    output:
+#        outFile = iowaExpSegReadyPreDir + "{iowaExpPrePat}Pre_segReady.ply"
+#    shell:
+#        """
+#        python {input.script} {input.inFile} {output.outFile}
+#        """
 
 #iowaExpansion
 #make post full annotated scans ready for the segmentation model
-rule makeIowaExpFullAnnotPostSegReady:
-    input:
-        #using helper function
-        inFile = getIowaExpFullAnnotPost,
-        script = "tools/processes/makeSegmentationReady.py",
-        deps = makeSegReadyDeps
-    output:
-        outFile = iowaExpSegReadyPostDir + "{iowaExpPostPat}Post_segReady.ply"
-    shell:
-        """
-        python {input.script} {input.inFile} {output.outFile}
-        """
+#rule makeIowaExpFullAnnotPostSegReady:
+#    input:
+#        #using helper function
+#        inFile = getIowaExpFullAnnotPost,
+#        script = "tools/processes/makeSegmentationReady.py",
+#        deps = makeSegReadyDeps
+#    output:
+#        outFile = iowaExpSegReadyPostDir + "{iowaExpPostPat}Post_segReady.ply"
+#    shell:
+#        """
+#        python {input.script} {input.inFile} {output.outFile}
+#        """
 
-#teeth3ds
-#remesh full plys
-rule remeshTeeth3dsFullPlys:
-    input:
-        #using the helper function
-        objFile = getOrig3dsObj,
-        jsonFile = getOrig3dsJson,
-        script = "tools/processes/remeshFullPlyTeeth3Ds.py",
-        deps = remeshTeeth3dsFullPlysDeps
-    output:
-        outFile = teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply"
-    shell:
-        """
-        python {input.script} {input.objFile} {input.jsonFile} {output.outFile}
-        """
 
 ##########################################
+#BEGIN NEW TEETH3DS
+
 #teeth3ds
 #convert obj/json combos into plys
 rule convertTeeth3dsObjToPly:
@@ -688,164 +709,200 @@ rule remeshTeeth3ds:
         python {input.script} {input.inPath} {output.outPath} {params.labs}
         """
 
+#END NEW TEETH3DS
 ################################################
 
 #iowaExpansion
 #superimposition on annotated rugae region
-rule superimpIowaExpAnnotRugae:
-    input:
-        #using the helper function
-        prePath = getIowaExpFullAnnotPre_both,
-        postPath = getIowaExpFullAnnotPost_both,
-        script = "superimposition/rugaeAnnotRegistration.py",
-        deps = superimpIowaExpAnnotRugaeDeps
-    output:
-        transPath = iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl",
-        outPlyPath = iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply"
-    shell:
-        """
-        python {input.script} {input.prePath} {input.postPath} {output.transPath} {output.outPlyPath}
-        """
+#rule superimpIowaExpAnnotRugae:
+#    input:
+#        #using the helper function
+#        prePath = getIowaExpFullAnnotPre_both,
+#        postPath = getIowaExpFullAnnotPost_both,
+#        script = "superimposition/rugaeAnnotRegistration.py",
+#        deps = superimpIowaExpAnnotRugaeDeps
+#    output:
+#        transPath = iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl",
+#        outPlyPath = iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply"
+#    shell:
+#        """
+#        python {input.script} {input.prePath} {input.postPath} {output.transPath} {output.outPlyPath}
+#        """
 
 
 #iowaExpansion
 #html visuals for pre and post scans with no superimposition
-rule makePrePostScanVisNoSuperimp:
-    input:
-        prePath = getIowaExpFullAnnotPre_both,
-        postPath = getIowaExpFullAnnotPost_both,
-        script = "superimposition/createSuperimpHtmlVisuals.py"
-    params:
-        color_ = "red",
-    output:
-        visHtml = iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html"
-    shell:
-        """
-        python {input.script} {input.prePath} {input.postPath} {params.color_} {output.visHtml}
-        """
+#rule makePrePostScanVisNoSuperimp:
+#    input:
+#        prePath = getIowaExpFullAnnotPre_both,
+#        postPath = getIowaExpFullAnnotPost_both,
+#        script = "superimposition/createSuperimpHtmlVisuals.py"
+#    params:
+#        color_ = "red",
+#    output:
+#        visHtml = iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html"
+#    shell:
+#        """
+#        python {input.script} {input.prePath} {input.postPath} {params.color_} {output.visHtml}
+#        """
 
 #iowaExpansion
 #html visuals for pre and post scans with annotated rugae superimposition
-rule makePrePostScanVisAnnotRugaeSuperimp:
+#rule makePrePostScanVisAnnotRugaeSuperimp:
+#    input:
+#        prePath = getIowaExpFullAnnotPre_both,
+#        postPath = iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply",
+#        script = "superimposition/createSuperimpHtmlVisuals.py"
+#    params:
+#        color_ = "green",
+#    output:
+#        visHtml = iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html"
+#    shell:
+#        """
+#        python {input.script} {input.prePath} {input.postPath} {params.color_} {output.visHtml}
+#        """
+
+
+#################################################
+#BEGIN NEW IOWAEXPTEST
+
+#iowaExpTest
+#format raw itero scans pre
+rule formatRawIowaExpTestPre:
     input:
-        prePath = getIowaExpFullAnnotPre_both,
-        postPath = iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply",
-        script = "superimposition/createSuperimpHtmlVisuals.py"
-    params:
-        color_ = "green",
+        inPath = getIowaExpTestOrigPre,
+        script = "tools/processes/formatRawIteroPly.py",
+        deps = formatRawIteroPlyDeps
     output:
-        visHtml = iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html"
+        outPath = iowaExpTestOrigFormPreDir + "{iowaExpTestPrePat}Pre_form.ply"
     shell:
         """
-        python {input.script} {input.prePath} {input.postPath} {params.color_} {output.visHtml}
+        python {input.script} {input.inPath} {output.outPath}
         """
 
-#teeth3ds, create random rotations
-rule createRandomRotTeeth3ds:
+#iowaExpTest
+#format raw itero scans post
+rule formatRawIowaExpTestPost:
     input:
-        dirPath = teeth3dsFullDir,
-        script = "tools/processes/getRandRotationsForDir.py"
+        inPath = getIowaExpTestOrigPost,
+        script = "tools/processes/formatRawIteroPly.py",
+        deps = formatRawIteroPlyDeps
     output:
-        #monitoring done be sentinel file
-        touch(teeth3dsRandRotDir + "allRotationsCreated.complete")
+        outPath = iowaExpTestOrigFormPostDir + "{iowaExpTestPostPat}Post_form.ply"
     shell:
         """
-        python {input.script} {input.dirPath} "K:/teeth3DS/randomRotations/"
+        python {input.script} {input.inPath} {output.outPath}
         """
 
-#teeth3ds, center scale and randomly rotate the remeshed files
-rule cSRotTeeth3dsRemeshed:
-    input:
-        inPath = teeth3dsRemeshDir + "{teeth3dsName}_U_remesh.ply",
-        #rotation matrices monitored by sentinel file
-        rotSentinel = teeth3dsRandRotDir + "allRotationsCreated.complete",
-        script = "tools/processes/centerScaleRotatePly.py",
-        deps = manipulateAndFormatPack
-    params:
-        fileSuffix = "_remesh.ply"
-    output:
-        outPath = teeth3dsRemeshCSRotDir + "{teeth3dsName}_U_remeshCSRot.ply"
-    shell:
-        """
-        python {input.script} {input.inPath} "K:/teeth3DS/randomRotations/" {params.fileSuffix} {output.outPath}
-        """
+#END NEW IOWAEXPTEST
+#################################################
 
-#iosseg, create random rotations
-rule createRandomRotIosseg:
-    input:
-        dirPath = iossegAllCleanUDir,
-        script = "tools/processes/getRandRotationsForDir.py"
-    output:
-        #monitoring done be sentinel file
-        touch(iossegRandRotDir + "allRotationsCreated.complete")
-    shell:
-        """
-        python {input.script} {input.dirPath} "K:/IOSSegData/randomRotations/"
-        """
 
-#iosseg, center scale and randomly rotate the clean files
-rule cSRotIossegCleanU:
+
+#############################
+#BEGIN NEW IOSSEG
+
+#iosseg
+#center and scale
+rule centerAndScaleIosseg:
     input:
         inPath = getIossegCleanU,
-        #rotation matrices monitored by sentinel file
-        rotSentinel = iossegRandRotDir + "allRotationsCreated.complete",
-        script = "tools/processes/centerScaleRotatePly.py",
-        deps = manipulateAndFormatPack
+        script = "tools/processes/centerAndScale.py",
+        deps = manipulateAndFormatPack2
     params:
-        fileSuffix = ".ply"
+        labs = True
     output:
-        outPath = iossegCleanCSRotUpperDir + "{iossegCleanUPat}_U_cSRot.ply"
+        outPath = iossegCleanUCSDir + "{iossegCleanUPat}_U_cS.ply"
     shell:
         """
-        python {input.script} {input.inPath} "K:/IOSSegData/randomRotations/" {params.fileSuffix} {output.outPath}
+        python {input.script} {input.inPath} {output.outPath} {params.labs}
         """
 
-#tain test set for teeth3dsIosseg_cSRot
-rule trainTestSplit_Teeth3dsIosseg_cSRot:
+#iosseg
+#get rotation matrix to master arch
+rule getRotToMastIosseg:
     input:
-        #require all remeshCSRot teeth3ds files, but they are not input into the script
-        t3ds_remeshCSRot = expand(teeth3dsRemeshCSRotDir + "{teeth3dsName}_U_remeshCSRot.ply", teeth3dsName = patNames3ds),
-        #require all cSRot teeth3ds files, but they are not input into the script
-        ios_cSRot = expand(iossegCleanCSRotUpperDir + "{iossegCleanUPat}_U_cSRot.ply", iossegCleanUPat = allIossegCleanUPats),
-        script = "tools/processes/trainTestSets/split_teeth3dsIosseg_cSRot.py"
+        inPath = iossegCleanUCSDir + "{iossegCleanUPat}_U_cS.ply",
+        script = "tools/processes/getRotMatToMasterArch.py",
+        deps = getRotToMastDeps
     output:
-        #monitoring done by sentinel file
-        touch("K:/trainTestSets/remeshT3dsIos_cSRot/remeshT3dsIos_cSRot_trainTestSplit.complete")
+        outPath = iossegCleanUCSMastRotMatDir + "{iossegCleanUPat}_U_cS_mastRotMat.pkl"
     shell:
         """
-        python {input.script}
+        python {input.script} {input.inPath} {output.outPath}
+        """
+
+#iosseg
+#apply rotation matrix to center and scaled teeth3ds data
+rule orientToMastIosseg:
+    input:
+        inPly = iossegCleanUCSDir + "{iossegCleanUPat}_U_cS.ply",
+        inMat = iossegCleanUCSMastRotMatDir + "{iossegCleanUPat}_U_cS_mastRotMat.pkl",
+        script = "tools/processes/orientToMasterArch.py",
+        deps = manipulateAndFormatPack2
+    params:
+        labs = True
+    output:
+        outPath = iossegCleanUCSOriMastDir + "{iossegCleanUPat}_U_cSOriMast.ply"
+    shell:
+        """
+        python {input.script} {input.inPly} {input.inMat} {output.outPath} {params.labs}
+        """
+
+#END NEW IOSSEG
+#############################
+
+
+#tain test set for teeth3dsIosseg_cSOriMast
+rule trainTestSplit_teeth3dsIosseg_cSOriMast:
+    input:
+        #require all CSOriMastRemesh teeth3ds files, but they are not input into the script
+        t3ds_cSOriMastRemesh = expand(teeth3dsCSOriMastRemeshDir + "{teeth3dsName}_U_cSOriMastRemesh.ply", teeth3dsName = patNames3ds),
+        #require all cSRot teeth3ds files, but they are not input into the script
+        ios_cSOriMast = expand(iossegCleanUCSOriMastDir + "{iossegCleanUPat}_U_cSOriMast.ply", iossegCleanUPat = allIossegCleanUPats),
+        script = "tools/processes/trainTestSets/split_teeth3dsIosseg_cSOriMast.py"
+    params:
+        newDir = trainTestDir_t3dsIosseg_cSOriMast,
+        t3dsDir = teeth3dsCSOriMastRemeshDir,
+        iosDir = iossegCleanUCSOriMastDir
+    output:
+        #monitoring done by sentinel file
+        touch(trainTestDir_t3dsIosseg_cSOriMast + "t3dsIosseg_cSOriMast_trainTestSplit.complete")
+    shell:
+        """
+        python {input.script} {params.newDir} {params.t3dsDir} {params.iosDir}
         """
 
 #THIS IS TEMPORARY
 #iowaExpansion
 #pre full annotated scans CENTER SCALE AND NO ORIENTATION, SEGREADY2
-rule makeIowaExpFullAnnotPreSegReady2:
-    input:
-        #using helper function
-        inFile = getIowaExpFullAnnotPre,
-        script = "tools/processes/makeSegmentationReady2.py",
-        deps = makeSegReadyDeps
-    output:
-        outFile = iowaExpSegReadyPreDir2 + "{iowaExpPrePat}Pre_segReady2.ply"
-    shell:
-        """
-        python {input.script} {input.inFile} {output.outFile}
-        """
+#rule makeIowaExpFullAnnotPreSegReady2:
+#    input:
+#        #using helper function
+#        inFile = getIowaExpFullAnnotPre,
+#        script = "tools/processes/makeSegmentationReady2.py",
+#        deps = makeSegReadyDeps
+#    output:
+#        outFile = iowaExpSegReadyPreDir2 + "{iowaExpPrePat}Pre_segReady2.ply"
+#    shell:
+#        """
+#        python {input.script} {input.inFile} {output.outFile}
+#        """
 
 #iowaExpansion
 #post full annotated scans CENTER SCALE AND NO ORIENTATION, SEGREADY2
-rule makeIowaExpFullAnnotPostSegReady2:
-    input:
-        #using helper function
-        inFile = getIowaExpFullAnnotPost,
-        script = "tools/processes/makeSegmentationReady2.py",
-        deps = makeSegReadyDeps
-    output:
-        outFile = iowaExpSegReadyPostDir2 + "{iowaExpPostPat}Post_segReady2.ply"
-    shell:
-        """
-        python {input.script} {input.inFile} {output.outFile}
-        """
+#rule makeIowaExpFullAnnotPostSegReady2:
+#    input:
+#        #using helper function
+#        inFile = getIowaExpFullAnnotPost,
+#        script = "tools/processes/makeSegmentationReady2.py",
+#        deps = makeSegReadyDeps
+#    output:
+#        outFile = iowaExpSegReadyPostDir2 + "{iowaExpPostPat}Post_segReady2.ply"
+#    shell:
+#        """
+#        python {input.script} {input.inFile} {output.outFile}
+#        """
 
 #create master arches
 rule createMasterArches:

@@ -1,19 +1,27 @@
 import numpy as np
 import os
 import shutil
+import sys
 
 #set seed
+os.environ["OMP_NUM_THREADS"] = "1"
 seed = 826
+import random
+random.seed(seed)
 np.random.seed(seed)
 
-#directory for new test and train set
-newDir = "K:/trainTestSets/remeshT3dsIos_cSRot/"
+
+#pull variables from snakemake
+newDir = sys.argv[1]
+t3dsDir = sys.argv[2]
+iosDir = sys.argv[3]
+
+
 
 
 ###############################################################################
 #teeth3ds
 #files in teeth3ds remesh center, scale, random rotate directory
-t3dsDir = "K:/teeth3DS/scanData/upperPlyRemeshCSRot/"
 t3dsFiles = os.listdir(t3dsDir)
 
 #generate random order of files
@@ -45,7 +53,6 @@ for source, destination in t3dsTrainFilePairs:
 
 ###############################################################################
 #iosseg
-iosDir = "K:/IOSSegData/cleanCSRot/upper/"
 iosFiles = os.listdir(iosDir)
 
 #generate random order of files
