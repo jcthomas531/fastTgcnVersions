@@ -66,6 +66,14 @@ iowaExpTestOrigPreDir = "K:/iowaExpTest/scanData/orig/pre/"
 iowaExpTestOrigPostDir = "K:/iowaExpTest/scanData/orig/post/"
 iowaExpTestOrigFormPreDir = "K:/iowaExpTest/scanData/origForm/pre/"
 iowaExpTestOrigFormPostDir = "K:/iowaExpTest/scanData/origForm/post/"
+iowaExpTestOrigFormCSPreDir = "K:/iowaExpTest/scanData/origForm_cS/pre/"
+iowaExpTestOrigFormCSPostDir = "K:/iowaExpTest/scanData/origForm_cS/post/"
+iowaExpTestOrigFormCSPreMastRotMatDir = "K:/iowaExpTest/rotationMatrices/origForm_cS_mastRotMat/pre/"
+iowaExpTestOrigFormCSPostMastRotMatDir = "K:/iowaExpTest/rotationMatrices/origForm_cS_mastRotMat/post/"
+iowaExpTestOrigFormCSOriMastPreDir = "K:/iowaExpTest/scanData/origForm_cSOriMast/pre/"
+iowaExpTestOrigFormCSOriMastPostDir = "K:/iowaExpTest/scanData/origForm_cSOriMast/post/"
+iowaExpTestOrigFormCSOriMastRemeshPreDir = "K:/iowaExpTest/scanData/origForm_cSOriMastRemesh/pre/"
+iowaExpTestOrigFormCSOriMastRemeshPostDir = "K:/iowaExpTest/scanData/origForm_cSOriMastRemesh/post/"
 
 #directories for superimposition transformations
 iowaExpRugaeTransDir = "K:/iowaExpansion/superimposition/transformations/annotRugaeTrans/"
@@ -432,7 +440,15 @@ rule trainTestSplits:
 rule processIowaExpTest:
     input:
         expand(iowaExpTestOrigFormPreDir + "{iowaExpTestPrePat}Pre_form.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
-        expand(iowaExpTestOrigFormPostDir + "{iowaExpTestPostPat}Post_form.ply", iowaExpTestPostPat = iowaExpTestPatsPost)
+        expand(iowaExpTestOrigFormPostDir + "{iowaExpTestPostPat}Post_form.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
+        expand(iowaExpTestOrigFormCSPreDir + "{iowaExpTestPrePat}Pre_formCS.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormCSPostDir + "{iowaExpTestPostPat}Post_formCS.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
+        expand(iowaExpTestOrigFormCSPreMastRotMatDir + "{iowaExpTestPrePat}Pre_formCS_mastRotMat.pkl", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormCSPostMastRotMatDir + "{iowaExpTestPostPat}Post_formCS_mastRotMat.pkl", iowaExpTestPostPat = iowaExpTestPatsPost),
+        expand(iowaExpTestOrigFormCSOriMastPreDir + "{iowaExpTestPrePat}Pre_formCSOriMast.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormCSOriMastPostDir + "{iowaExpTestPostPat}Post_formCSOriMast.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
+        expand(iowaExpTestOrigFormCSOriMastRemeshPreDir + "{iowaExpTestPrePat}Pre_formCSOriMastRemesh.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormCSOriMastRemeshPostDir + "{iowaExpTestPostPat}Post_formCSOriMastRemesh.ply", iowaExpTestPostPat = iowaExpTestPatsPost)
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
 #function that snakemake will not be able to understand without the context of the rule all
@@ -792,6 +808,132 @@ rule formatRawIowaExpTestPost:
     shell:
         """
         python {input.script} {input.inPath} {output.outPath}
+        """
+
+#iowaExpTest
+#cetner and scale pre
+rule centerScaleIowaExpTestPre:
+    input:
+        inPath = iowaExpTestOrigFormPreDir + "{iowaExpTestPrePat}Pre_form.ply",
+        script = "tools/processes/centerAndScale.py",
+        deps = manipulateAndFormatPack2
+    params:
+        labs = False
+    output:
+        outPath = iowaExpTestOrigFormCSPreDir + "{iowaExpTestPrePat}Pre_formCS.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath} {params.labs}
+        """
+
+#iowaExpTest
+#cetner and scale post
+rule centerScaleIowaExpTestPost:
+    input:
+        inPath = iowaExpTestOrigFormPostDir + "{iowaExpTestPostPat}Post_form.ply",
+        script = "tools/processes/centerAndScale.py",
+        deps = manipulateAndFormatPack2
+    params:
+        labs = False
+    output:
+        outPath = iowaExpTestOrigFormCSPostDir + "{iowaExpTestPostPat}Post_formCS.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath} {params.labs}
+        """
+
+#iowaExpTest
+#get rotation matrix to master arch, pre
+rule getRotToMastIowaExpTestPre:
+    input:
+        inPath = iowaExpTestOrigFormCSPreDir + "{iowaExpTestPrePat}Pre_formCS.ply",
+        script = "tools/processes/getRotMatToMasterArch.py",
+        deps = getRotToMastDeps
+    output:
+        outPath = iowaExpTestOrigFormCSPreMastRotMatDir + "{iowaExpTestPrePat}Pre_formCS_mastRotMat.pkl"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath}
+        """
+
+#iowaExpTest
+#get rotation matrix to master arch, post
+rule getRotToMastIowaExpTestPost:
+    input:
+        inPath = iowaExpTestOrigFormCSPostDir + "{iowaExpTestPostPat}Post_formCS.ply",
+        script = "tools/processes/getRotMatToMasterArch.py",
+        deps = getRotToMastDeps
+    output:
+        outPath = iowaExpTestOrigFormCSPostMastRotMatDir + "{iowaExpTestPostPat}Post_formCS_mastRotMat.pkl"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath}
+        """
+
+#iowaExpTest
+#apply rotation matrix to center and scaled iowaExpTest pre data
+rule orientToMastIowaExpTestPre:
+    input:
+        inPly = iowaExpTestOrigFormCSPreDir + "{iowaExpTestPrePat}Pre_formCS.ply",
+        inMat = iowaExpTestOrigFormCSPreMastRotMatDir + "{iowaExpTestPrePat}Pre_formCS_mastRotMat.pkl",
+        script = "tools/processes/orientToMasterArch.py",
+        deps = manipulateAndFormatPack2
+    params:
+        labs = False
+    output:
+        outPath = iowaExpTestOrigFormCSOriMastPreDir + "{iowaExpTestPrePat}Pre_formCSOriMast.ply"
+    shell:
+        """
+        python {input.script} {input.inPly} {input.inMat} {output.outPath} {params.labs}
+        """
+
+#iowaExpTest
+#apply rotation matrix to center and scaled iowaExpTest post data
+rule orientToMastIowaExpTestPost:
+    input:
+        inPly = iowaExpTestOrigFormCSPostDir + "{iowaExpTestPostPat}Post_formCS.ply",
+        inMat = iowaExpTestOrigFormCSPostMastRotMatDir + "{iowaExpTestPostPat}Post_formCS_mastRotMat.pkl",
+        script = "tools/processes/orientToMasterArch.py",
+        deps = manipulateAndFormatPack2
+    params:
+        labs = False
+    output:
+        outPath = iowaExpTestOrigFormCSOriMastPostDir + "{iowaExpTestPostPat}Post_formCSOriMast.ply"
+    shell:
+        """
+        python {input.script} {input.inPly} {input.inMat} {output.outPath} {params.labs}
+        """
+
+#iowaExpTest
+#remesh scans that are rotated, centered, and scaled for pre data
+rule remeshIowaExpTestPre:
+    input:
+        inPath = iowaExpTestOrigFormCSOriMastPreDir + "{iowaExpTestPrePat}Pre_formCSOriMast.ply",
+        script = "tools/processes/remesh.py",
+        deps = remeshDeps
+    params:
+        labs = False
+    output:
+        outPath = iowaExpTestOrigFormCSOriMastRemeshPreDir + "{iowaExpTestPrePat}Pre_formCSOriMastRemesh.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath} {params.labs}
+        """
+
+#iowaExpTest
+#remesh scans that are rotated, centered, and scaled for post data
+rule remeshIowaExpTestPost:
+    input:
+        inPath = iowaExpTestOrigFormCSOriMastPostDir + "{iowaExpTestPostPat}Post_formCSOriMast.ply",
+        script = "tools/processes/remesh.py",
+        deps = remeshDeps
+    params:
+        labs = False
+    output:
+        outPath = iowaExpTestOrigFormCSOriMastRemeshPostDir + "{iowaExpTestPostPat}Post_formCSOriMastRemesh.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath} {params.labs}
         """
 
 #END NEW IOWAEXPTEST
