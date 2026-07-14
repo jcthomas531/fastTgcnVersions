@@ -74,6 +74,11 @@ iowaExpTestOrigFormCSOriMastPreDir = "K:/iowaExpTest/scanData/origForm_cSOriMast
 iowaExpTestOrigFormCSOriMastPostDir = "K:/iowaExpTest/scanData/origForm_cSOriMast/post/"
 iowaExpTestOrigFormCSOriMastRemeshPreDir = "K:/iowaExpTest/scanData/origForm_cSOriMastRemesh/pre/"
 iowaExpTestOrigFormCSOriMastRemeshPostDir = "K:/iowaExpTest/scanData/origForm_cSOriMastRemesh/post/"
+#segmeted directories
+iowaExpTestSegPreDir = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/origForm_cSOriMastRemesh/pre/"
+iowaExpTestSegPostDir = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/origForm_cSOriMastRemesh/post/"
+#centroid size directiories
+iowaExpTestCentSizeDir = "K:/iowaExpTest/centroidSize/"
 
 #directories for superimposition transformations
 iowaExpRugaeTransDir = "K:/iowaExpansion/superimposition/transformations/annotRugaeTrans/"
@@ -250,6 +255,7 @@ def getIowaExpTestOrigPre(wildcards):
 def getIowaExpTestOrigPost(wildcards):
     return iowaExpTestOrigPathDictPost[wildcards.iowaExpTestPostPat]
 
+
 ###############################################################################
 #iowaExpansion
 #patient names for just the patients with both a pre and a post
@@ -315,7 +321,7 @@ def getOrig3dsJson(wildcards):
 ###############################################################################
 #iosseg
 
-#iowaExpansion
+#iosseg
 #get patient names and create directory dictionary
 allIossegCleanUPats, iossegCleanUPathDict = patNamesAndPathDict(iossegCleanUDir, pattern = r'^[0-9]{3}')
 #create helper functions for using the raw data
@@ -338,6 +344,14 @@ convertTeeth3dsObjToPlyDeps = ["tools/colorNumFrame.py", "tools/trimeshToDf_labe
 getRotToMastDeps = ["tools/getRotToMaster.py", "tools/preprocess_point_cloud.py"]
 remeshDeps = ["tools/trimeshExtractFaceLabels.py", "tools/colorNumFrame.py", "tools/trimeshToDf_labels.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 formatRawIteroPlyDeps = ["tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
+calcCentSizeDeps = [
+"tools/readAndFormat.py",
+"tools/toothCentroids.py",
+"tools/teethToCenterDist.py",
+"tools/centroidSize.py",
+"tools/toothVars.py",
+"tools/plyRead.py"
+]
 
 ###############################################################################
 ##################################BEGIN RULES##################################
@@ -449,6 +463,13 @@ rule processIowaExpTest:
         expand(iowaExpTestOrigFormCSOriMastPostDir + "{iowaExpTestPostPat}Post_formCSOriMast.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
         expand(iowaExpTestOrigFormCSOriMastRemeshPreDir + "{iowaExpTestPrePat}Pre_formCSOriMastRemesh.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
         expand(iowaExpTestOrigFormCSOriMastRemeshPostDir + "{iowaExpTestPostPat}Post_formCSOriMastRemesh.ply", iowaExpTestPostPat = iowaExpTestPatsPost)
+
+rule iowaExpTestCentroidSize:
+    input:
+        #pre centroid size
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePre.csv",
+        #post centroid size
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePost.csv"
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
 #function that snakemake will not be able to understand without the context of the rule all
@@ -934,6 +955,34 @@ rule remeshIowaExpTestPost:
     shell:
         """
         python {input.script} {input.inPath} {output.outPath} {params.labs}
+        """
+
+#iowaExpTest
+#get centroid size for segmented pre scans
+rule getCentSizeIowaExpTestPre:
+    input:
+        dir_ = directory(iowaExpTestSegPreDir),
+        script = "tools/processes/calculateCentroidSize.py",
+        deps = calcCentSizeDeps
+    output:
+        outPath = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePre.csv"
+    shell:
+        """
+        python {input.script} {input.dir_} {output.outPath}
+        """
+
+#iowaExpTest
+#get centroid size for segmented post scans
+rule getCentSizeIowaExpTestPost:
+    input:
+        dir_ = directory(iowaExpTestSegPostDir),
+        script = "tools/processes/calculateCentroidSize.py",
+        deps = calcCentSizeDeps
+    output:
+        outPath = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePost.csv"
+    shell:
+        """
+        python {input.script} {input.dir_} {output.outPath}
         """
 
 #END NEW IOWAEXPTEST

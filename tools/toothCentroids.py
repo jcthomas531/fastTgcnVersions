@@ -29,7 +29,34 @@ def toothCentroids(face, vertex):
         #calculate and store the centriods
         centHolder.iloc[i,range(1, 4)] = vertVals.mean()
     
-    return centHolder
+    
+    
+    #overall centroid for the entire scan
+    #get unique vertex indices for all faces
+    overallVertInd = faceC["vertex_indices"].explode().unique().tolist()
+    #get vertex values
+    overallVertVals = vertexC.iloc[overallVertInd,][["x", "y", "z"]]
+    #calculate centroid
+    overallCentDf = overallVertVals.mean().to_frame().T
+    #add label
+    overallCentDf.insert(0, "toothNum", "allScan")
+    
+    #overall centroid for the teeth in the scan, ie gum excluded
+    #get all gum indices from face data
+    gumInd = faceC["toothNum"].isin(["gum"])
+    #get vertex indices for all vertices that are not gums
+    noGumVertInd = faceC[~gumInd]["vertex_indices"].explode().unique().tolist()
+    #get vertex values
+    noGumVertVals = vertexC.iloc[noGumVertInd,][["x", "y", "z"]] 
+    #calculate centroid
+    noGumCentDf = noGumVertVals.mean().to_frame().T
+    #add label
+    noGumCentDf.insert(0, "toothNum", "noGum")
+    
+    #add rows for the overall scan centroid and the centroid for all teeth
+    centHolder2 = pd.concat([centHolder, overallCentDf, noGumCentDf], ignore_index=True)
+    
+    return centHolder2
 
 #example
 # import os

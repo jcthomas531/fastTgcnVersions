@@ -1,0 +1,54 @@
+---
+title: "Preliminary: centroid size for exp test data"
+author: "J. C. Thomas"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document:
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, comment = NULL)
+set.seed(826)
+source("Y:/dissModels/intraoralSegmentation/centroidSize/testDatCentSizeAnalysis.R")
+library(mysticOwl)
+```
+
+# Centroid size
+
+Process: Each scan is segmented to identify each tooth. The centroid for each tooth is calculated. The centroid for all of the teeth together is calculated (center point). The distance between each tooth's centroid and the center point is calculated. These distances are combined (via the L2 norm) to yield the centroid size.
+
+![Example of centroid size measurement](K:/iowaExpTest/visuals/centroidSizeMeasurement.png){width=60%}
+
+\newpage
+
+# Centroid size pre and post for each patient
+
+Below is a table showing the centroid sizes for each patient in their pre and post scans along with the difference (post - pre). Based on my understanding of our discussion, I assume that the hypothesis is that these values would increase which is not what we see here.
+
+What does this mean for us? The main take away is that this is likely not the correct metric to describe what we are interested in investigating. We know from looking at the superimposed scans that there is expansion, this metric simply does not capture that.
+
+```{r}
+dat |> kablePdf(digits = 3, title = "Centroid Size for Each Patient")
+```
+
+```{r}
+vis1
+```
+
+One thing to note here is that the values here are generally small which might mean that this metric doesnt really capture anything at all. Below is the results of a basic paired t-test to determine if there is evidence that the true mean is different than 0. The results indicate that there is not sufficient evidence to conclude that the true mean is anything different than zero. Granted we have a limited sample size, but this is reassuring.
+
+```{r}
+res1
+```
+
+# Whats next?
+
+Well, we knew that this single value representation in centroid size would certainly not be perfect. This confirms that and indicates that this metric is not very useful. There are many other options:
+
+* measuring centroid size only using certain teeth such as the rear molars. This is a slight and easy variation on what we have already produced.
+* looking at individual tooth trajectories. This is more work but has the potential to be very interesting.
+* looking at more basic but established measures like intermolar width and such
+* looking at the profile of the roof of the mouth and comparing pre and post like they did in the paper you sent, this would also be more work.
+
+We can discuss these results and where we want to look next at our meeting this week.
