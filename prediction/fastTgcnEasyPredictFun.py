@@ -25,11 +25,11 @@ import pandas as pd
 from dataloader import generate_plyfile, plydataset
 from loss import IoULoss, DiceLoss
 from utils import compute_cat_iou, compute_mACC
+import pickle
 
 
 
-
-def fastTgcnEasyPredict(inDir, outDir, modelPath):
+def fastTgcnEasyPredict(inDir, outDir, predMatOutDir, modelPath):
     
     
     
@@ -90,6 +90,9 @@ def fastTgcnEasyPredict(inDir, outDir, modelPath):
     # print(plyPathStr)
     # print(plyPathStr1)
     # print(plyPathStr2)
+    #attempting same process for pred mat
+    predPathStr = str(predMatOutDir).replace("\\", "/") + "/%s"
+    
     
     print("a")
     #removed for now, this seems to be the first catch
@@ -100,6 +103,13 @@ def fastTgcnEasyPredict(inDir, outDir, modelPath):
     #i believe a lot of the stuff in here is unnecessary, we really just need the preds
     #
     for batch_id, (index, points, label_face, label_face_onehot, name, raw_points_face, idx_face) in tqdm(enumerate(loader), total=len(loader), smoothing=0.9):
+        
+        #making output name
+        #using this odd form bc thats what the name object is like and 
+        #this is easy to deal with for the moment.
+        nameSeg = (name[0].replace(".ply", "_seg.ply"),)
+        namePred = (name[0].replace(".ply", "_predMat.pkl"),)
+        
         batchsize, num_point, _ = points.size()
         point_face = raw_points_face[0].numpy()
         index_face = index[0].numpy()
@@ -125,16 +135,26 @@ def fastTgcnEasyPredict(inDir, outDir, modelPath):
         correct = pred_choice.eq(label_face.data).cpu().sum()
         metrics['accuracy'].append(correct.item()/ (batchsize * num_point))
         label_face = pred_choice.cpu().reshape(pred_choice.shape[0], 1)
+        #
+        #output pred matrix
+        #
+        #move pred matrix to cpu
+        pred = pred.cpu()
+        #
+        matPath = (predPathStr) % namePred
+        fp2 = open(matPath, "wb")
+        pickle.dump(obj = pred,
+                    file = fp2)
+        fp2.close()
+        #can be read in like: 
+        # with open(outPath, "rb") as f:
+        #     obj = pickle.load(f)
+        #
+        #
+        #
         print("e")
         if generate_ply:
-
             #label_face=label_optimization(index_face, label_face)
-            
-            #making output name
-            #using this odd form bc thats what the name object is like and 
-            #this is easy to deal with for the moment.
-            nameSeg = (name[0].replace(".ply", "_seg.ply"),)
-
             generate_plyfile(index_face = index_face, point_face = point_face,
                              label_face = label_face, arch = arch, path=(plyPathStr2) % nameSeg)
     print("f")
