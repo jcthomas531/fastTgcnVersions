@@ -35,20 +35,8 @@ origStlDir = "K:/iowaRme/preDelivAndFinalScans/originalStl/"
 #iowaRme:
 #preD files and directories
 preDFullScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/fullScans/"
-preDDec016ScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016Scans/"
-preDDec016OriScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016OriScans/"
-PreDDec016OriSegDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/dec016OriSeg/"
-preDSegReadyScansDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/segReadyScans/"
 #fin files and directories
 finFullScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/fullScans/"
-finDec016ScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016Scans/"
-finDec016OriScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016OriScans/"
-finDec016OriSegDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/dec016OriSeg/"
-finSegReadyScansDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/segReadyScans/"
-#directories for transformations for registering final scan to preD scan
-preDFinDec016TransDir = "K:/iowaRme/registTrans/preDFin_dec016/"
-#centroid and distance directories
-preDFunDec016DistDir = "K:/iowaRme/movement/preDFin_dec016/"
 
 #iowaExpansion
 #full, rugae annotated scans
@@ -96,11 +84,6 @@ teeth3dsFullCSDir = "K:/teeth3DS/scanData/upperPly_cS/"
 teeth3dsCSMastRotMatDir = "K:/teeth3DS/rotationMatrices/upperPly_cS_mastRotMat/"
 teeth3dsFullCSOriMastDir = "K:/teeth3DS/scanData/upperPly_cSOriMast/"
 teeth3dsCSOriMastRemeshDir = "K:/teeth3DS/scanData/upperPly_cSOriMastRemesh/"
-
-
-teeth3dsRemeshDir = "K:/teeth3DS/scanData/upperPlyRemesh/"
-teeth3dsRandRotDir = "K:/teeth3DS/randomRotations/"
-teeth3dsRemeshCSRotDir = "K:/teeth3DS/scanData/upperPlyRemeshCSRot/"
 #original files
 teeth3dsOrigFilesDir = "K:/teeth3DS/scanData/upper/"
 
@@ -110,10 +93,6 @@ iossegCleanUDir = "K:/IOSSegData/scanData/cleanU/"
 iossegCleanUCSDir = "K:/IOSSegData/scanData/cleanU_cS/"
 iossegCleanUCSMastRotMatDir = "K:/IOSSegData/rotationMatrices/cleanU_cS_mastRotMat/"
 iossegCleanUCSOriMastDir = "K:/IOSSegData/scanData/cleanU_cSOriMast/"
-
-iossegCleanCSRotUpperDir = "K:/IOSSegData/cleanCSRot/upper/"
-#random rotations
-iossegRandRotDir = "K:/IOSSegData/randomRotations/"
 
 #master arches
 masterArchesDir = "K:/masterArches/"
@@ -204,36 +183,6 @@ def getOrigStlFin(wildcards):
     return origStlFinFilePathDict[wildcards.finPat]
 
 ###############################################################################
-#iowaRme
-#i do not currently have a set up to make snake make run the actual segmentation process
-#because that involves using the HPC and i need to make an updated container 
-#for this that contains snake make. In the mean time, I will take care of the 
-#segementation manually 
-#since that is the case, we need to use a bit of a work around since we cannot require
-#the segmented plys to exist bc there is not rule that is able to make them
-#i am going to use a similar process to what is used in the first step with
-#the original stls
-
-#we will no longer need this when i have snakemake working on hpc
-
-#for preD scans
-#dictionary for segmented file paths
-preDDec016OriSegPath = [PreDDec016OriSegDir + i + "u_preD_dec016Ori_seg.ply" for i in patNamesPreD]
-preDDec016OriSegDict = dict(zip(patNamesPreD, preDDec016OriSegPath))
-#creating helper function to use with wildcards in rules section
-def getPreDDec016OriSeg(wildcards):
-    return preDDec016OriSegDict[wildcards.bothPat]
-
-
-#for fin scans
-#dictionary for segmented file paths
-finDec016OriSegPath = [finDec016OriSegDir + i + "u_fin_dec016Ori_seg.ply" for i in patNamesFin]
-finDec016OriSegDict = dict(zip(patNamesFin, finDec016OriSegPath))
-#creating helper function to use with wildcards in rules section
-def getFinDec016OriSeg(wildcards):
-    return finDec016OriSegDict[wildcards.bothPat]
-
-###############################################################################
 #iowaExpansion
 #get patient names and create directory dictionary
 #iowaExpPatsPre, iowaExpFullAnnotPathDictPre = patNamesAndPathDict(iowaExpFullAnnotPreDir)
@@ -267,15 +216,6 @@ def getIowaExpTestOrigPost(wildcards):
 #    return iowaExpFullAnnotPathDictPre[wildcards.iowaExpPats]
 #def getIowaExpFullAnnotPost_both(wildcards):
 #    return iowaExpFullAnnotPathDictPost[wildcards.iowaExpPats]
-
-###############################################################################
-#NOT CURRENTLY IN USE
-#teeth3ds
-#get patient names and create directory dictionary
-teeth3dsFullPlyNames, teeth3dsFullPlyPathDict = patNamesAndPathDict(dir_ = teeth3dsFullDir,  pattern = r'^(.+)_', captureGroup = 1)
-#create helper functions for using the raw data
-def getTeeth3dsFullPly(wildcards):
-    return teeth3dsFullPlyPathDict[wildcards.teeth3dsPlyName]
 
 ###############################################################################
 #teeth3ds
@@ -331,12 +271,7 @@ def getIossegCleanU(wildcards):
 ###############################################################################
 #dependency lists
 stlConvertNoLabsDepends = ["tools/stlToPlyFuns.py"]
-decimNoLabsDepends = ["tools/decimationFuns.py", "tools/formatAndExportFuns.py"]
-orientTeeth3DSDepends = ["tools/registrationFuns.py"]
-getRegistTransDepends = ["tools/plyToRegistTransformation.py", "tools/registrationFuns.py"]
-centroidAndMeasureDepends = ["tools/trimeshToDf_labels.py", "tools/plyFunctions.py", "tools/centroidDistance.py", "tools/toothCentroids.py"]
 makeSegReadyDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
-remeshTeeth3dsFullPlysDeps = ["tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py", "tools/colorNumFrame.py"]
 superimpIowaExpAnnotRugaeDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 manipulateAndFormatPack = ["tools/trimeshExtractFaceLabels.py", "tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py"]
 manipulateAndFormatPack2 = ["tools/trimeshExtractFaceLabels.py", "tools/trimeshToDf_labels.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
@@ -369,28 +304,6 @@ rule all:
         expand(preDFullScanDir + "{preDPat}u_preD.ply", preDPat = patNamesPreD),
         #fin
         expand(finFullScanDir + "{finPat}u_fin.ply", finPat = patNamesFin),
-        #iowaRme preD upper scan plys decimated to 16000 faces
-        expand(preDDec016ScanDir + "{preDPat}u_preD_dec016.ply", preDPat = patNamesPreD),
-        #iowaRme fin upper scan plys decimated to 16000 faces
-        expand(finDec016ScanDir + "{finPat}u_fin_dec016.ply", finPat = patNamesFin),
-        #iowaRme preD upper decimated scans oriented to teeth3ds training data
-        expand(preDDec016OriScanDir + "{preDPat}u_preD_dec016Ori.ply", preDPat = patNamesPreD),
-        #iowaRme fin upper decimated scans oriented to teeth3ds training data
-        expand(finDec016OriScanDir + "{finPat}u_fin_dec016Ori.ply", finPat = patNamesFin),
-        #iowaRme preD segmentation ready
-        expand(preDSegReadyScansDir + "{preDPat}u_preD_segReady.ply", preDPat = patNamesPreD),
-        #iowaRme fin segmentationReady
-        expand(finSegReadyScansDir + "{finPat}u_fin_segReady.ply", finPat = patNamesFin),
-        #iowaRme transformations for registering fin scan to preD scan
-        expand(preDFinDec016TransDir + "{bothPat}u_registTrans_dec016.pkl", bothPat = patNamesBoth),
-        #iowaRme centroid and distance data
-        expand(preDFunDec016DistDir + "{bothPat}u_dist_dec016.csv", bothPat = patNamesBoth),
-        #visualizations
-        # COMMENTING OUT FOR NOW UNTIL I FIGURE OUT THE RSCRIPT ISSUE
-        #iowaRme centroid movement line plot
-        #"movement/visualization/centroidMovement/centMovePatLines.html",
-        #iowaRme cetroid movement bee swarm
-        #"movement/visualization/centroidMovement/centMoveBeeSwarm.png"
         #iowaExpansion, segmentation model ready data
         #pre
         #expand(iowaExpSegReadyPreDir + "{iowaExpPrePat}Pre_segReady.ply", iowaExpPrePat = iowaExpPatsPre),
@@ -404,17 +317,8 @@ rule all:
         #expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
         #expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
-        #iosseg, creating random rotations which is monitored via a sentinel file
-        iossegRandRotDir + "allRotationsCreated.complete",
-        #iosseg, clean files that are cetnered scaled and randomly rotated
-        expand(iossegCleanCSRotUpperDir + "{iossegCleanUPat}_U_cSRot.ply", iossegCleanUPat = allIossegCleanUPats),
         #train and test split for teeth3dsIosseg_cSRot
         "K:/trainTestSets/remeshT3dsIos_cSRot/remeshT3dsIos_cSRot_trainTestSplit.complete",
-        #iowaExpansion, CENTER SCALE AND NO ORIENTATION, SEGREADY2, TEMPORARY
-        #pre
-        #expand(iowaExpSegReadyPreDir2 + "{iowaExpPrePat}Pre_segReady2.ply", iowaExpPrePat = iowaExpPatsPre),
-        #post
-        #expand(iowaExpSegReadyPostDir2 + "{iowaExpPostPat}Post_segReady2.ply", iowaExpPostPat = iowaExpPatsPost),
         #master arches
         masterArchesDir + "masterArch1/mA1Full.ply"
 
@@ -499,138 +403,6 @@ rule convertFinStlToPly:
         """
         python {input.script} "{input.inFile}" "{output.outFile}"
         """
-
-#iowaRme
-#decimate preD scans
-rule producePreDDec016Scans:
-    input:
-        inFile = preDFullScanDir + "{preDPat}u_preD.ply",
-        script = "tools/processes/fullScanDecim_noLabs.py",
-        deps = decimNoLabsDepends
-    output:
-        outFile = preDDec016ScanDir + "{preDPat}u_preD_dec016.ply"
-    shell:
-        """
-        python {input.script} "{input.inFile}" "{output.outFile}"
-        """
-
-#iowaRme
-#decimate fin scans
-rule produceFinDec016Scans:
-    input:
-        inFile = finFullScanDir + "{finPat}u_fin.ply",
-        script = "tools/processes/fullScanDecim_noLabs.py",
-        deps = decimNoLabsDepends
-    output:
-        outFile = finDec016ScanDir + "{finPat}u_fin_dec016.ply"
-    shell:
-        """
-        python {input.script} "{input.inFile}" "{output.outFile}"
-        """
-
-#iowaRme
-#orient preD iowaRme scans in direction of teeth3ds training data
-rule orientPreDDec016Scans:
-    input:
-        inFile = preDDec016ScanDir + "{preDPat}u_preD_dec016.ply",
-        script = "tools/processes/orientToTeeth3DS.py",
-        deps = orientTeeth3DSDepends
-    output:
-        outFile = preDDec016OriScanDir + "{preDPat}u_preD_dec016Ori.ply"
-    shell:
-        """
-        python {input.script} "{input.inFile}" "{output.outFile}"
-        """
-
-#iowaRme
-#orient fin iowaRme scans in direction of teeth3ds training data
-rule orientFinDec016Scans:
-    input:
-        inFile = finDec016ScanDir + "{finPat}u_fin_dec016.ply",
-        script = "tools/processes/orientToTeeth3DS.py",
-        deps = orientTeeth3DSDepends
-    output:
-        outFile = finDec016OriScanDir + "{finPat}u_fin_dec016Ori.ply"
-    shell:
-        """
-        python {input.script} "{input.inFile}" "{output.outFile}"
-        """
-
-#iowaRme
-#get transformations that register fin scan to preD scan
-rule getPreDFinRegistTrans:
-    input:
-        preDPath = getPreDDec016OriSeg,
-        finPath = getFinDec016OriSeg,
-        script = "tools/processes/getRegistTrans.py",
-        deps = getRegistTransDepends
-    output:
-        outFile = preDFinDec016TransDir + "{bothPat}u_registTrans_dec016.pkl"
-    shell:
-        """
-        python {input.script} {input.preDPath} {input.finPath} {output.outFile}
-        """
-
-#iowaRme
-#get distance and centroid data for preD and fin scans
-rule getPreDFinDist:
-    input:
-        preDPath = getPreDDec016OriSeg,
-        finPath = getFinDec016OriSeg,
-        transPath = preDFinDec016TransDir + "{bothPat}u_registTrans_dec016.pkl",
-        script = "tools/processes/centroidAndMeasure.py",
-        deps = centroidAndMeasureDepends
-    output:
-        outFile = preDFunDec016DistDir + "{bothPat}u_dist_dec016.csv"
-    shell:
-        """
-        python {input.script} {input.preDPath} {input.finPath} {input.transPath} {output.outFile}
-        """
-
-#iowaRme
-#make preD iowaRme scans ready for segmentation model via remeshing and orientation
-rule makeIowaRmePreDSegmentationReady:
-    input:
-        inFile = preDFullScanDir + "{preDPat}u_preD.ply",
-        script = "tools/processes/makeSegmentationReady.py",
-        deps = makeSegReadyDeps
-    output:
-        outFile = preDSegReadyScansDir + "{preDPat}u_preD_segReady.ply"
-    shell:
-        """
-        python {input.script} {input.inFile} {output.outFile}
-        """
-
-#iowaRme
-#make fin iowaRme scans ready for segmentation model via remeshing and orientation
-rule makeIowaRmeFinSegmentationReady:
-    input:
-        inFile = finFullScanDir + "{finPat}u_fin.ply",
-        script = "tools/processes/makeSegmentationReady.py",
-        deps = makeSegReadyDeps
-    output:
-        outFile = finSegReadyScansDir + "{finPat}u_fin_segReady.ply"
-    shell:
-        """
-        python {input.script} {input.inFile} {output.outFile}
-        """
-
-
-#iowaRme
-#basic visualizations for the centroid movement data
-#this relies on an entire directory of files, using expand() functionality
-# COMMENTING OUT FOR NOW UNTIL I FIGURE OUT THE RSCRIPT ISSUE
-#rule makeCentroidVis:
-#    input:
-#        inFiles = expand(preDFunDec016DistDir + "{bothPat}u_dist_dec016.csv", bothPat = patNamesBoth),
-#        script = "movement/visualization/centroidMovement/centroidMoveVis.R"
-#    output:
-#        patLines = "movement/visualization/centroidMovement/centMovePatLines.html",
-#        beePlot = "movement/visualization/centroidMovement/centMoveBeeSwarm.png"
-#    shell:
-#        """
-#        Rscript {input.script} {output.patLines} {output.beePlot}
-#        """
 
 
 #iowaExpansion
