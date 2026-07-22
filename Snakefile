@@ -68,6 +68,13 @@ iowaExpTestSegPostDir = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMa
 #centroid size directiories
 iowaExpTestCentSizeDir = "K:/iowaExpTest/centroidSize/"
 
+#iowaExpTest
+#rugae annotate (RA) scans
+iowaExpTestRAPreDir = "K:/iowaExpTest/scanData/rugAnnot/pre/"
+iowaExpTestRAPostDir = "K:/iowaExpTest/scanData/rugAnnot/post/"
+iowaExpTestRAFormPreDir = "K:/iowaExpTest/scanData/rugAnnotForm/pre/"
+iowaExpTestRAFormPostDir = "K:/iowaExpTest/scanData/rugAnnotForm/post/"
+
 #directories for superimposition transformations
 iowaExpRugaeTransDir = "K:/iowaExpansion/superimposition/transformations/annotRugaeTrans/"
 #directory for post scans with superimposition transformation applied
@@ -195,7 +202,7 @@ def getOrigStlFin(wildcards):
 
 ###############################################################################
 #iowaExpTest
-#get patient names and create directory dictionary
+#get patient names and create directory dictionary for orig files
 iowaExpTestPatsPre, iowaExpTestOrigPathDictPre = patNamesAndPathDict(iowaExpTestOrigPreDir)
 iowaExpTestPatsPost, iowaExpTestOrigPathDictPost = patNamesAndPathDict(iowaExpTestOrigPostDir)
 #create helper functions for using the raw data
@@ -204,6 +211,16 @@ def getIowaExpTestOrigPre(wildcards):
 def getIowaExpTestOrigPost(wildcards):
     return iowaExpTestOrigPathDictPost[wildcards.iowaExpTestPostPat]
 
+
+#iowaExpTest
+#get patient names and create directory dictionary for rugae annotated (RA) files
+iowaExpTestRAPatsPre, iowaExpTestRAPathDictPre = patNamesAndPathDict(iowaExpTestRAPreDir)
+iowaExpTestRAPatsPost, iowaExpTestRAPathDictPost = patNamesAndPathDict(iowaExpTestRAPostDir)
+#create helper functions for using the raw data
+def getIowaExpTestRAPre(wildcards):
+    return iowaExpTestRAPathDictPre[wildcards.iowaExpTestRAPrePat]
+def getIowaExpTestRAPost(wildcards):
+    return iowaExpTestRAPathDictPost[wildcards.iowaExpTestRAPostPat]
 
 ###############################################################################
 #iowaExpansion
@@ -278,7 +295,7 @@ manipulateAndFormatPack2 = ["tools/trimeshExtractFaceLabels.py", "tools/trimeshT
 convertTeeth3dsObjToPlyDeps = ["tools/colorNumFrame.py", "tools/trimeshToDf_labels.py", "tools/objJsonToDataFrames.py", "tools/dfToPlyExport.py"]
 getRotToMastDeps = ["tools/getRotToMaster.py", "tools/preprocess_point_cloud.py"]
 remeshDeps = ["tools/trimeshExtractFaceLabels.py", "tools/colorNumFrame.py", "tools/trimeshToDf_labels.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
-formatRawIteroPlyDeps = ["tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
+formatNoLabPlyDeps = ["tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 calcCentSizeDeps = [
 "tools/readAndFormat.py",
 "tools/toothCentroids.py",
@@ -291,6 +308,11 @@ calcCentSizeDeps = [
 ###############################################################################
 ##################################BEGIN RULES##################################
 ###############################################################################
+
+###############################################################################
+#execution rules
+##########
+
 
 #rule specifying what is required to exist
 rule all:
@@ -317,13 +339,8 @@ rule all:
         #expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
         #expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
-        #train and test split for teeth3dsIosseg_cSRot
-        "K:/trainTestSets/remeshT3dsIos_cSRot/remeshT3dsIos_cSRot_trainTestSplit.complete",
         #master arches
         masterArchesDir + "masterArch1/mA1Full.ply"
-
-
-
 
 #rule for just superimposition work
 #rule superimp:
@@ -374,6 +391,17 @@ rule iowaExpTestCentroidSize:
         iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePre.csv",
         #post centroid size
         iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePost.csv"
+
+rule processIowaExpTestRA:
+    input:
+        expand(iowaExpTestRAFormPreDir + "{iowaExpTestRAPrePat}Pre_form.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormPostDir + "{iowaExpTestRAPostPat}Post_form.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost)
+
+###############################################################################
+#pipeline rules
+##########
+
+
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
 #function that snakemake will not be able to understand without the context of the rule all
@@ -581,7 +609,7 @@ rule formatRawIowaExpTestPre:
     input:
         inPath = getIowaExpTestOrigPre,
         script = "tools/processes/formatRawIteroPly.py",
-        deps = formatRawIteroPlyDeps
+        deps = formatNoLabPlyDeps
     output:
         outPath = iowaExpTestOrigFormPreDir + "{iowaExpTestPrePat}Pre_form.ply"
     shell:
@@ -595,7 +623,7 @@ rule formatRawIowaExpTestPost:
     input:
         inPath = getIowaExpTestOrigPost,
         script = "tools/processes/formatRawIteroPly.py",
-        deps = formatRawIteroPlyDeps
+        deps = formatNoLabPlyDeps
     output:
         outPath = iowaExpTestOrigFormPostDir + "{iowaExpTestPostPat}Post_form.ply"
     shell:
@@ -760,6 +788,45 @@ rule getCentSizeIowaExpTestPost:
 #END NEW IOWAEXPTEST
 #################################################
 
+#################################################
+#BEGIN IOWAEXPTEST RUGAE ANNOT
+
+#iowaExpTestRA
+#format and vert labs to face labs, rugae annot iowa exp test scans pre
+rule formatAndLabsIowaExpTestRAPre:
+    input:
+        inPath = getIowaExpTestRAPre,
+        script = "tools/processes/ccRugaeAnnotVertToFaceLab.py",
+        deps = formatNoLabPlyDeps
+    output:
+        outPath = iowaExpTestRAFormPreDir + "{iowaExpTestRAPrePat}Pre_form.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath}
+        """
+
+#iowaExpTestRA
+#format and vert labs to face labs, rugae annot iowa exp test scans post
+rule formatAndLabsIowaExpTestRAPost:
+    input:
+        inPath = getIowaExpTestRAPost,
+        script = "tools/processes/ccRugaeAnnotVertToFaceLab.py",
+        deps = formatNoLabPlyDeps
+    output:
+        outPath = iowaExpTestRAFormPostDir + "{iowaExpTestRAPostPat}Post_form.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath}
+        """
+
+
+#MAKE SURE WHEN YOU REMESH YOU RETAIN LABELS
+#SEE HOW IT WAS DONE WITH TEETH3DS
+#MAKE SURE IT WORKS FOR THESE LABELS AS WELL
+
+
+#END IOWAEXPTEST RUGAE ANNOT
+#################################################
 
 
 #############################

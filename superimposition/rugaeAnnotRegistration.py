@@ -28,8 +28,8 @@ outPlyPath = sys.argv[4]
 
 
 #testing
-# prePath = "K:/iowaExpansion/fullRugaeAnnotScans/pre/pat001Pre_annot.ply"
-# postPath = "K:/iowaExpansion/fullRugaeAnnotScans/post/pat001Post_annot.ply"
+# prePath = "K:/iowaExpansion/scanData/rugaeAnnot/pre/pat001Pre_annot.ply"
+# postPath = "K:/iowaExpansion/scanData/rugaeAnnot/post/pat001Post_annot.ply"
 # transPath = "Y:/dissModels/intraoralSegmentation/superimposition/testPickle.pkl"
 # outPlyPath = "K:/iowaExpansion/testDir/testPly.ply"
 
