@@ -1,17 +1,16 @@
 import sys
 sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
-import getRegistration as gr
-import trimeshToDfNoLabels as tdnl
-import dfToPlyExport as dpe
-
-from  plyfile import PlyData
-import pandas as pd
 import open3d as o3d
 import numpy as np
 import pickle
 import trimesh
 import copy
 import random
+
+import getRegistration as gr
+import dfToPlyExport as dpe
+import trimeshToDf_labels as ttdl
+import trimeshExtractFaceLabels as tefl
 
 
 #this as well as the os.environ statemetn up top is necessary for reproducing randomness
@@ -20,6 +19,15 @@ random.seed(seed)
 np.random.seed(seed)
 o3d.utility.random.seed(seed)
 
+
+
+
+#testing
+# prePath = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat001Pre_formCSOriMast.ply"
+# postPath = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat001Post_formCSOriMast.ply"
+# transPath = "Y:/dissModels/intraoralSegmentation/superimposition/testPickle.pkl"
+# outPlyPath = "K:/iowaExpTest/testDir/testPly.ply"
+
 #pull variables from snakemake
 prePath = sys.argv[1]
 postPath = sys.argv[2]
@@ -27,53 +35,45 @@ transPath = sys.argv[3]
 outPlyPath = sys.argv[4]
 
 
-#testing
-# prePath = "K:/iowaExpansion/scanData/rugaeAnnot/pre/pat001Pre_annot.ply"
-# postPath = "K:/iowaExpansion/scanData/rugaeAnnot/post/pat001Post_annot.ply"
-# transPath = "Y:/dissModels/intraoralSegmentation/superimposition/testPickle.pkl"
-# outPlyPath = "K:/iowaExpansion/testDir/testPly.ply"
-
-
 ####
-#read in data
+#helper function
 ####
-#small helper function
-def datToDf(x):
-    xDf = {
-        "vert": pd.DataFrame(x["vertex"].data), 
-        "face": pd.DataFrame(x["face"].data)
-        }
-    return xDf
-
-#for pre data
-preDat = PlyData.read(prePath)
-preDf = datToDf(preDat)
-
-#for post data
-postDat = PlyData.read(postPath)
-postDf = datToDf(postDat)
-
-
-####
-#create o3d point cloud object with just vertices that are labeld as 1
-####
-#small helper function
-def labeledCloud(vertData):
-    #just the vertexes labeled with 1
-    vertLab = (
-        vertData.loc[vertData["scalar_Classification"] == 1, ["x", "y", "z"]]
-        .to_numpy()
-               )
-    #convert to open3d point cloud
+#reads in the data and returns a point cloud for the annotated region
+def getLabeledPC(filePath):
+    #load in mesh and extrach vertex and face information as data frames
+    mesh = trimesh.load(filePath, process = False)
+    colorDf = tefl.trimeshExtractFaceLabels(mesh)
+    vDf, fDf = ttdl.trimeshToDf_labels(mesh, colorDf=colorDf)
+    
+    #create data frame of only labeled faces
+    labFaces = fDf.loc[(fDf["red"] == 255) & (fDf["green"] == 0) & (fDf["blue"] == 127)]
+    
+    #create list of unique vertices associated with labeled faces
+    vertInd = list(set(
+        vert
+        for sublist in labFaces["vertex_indices"]
+        for vert in sublist
+        ))
+    
+    #subset vertex data frame to only those associated with labeled faces, only x y z coords, convert to numpy
+    labVerts = vDf.iloc[vertInd].loc[:,["x", "y", "z"]].to_numpy()
+    
+    #convert to o3d point cloud
     labPointCloud = o3d.geometry.PointCloud()
-    labPointCloud.points = o3d.utility.Vector3dVector(vertLab)
+    labPointCloud.points = o3d.utility.Vector3dVector(labVerts)
+    
     return labPointCloud
 
-#for pre data
-preCloud = labeledCloud(preDf["vert"])
 
-#for post data
-postCloud = labeledCloud(postDf["vert"])
+
+####
+#read in scans and return labeled area as point cloud
+####
+preCloud = getLabeledPC(prePath)
+postCloud = getLabeledPC(postPath)
+#o3d.visualization.draw_geometries([postCloud])
+
+
 
 ####
 #transformation for superimposition
@@ -101,12 +101,11 @@ postMesh = trimesh.load(postPath, process = False)
 #copy post mesh and apply transformation, must copy bc the trans happens in palce
 postMeshTrans = copy.deepcopy(postMesh)
 postMeshTrans.apply_transform(regTrans.transformation) #this occurs in place
-#note, this transformation retains the scalar classification variable for the vertex data
-# postMeshTrans.metadata["_ply_raw"]["vertex"]["data"]["scalar_Classification"]
 
+#extract colors and convert to data frames for export
+colorDfTrans = tefl.trimeshExtractFaceLabels(postMeshTrans)
+transDfVert, transDfFace = ttdl.trimeshToDf_labels(postMeshTrans, colorDf=colorDfTrans)
 
-#format and export transformed mesh
-transDfVert, transDfFace = tdnl.trimeshToDfNoLabels(postMeshTrans,
-                                                    pointLab=postMeshTrans.metadata["_ply_raw"]["vertex"]["data"]["scalar_Classification"])
-dpe.dfToPlyExport(vertDf = transDfVert, faceDf = transDfFace, outFile = outPlyPath, pointLabCol = "scalar_Classification")
+#export
+dpe.dfToPlyExport(vertDf = transDfVert, faceDf = transDfFace, outFile = outPlyPath)
 

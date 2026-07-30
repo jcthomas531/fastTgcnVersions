@@ -74,15 +74,23 @@ iowaExpTestRAPreDir = "K:/iowaExpTest/scanData/rugAnnot/pre/"
 iowaExpTestRAPostDir = "K:/iowaExpTest/scanData/rugAnnot/post/"
 iowaExpTestRAFormPreDir = "K:/iowaExpTest/scanData/rugAnnotForm/pre/"
 iowaExpTestRAFormPostDir = "K:/iowaExpTest/scanData/rugAnnotForm/post/"
+iowaExpTestRAFormCSPreDir = "K:/iowaExpTest/scanData/rugAnnotForm_cS/pre/"
+iowaExpTestRAFormCSPostDir = "K:/iowaExpTest/scanData/rugAnnotForm_cS/post/"
+iowaExpTestRAFormCSPreMastRotMatDir = "K:/iowaExpTest/rotationMatrices/rugAnnotForm_cS_mastRotMat/pre/"
+iowaExpTestRAFormCSPostMastRotMatDir = "K:/iowaExpTest/rotationMatrices/rugAnnotForm_cS_mastRotMat/post/"
+iowaExpTestRAFormCSOriMastPreDir = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/"
+iowaExpTestRAFormCSOriMastPostDir = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/"
+iowaExpTestRAFormCSOriMastRemeshPreDir = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/"
+iowaExpTestRAFormCSOriMastRemeshPostDir = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/"
 
 #directories for superimposition transformations
-iowaExpRugaeTransDir = "K:/iowaExpansion/superimposition/transformations/annotRugaeTrans/"
+iowaExpTestRATransDir = "K:/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/"
 #directory for post scans with superimposition transformation applied
-iowaExpRugaeSuperimpPostScanDir = "K:/iowaExpansion/superimposition/transPostScan/annotRugaeTransPostScan/"
+iowaExpTestRASuperimpPostScanDir = "K:/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/"
 #directory for html visuals of pre and post scans without superimposition
-iowaExpNoSuperimpVisDir = "K:/iowaExpansion/superimposition/visuals/noSuperimp/"
+iowaExpTestRANoSuperimpVisDir = "K:/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/"
 #directory for html visuals of pre and post scans with annoted rugae superimposition
-iowaExpAnnotRugaeSuperimpVisDir = "K:/iowaExpansion/superimposition/visuals/annotRugaeSuperimp/"
+iowaExpTestRASuperimpVisDir = "K:/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/"
 
 #teeth3ds
 #full plys
@@ -212,7 +220,7 @@ def getIowaExpTestOrigPost(wildcards):
     return iowaExpTestOrigPathDictPost[wildcards.iowaExpTestPostPat]
 
 
-#iowaExpTest
+#iowaExpTestRA
 #get patient names and create directory dictionary for rugae annotated (RA) files
 iowaExpTestRAPatsPre, iowaExpTestRAPathDictPre = patNamesAndPathDict(iowaExpTestRAPreDir)
 iowaExpTestRAPatsPost, iowaExpTestRAPathDictPost = patNamesAndPathDict(iowaExpTestRAPostDir)
@@ -222,17 +230,10 @@ def getIowaExpTestRAPre(wildcards):
 def getIowaExpTestRAPost(wildcards):
     return iowaExpTestRAPathDictPost[wildcards.iowaExpTestRAPostPat]
 
-###############################################################################
-#iowaExpansion
+#iowaExpTestRA, patient pairs, for superimp
 #patient names for just the patients with both a pre and a post
-#iowaExpPatsBoth = list(set(iowaExpPatsPre) & set(iowaExpPatsPost))
-#create helper functions for using the raw data
-#these are the same as above but using a different wildcard
-#this is repetative and there is likely a better way to do this
-#def getIowaExpFullAnnotPre_both(wildcards):
-#    return iowaExpFullAnnotPathDictPre[wildcards.iowaExpPats]
-#def getIowaExpFullAnnotPost_both(wildcards):
-#    return iowaExpFullAnnotPathDictPost[wildcards.iowaExpPats]
+iowaExpTestRAPatsBoth = list(set(iowaExpTestRAPatsPre) & set(iowaExpTestRAPatsPost))
+
 
 ###############################################################################
 #teeth3ds
@@ -289,7 +290,7 @@ def getIossegCleanU(wildcards):
 #dependency lists
 stlConvertNoLabsDepends = ["tools/stlToPlyFuns.py"]
 makeSegReadyDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
-superimpIowaExpAnnotRugaeDeps = ["tools/getRegistration.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
+superimpIowaExpAnnotRugaeDeps = ["tools/getRegistration.py", "tools/preprocess_point_cloud.py", "tools/trimeshToDf_labels.py", "tools/trimeshExtractFaceLabels.py", "tools/dfToPlyExport.py"]
 manipulateAndFormatPack = ["tools/trimeshExtractFaceLabels.py", "tools/trimeshToDf_labels.py", "tools/dfToPlyExport.py"]
 manipulateAndFormatPack2 = ["tools/trimeshExtractFaceLabels.py", "tools/trimeshToDf_labels.py", "tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 convertTeeth3dsObjToPlyDeps = ["tools/colorNumFrame.py", "tools/trimeshToDf_labels.py", "tools/objJsonToDataFrames.py", "tools/dfToPlyExport.py"]
@@ -304,6 +305,7 @@ calcCentSizeDeps = [
 "tools/toothVars.py",
 "tools/plyRead.py"
 ]
+
 
 ###############################################################################
 ##################################BEGIN RULES##################################
@@ -342,17 +344,6 @@ rule all:
         #master arches
         masterArchesDir + "masterArch1/mA1Full.ply"
 
-#rule for just superimposition work
-#rule superimp:
-#    input:
-#        #iowaExpansion annotated rugae superimposition transformations
-#        expand(iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl", iowaExpPats = iowaExpPatsBoth),
-#        #iowaExpansion post scans with annotated rugae superimposition transformation applied
-#        expand(iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply", iowaExpPats = iowaExpPatsBoth),
-#        #iowaExpansion pre and post scan visualization htmls with no superimposition
-#        expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
-#        #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
-#        expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth)
 
 rule processTeeth3ds:
     input:
@@ -395,7 +386,29 @@ rule iowaExpTestCentroidSize:
 rule processIowaExpTestRA:
     input:
         expand(iowaExpTestRAFormPreDir + "{iowaExpTestRAPrePat}Pre_form.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
-        expand(iowaExpTestRAFormPostDir + "{iowaExpTestRAPostPat}Post_form.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost)
+        expand(iowaExpTestRAFormPostDir + "{iowaExpTestRAPostPat}Post_form.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        expand(iowaExpTestRAFormCSPreDir + "{iowaExpTestRAPrePat}Pre_formCS.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormCSPostDir + "{iowaExpTestRAPostPat}Post_formCS.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        expand(iowaExpTestRAFormCSPreMastRotMatDir + "{iowaExpTestRAPrePat}Pre_formCS_mastRotMat.pkl", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormCSPostMastRotMatDir + "{iowaExpTestRAPostPat}Post_formCS_mastRotMat.pkl", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        expand(iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMast.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormCSOriMastPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMast.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        expand(iowaExpTestRAFormCSOriMastRemeshPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMastRemesh.ply",  iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormCSOriMastRemeshPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMastRemesh.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost)
+
+#rule for just superimposition work
+rule superimp:
+    input:
+        #iowaExpTestRA, trans to superimp post on pre
+        expand(iowaExpTestRATransDir + "{iowaExpTestRABothPats}SuperimpPostOnPreTrans_rugAnnot.pkl", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        #iowaExpTestRA, post scans with annotated rugae superimposition transformation applied
+        expand(iowaExpTestRASuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMast_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        #iowaExpansion pre and post scan visualization htmls with no superimposition
+        expand(iowaExpTestRANoSuperimpVisDir + "{iowaExpTestRABothPats}NoSuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
+        expand(iowaExpTestRASuperimpVisDir + "{iowaExpTestRABothPats}SuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth)
+
+
 
 ###############################################################################
 #pipeline rules
@@ -548,57 +561,6 @@ rule remeshTeeth3ds:
 
 #END NEW TEETH3DS
 ################################################
-
-#iowaExpansion
-#superimposition on annotated rugae region
-#rule superimpIowaExpAnnotRugae:
-#    input:
-#        #using the helper function
-#        prePath = getIowaExpFullAnnotPre_both,
-#        postPath = getIowaExpFullAnnotPost_both,
-#        script = "superimposition/rugaeAnnotRegistration.py",
-#        deps = superimpIowaExpAnnotRugaeDeps
-#    output:
-#        transPath = iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl",
-#        outPlyPath = iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply"
-#    shell:
-#        """
-#        python {input.script} {input.prePath} {input.postPath} {output.transPath} {output.outPlyPath}
-#        """
-
-
-#iowaExpansion
-#html visuals for pre and post scans with no superimposition
-#rule makePrePostScanVisNoSuperimp:
-#    input:
-#        prePath = getIowaExpFullAnnotPre_both,
-#        postPath = getIowaExpFullAnnotPost_both,
-#        script = "superimposition/createSuperimpHtmlVisuals.py"
-#    params:
-#        color_ = "red",
-#    output:
-#        visHtml = iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html"
-#    shell:
-#        """
-#        python {input.script} {input.prePath} {input.postPath} {params.color_} {output.visHtml}
-#        """
-
-#iowaExpansion
-#html visuals for pre and post scans with annotated rugae superimposition
-#rule makePrePostScanVisAnnotRugaeSuperimp:
-#    input:
-#        prePath = getIowaExpFullAnnotPre_both,
-#        postPath = iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply",
-#        script = "superimposition/createSuperimpHtmlVisuals.py"
-#    params:
-#        color_ = "green",
-#    output:
-#        visHtml = iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html"
-#    shell:
-#        """
-#        python {input.script} {input.prePath} {input.postPath} {params.color_} {output.visHtml}
-#        """
-
 
 #################################################
 #BEGIN NEW IOWAEXPTEST
@@ -819,15 +781,193 @@ rule formatAndLabsIowaExpTestRAPost:
         python {input.script} {input.inPath} {output.outPath}
         """
 
+#iowaExpTestRA
+#cetner and scale pre
+rule centerScaleIowaExpTestRAPre:
+    input:
+        inPath = iowaExpTestRAFormPreDir + "{iowaExpTestRAPrePat}Pre_form.ply",
+        script = "tools/processes/centerAndScale.py",
+        deps = manipulateAndFormatPack2
+    params:
+        labs = True
+    output:
+        outPath = iowaExpTestRAFormCSPreDir + "{iowaExpTestRAPrePat}Pre_formCS.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath} {params.labs}
+        """
 
-#MAKE SURE WHEN YOU REMESH YOU RETAIN LABELS
-#SEE HOW IT WAS DONE WITH TEETH3DS
-#MAKE SURE IT WORKS FOR THESE LABELS AS WELL
+#iowaExpTestRA
+#cetner and scale post
+rule centerScaleIowaExpTestRAPost:
+    input:
+        inPath = iowaExpTestRAFormPostDir + "{iowaExpTestRAPostPat}Post_form.ply",
+        script = "tools/processes/centerAndScale.py",
+        deps = manipulateAndFormatPack2
+    params:
+        labs = True
+    output:
+        outPath = iowaExpTestRAFormCSPostDir + "{iowaExpTestRAPostPat}Post_formCS.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath} {params.labs}
+        """
+
+#iowaExpTestRA
+#get rotation matrix to master arch, pre
+rule getRotToMastIowaExpTestRAPre:
+    input:
+        inPath = iowaExpTestRAFormCSPreDir + "{iowaExpTestRAPrePat}Pre_formCS.ply",
+        script = "tools/processes/getRotMatToMasterArch.py",
+        deps = getRotToMastDeps
+    output:
+        outPath = iowaExpTestRAFormCSPreMastRotMatDir + "{iowaExpTestRAPrePat}Pre_formCS_mastRotMat.pkl"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath}
+        """
+
+#iowaExpTestRA
+#get rotation matrix to master arch, post
+rule getRotToMastIowaExpTestRAPost:
+    input:
+        inPath = iowaExpTestRAFormCSPostDir + "{iowaExpTestRAPostPat}Post_formCS.ply",
+        script = "tools/processes/getRotMatToMasterArch.py",
+        deps = getRotToMastDeps
+    output:
+        outPath = iowaExpTestRAFormCSPostMastRotMatDir + "{iowaExpTestRAPostPat}Post_formCS_mastRotMat.pkl"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath}
+        """
+
+#iowaExpTestRA
+#apply rotation matrix to center and scaled iowaExpTest pre data
+rule orientToMastIowaExpTestRAPre:
+    input:
+        inPly = iowaExpTestRAFormCSPreDir + "{iowaExpTestRAPrePat}Pre_formCS.ply",
+        inMat = iowaExpTestRAFormCSPreMastRotMatDir + "{iowaExpTestRAPrePat}Pre_formCS_mastRotMat.pkl",
+        script = "tools/processes/orientToMasterArch.py",
+        deps = manipulateAndFormatPack2
+    params:
+        labs = True
+    output:
+        outPath = iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMast.ply"
+    shell:
+        """
+        python {input.script} {input.inPly} {input.inMat} {output.outPath} {params.labs}
+        """
+
+#iowaExpTestRA
+#apply rotation matrix to center and scaled iowaExpTest post data
+rule orientToMastIowaExpTestRAPost:
+    input:
+        inPly = iowaExpTestRAFormCSPostDir + "{iowaExpTestRAPostPat}Post_formCS.ply",
+        inMat = iowaExpTestRAFormCSPostMastRotMatDir + "{iowaExpTestRAPostPat}Post_formCS_mastRotMat.pkl",
+        script = "tools/processes/orientToMasterArch.py",
+        deps = manipulateAndFormatPack2
+    params:
+        labs = True
+    output:
+        outPath = iowaExpTestRAFormCSOriMastPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMast.ply"
+    shell:
+        """
+        python {input.script} {input.inPly} {input.inMat} {output.outPath} {params.labs}
+        """
+
+#iowaExpTestRA
+#remesh scans that are rotated, centered, and scaled for pre data
+rule remeshIowaExpTestRAPre:
+    input:
+        inPath = iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMast.ply",
+        script = "tools/processes/remesh.py",
+        deps = remeshDeps
+    params:
+        labs = True
+    output:
+        outPath = iowaExpTestRAFormCSOriMastRemeshPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMastRemesh.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath} {params.labs}
+        """
+
+#iowaExpTestRA
+#remesh scans that are rotated, centered, and scaled for post data
+rule remeshIowaExpTestRAPost:
+    input:
+        inPath = iowaExpTestRAFormCSOriMastPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMast.ply",
+        script = "tools/processes/remesh.py",
+        deps = remeshDeps
+    params:
+        labs = True
+    output:
+        outPath = iowaExpTestRAFormCSOriMastRemeshPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMastRemesh.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath} {params.labs}
+        """
 
 
 #END IOWAEXPTEST RUGAE ANNOT
 #################################################
 
+#################################################
+#BEGIN IOWAEXPTEST RUGAE ANNOT SUPERIMPOSITION
+
+
+#iowaExpTest RA superimp
+#superimposition on annotated rugae region
+rule superimpIowaExpTestRA:
+    input:
+        #using the helper function
+        prePath = iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRABothPats}Pre_formCSOriMast.ply",
+        postPath = iowaExpTestRAFormCSOriMastPostDir + "{iowaExpTestRABothPats}Post_formCSOriMast.ply",
+        script = "superimposition/rugaeAnnotRegistration.py",
+        deps = superimpIowaExpAnnotRugaeDeps
+    output:
+        transPath = iowaExpTestRATransDir + "{iowaExpTestRABothPats}SuperimpPostOnPreTrans_rugAnnot.pkl",
+        outPlyPath = iowaExpTestRASuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMast_rugAnnotSuperimp.ply"
+    shell:
+        """
+        python {input.script} {input.prePath} {input.postPath} {output.transPath} {output.outPlyPath}
+        """
+
+
+#iowaExpTest RA superimp
+#html visuals for pre and post scans with no superimposition
+rule makeNoSuperimpVisIowaExpTestRA:
+    input:
+        prePath = iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRABothPats}Pre_formCSOriMast.ply",
+        postPath = iowaExpTestRAFormCSOriMastPostDir + "{iowaExpTestRABothPats}Post_formCSOriMast.ply",
+        script = "superimposition/createSuperimpHtmlVisuals.py"
+    params:
+        color_ = "red",
+    output:
+        visHtml = iowaExpTestRANoSuperimpVisDir + "{iowaExpTestRABothPats}NoSuperimpVis_formCSOriMast.html"
+    shell:
+        """
+        python {input.script} {input.prePath} {input.postPath} {params.color_} {output.visHtml}
+        """
+
+#iowaExpTest RA superimp
+#html visuals for pre and post scans with annotated rugae superimposition
+rule makeSuperimpVisIowaExpTestRA:
+    input:
+        prePath = iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRABothPats}Pre_formCSOriMast.ply",
+        postPath = iowaExpTestRASuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMast_rugAnnotSuperimp.ply",
+        script = "superimposition/createSuperimpHtmlVisuals.py"
+    params:
+        color_ = "green",
+    output:
+        visHtml = iowaExpTestRASuperimpVisDir + "{iowaExpTestRABothPats}SuperimpVis_formCSOriMast.html"
+    shell:
+        """
+        python {input.script} {input.prePath} {input.postPath} {params.color_} {output.visHtml}
+        """
+
+
+#END IOWAEXPTEST RUGAE ANNOT SUPERIMPOSITION
+#################################################
 
 #############################
 #BEGIN NEW IOSSEG

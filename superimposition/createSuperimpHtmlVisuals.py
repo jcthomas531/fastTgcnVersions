@@ -2,19 +2,20 @@ import pyvista as pv
 import sys
 
 
-#pull variables from snakemake
-prePath = sys.argv[1]
-postPath = sys.argv[2]
-color_ = sys.argv[3]
-visHtml = sys.argv[4]
-
-
 #testing
 # patNum = "015"
 # prePath = "K:/iowaExpansion/fullRugaeAnnotScans/pre/pat" + patNum + "Pre_annot.ply"
 # postPath = "K:/iowaExpansion/superimposition/transPostScan/annotRugaeTransPostScan/pat" + patNum + "Post_annotRugaeSuperimp.ply"
 # color_ = "green"
 # visHtml = "K:/iowaExpansion/superimposition/visuals/annotRugaeSuperimp/testRegist.html"
+
+
+#pull variables from snakemake
+prePath = sys.argv[1]
+postPath = sys.argv[2]
+color_ = sys.argv[3]
+visHtml = sys.argv[4]
+
 
 #read in meshes
 preMesh = pv.read(prePath)
