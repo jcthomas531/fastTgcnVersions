@@ -18,10 +18,17 @@ for i in range(len(segFiles)):
         rap.readAndPlot(file = filei, 
                        arch = "U")
 
+dir2 = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/"
+os.chdir(dir2)
+plyFiles = os.listdir()
+for i in range(len(plyFiles)):
+    filei = plyFiles[i]
+    if filei.endswith(".ply"):
+        rap.readAndPlot(file = filei, 
+                       arch = "U")
 
 
-os.chdir("K:/iowaRme/testDir/segTestInput")
-rap.readAndPlot(file = "pat058u_01CONV2.ply", 
+rap.readAndPlot(file = "K:/iowaExpTest/testDir/testPly.ply", 
                arch = "U")
 
 os.chdir("K:/iowaRme/testDir/segTestOutput/")
