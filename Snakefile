@@ -198,17 +198,6 @@ def getOrigStlFin(wildcards):
     return origStlFinFilePathDict[wildcards.finPat]
 
 ###############################################################################
-#iowaExpansion
-#get patient names and create directory dictionary
-#iowaExpPatsPre, iowaExpFullAnnotPathDictPre = patNamesAndPathDict(iowaExpFullAnnotPreDir)
-#iowaExpPatsPost, iowaExpFullAnnotPathDictPost = patNamesAndPathDict(iowaExpFullAnnotPostDir)
-#create helper functions for using the raw data
-#def getIowaExpFullAnnotPre(wildcards):
-#    return iowaExpFullAnnotPathDictPre[wildcards.iowaExpPrePat]
-#def getIowaExpFullAnnotPost(wildcards):
-#    return iowaExpFullAnnotPathDictPost[wildcards.iowaExpPostPat]
-
-###############################################################################
 #iowaExpTest
 #get patient names and create directory dictionary for orig files
 iowaExpTestPatsPre, iowaExpTestOrigPathDictPre = patNamesAndPathDict(iowaExpTestOrigPreDir)
@@ -322,28 +311,94 @@ rule all:
         #require the following things to exist
         #the wildcard {name} and what it stands for (given by the second expant arg) is passed
         #to any rule associated with this file
+        #
+        #master arches
+        #
+        masterArchesDir + "masterArch1/mA1Full.ply",
+        #
         #iowaRme:
+        #
         #upper scans converted from the original stls
         #preD
         expand(preDFullScanDir + "{preDPat}u_preD.ply", preDPat = patNamesPreD),
         #fin
         expand(finFullScanDir + "{finPat}u_fin.ply", finPat = patNamesFin),
-        #iowaExpansion, segmentation model ready data
-        #pre
-        #expand(iowaExpSegReadyPreDir + "{iowaExpPrePat}Pre_segReady.ply", iowaExpPrePat = iowaExpPatsPre),
-        #post
-        #expand(iowaExpSegReadyPostDir + "{iowaExpPostPat}Post_segReady.ply", iowaExpPostPat = iowaExpPatsPost),
-        #iowaExpansion annotated rugae superimposition transformations
-        #expand(iowaExpRugaeTransDir + "{iowaExpPats}AnnotRugaeTrans.pkl", iowaExpPats = iowaExpPatsBoth),
-        #iowaExpansion post scans with annotated rugae superimposition transformation applied
-        #expand(iowaExpRugaeSuperimpPostScanDir + "{iowaExpPats}Post_annotRugaeSuperimp.ply", iowaExpPats = iowaExpPatsBoth),
+        #
+        #process teeth3ds
+        #
+        expand(teeth3dsFullDir + "{teeth3dsName}_U.ply", teeth3dsName = patNames3ds),
+        expand(teeth3dsFullCSDir + "{teeth3dsName}_U_cS.ply", teeth3dsName = patNames3ds),
+        expand(teeth3dsCSMastRotMatDir + "{teeth3dsName}_U_cS_mastRotMat.pkl", teeth3dsName = patNames3ds),
+        expand(teeth3dsFullCSOriMastDir + "{teeth3dsName}_U_cSOriMast.ply", teeth3dsName = patNames3ds),
+        expand(teeth3dsCSOriMastRemeshDir + "{teeth3dsName}_U_cSOriMastRemesh.ply", teeth3dsName = patNames3ds),
+        #
+        #process Iosseg
+        #
+        expand(iossegCleanUCSDir + "{iossegCleanUPat}_U_cS.ply", iossegCleanUPat = allIossegCleanUPats),
+        expand(iossegCleanUCSMastRotMatDir + "{iossegCleanUPat}_U_cS_mastRotMat.pkl", iossegCleanUPat = allIossegCleanUPats),
+        expand(iossegCleanUCSOriMastDir + "{iossegCleanUPat}_U_cSOriMast.ply", iossegCleanUPat = allIossegCleanUPats),
+        #
+        #train test splits
+        #
+        trainTestDir_t3dsIosseg_cSOriMast + "t3dsIosseg_cSOriMast_trainTestSplit.complete",
+        #
+        #process iowaExptTest
+        #
+        expand(iowaExpTestOrigFormPreDir + "{iowaExpTestPrePat}Pre_form.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormPostDir + "{iowaExpTestPostPat}Post_form.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
+        expand(iowaExpTestOrigFormCSPreDir + "{iowaExpTestPrePat}Pre_formCS.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormCSPostDir + "{iowaExpTestPostPat}Post_formCS.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
+        expand(iowaExpTestOrigFormCSPreMastRotMatDir + "{iowaExpTestPrePat}Pre_formCS_mastRotMat.pkl", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormCSPostMastRotMatDir + "{iowaExpTestPostPat}Post_formCS_mastRotMat.pkl", iowaExpTestPostPat = iowaExpTestPatsPost),
+        expand(iowaExpTestOrigFormCSOriMastPreDir + "{iowaExpTestPrePat}Pre_formCSOriMast.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormCSOriMastPostDir + "{iowaExpTestPostPat}Post_formCSOriMast.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
+        expand(iowaExpTestOrigFormCSOriMastRemeshPreDir + "{iowaExpTestPrePat}Pre_formCSOriMastRemesh.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormCSOriMastRemeshPostDir + "{iowaExpTestPostPat}Post_formCSOriMastRemesh.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
+        #
+        #iowaExpTest centroid size
+        #
+        #pre centroid size
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePre.csv",
+        #post centroid size
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePost.csv",
+        #
+        #process iowaExpTestRA
+        #
+        expand(iowaExpTestRAFormPreDir + "{iowaExpTestRAPrePat}Pre_form.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormPostDir + "{iowaExpTestRAPostPat}Post_form.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        expand(iowaExpTestRAFormCSPreDir + "{iowaExpTestRAPrePat}Pre_formCS.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormCSPostDir + "{iowaExpTestRAPostPat}Post_formCS.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        expand(iowaExpTestRAFormCSPreMastRotMatDir + "{iowaExpTestRAPrePat}Pre_formCS_mastRotMat.pkl", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormCSPostMastRotMatDir + "{iowaExpTestRAPostPat}Post_formCS_mastRotMat.pkl", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        expand(iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMast.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormCSOriMastPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMast.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        expand(iowaExpTestRAFormCSOriMastRemeshPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMastRemesh.ply",  iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormCSOriMastRemeshPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMastRemesh.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        #
+        #superimp
+        #
+        #iowaExpTestRA, trans to superimp post on pre
+        expand(iowaExpTestRATransDir + "{iowaExpTestRABothPats}SuperimpPostOnPreTrans_rugAnnot.pkl", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        #iowaExpTestRA, post scans with annotated rugae superimposition transformation applied
+        expand(iowaExpTestRASuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMast_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with no superimposition
-        #expand(iowaExpNoSuperimpVisDir + "{iowaExpPats}NoSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
+        expand(iowaExpTestRANoSuperimpVisDir + "{iowaExpTestRABothPats}NoSuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
-        #expand(iowaExpAnnotRugaeSuperimpVisDir + "{iowaExpPats}AnnotRugaeSuperimpVis.html", iowaExpPats = iowaExpPatsBoth),
-        #master arches
+        expand(iowaExpTestRASuperimpVisDir + "{iowaExpTestRABothPats}SuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth)
+
+
+rule masterArches:
+    input:
         masterArchesDir + "masterArch1/mA1Full.ply"
 
+rule processIowaRme:
+    input:
+        #iowaRme:
+        #upper scans converted from the original stls
+        #preD
+        expand(preDFullScanDir + "{preDPat}u_preD.ply", preDPat = patNamesPreD),
+        #fin
+        expand(finFullScanDir + "{finPat}u_fin.ply", finPat = patNamesFin)
 
 rule processTeeth3ds:
     input:
@@ -414,7 +469,8 @@ rule superimp:
 #pipeline rules
 ##########
 
-
+##########################################
+#IOWARME
 
 #cannot directly run "snakemake convertPreDStlToPly -c1" because the input uses a wildcard via the helper
 #function that snakemake will not be able to understand without the context of the rule all
@@ -446,39 +502,9 @@ rule convertFinStlToPly:
         """
 
 
-#iowaExpansion
-#make pre full annotated scans ready for the segmentation model
-#rule makeIowaExpFullAnnotPreSegReady:
-#    input:
-#        #using helper function
-#        inFile = getIowaExpFullAnnotPre,
-#        script = "tools/processes/makeSegmentationReady.py",
-#        deps = makeSegReadyDeps
-#    output:
-#        outFile = iowaExpSegReadyPreDir + "{iowaExpPrePat}Pre_segReady.ply"
-#    shell:
-#        """
-#        python {input.script} {input.inFile} {output.outFile}
-#        """
-
-#iowaExpansion
-#make post full annotated scans ready for the segmentation model
-#rule makeIowaExpFullAnnotPostSegReady:
-#    input:
-#        #using helper function
-#        inFile = getIowaExpFullAnnotPost,
-#        script = "tools/processes/makeSegmentationReady.py",
-#        deps = makeSegReadyDeps
-#    output:
-#        outFile = iowaExpSegReadyPostDir + "{iowaExpPostPat}Post_segReady.ply"
-#    shell:
-#        """
-#        python {input.script} {input.inFile} {output.outFile}
-#        """
-
 
 ##########################################
-#BEGIN NEW TEETH3DS
+#TEETH3DS
 
 #teeth3ds
 #convert obj/json combos into plys
@@ -559,11 +585,9 @@ rule remeshTeeth3ds:
         python {input.script} {input.inPath} {output.outPath} {params.labs}
         """
 
-#END NEW TEETH3DS
-################################################
 
 #################################################
-#BEGIN NEW IOWAEXPTEST
+#IOWAEXPTEST
 
 #iowaExpTest
 #format raw itero scans pre
@@ -747,11 +771,9 @@ rule getCentSizeIowaExpTestPost:
         python {input.script} {input.dir_} {output.outPath}
         """
 
-#END NEW IOWAEXPTEST
-#################################################
 
 #################################################
-#BEGIN IOWAEXPTEST RUGAE ANNOT
+#IOWAEXPTEST RUGAE ANNOT
 
 #iowaExpTestRA
 #format and vert labs to face labs, rugae annot iowa exp test scans pre
@@ -908,11 +930,8 @@ rule remeshIowaExpTestRAPost:
         """
 
 
-#END IOWAEXPTEST RUGAE ANNOT
 #################################################
-
-#################################################
-#BEGIN IOWAEXPTEST RUGAE ANNOT SUPERIMPOSITION
+#IOWAEXPTEST RUGAE ANNOT SUPERIMPOSITION
 
 
 #iowaExpTest RA superimp
@@ -966,11 +985,10 @@ rule makeSuperimpVisIowaExpTestRA:
         """
 
 
-#END IOWAEXPTEST RUGAE ANNOT SUPERIMPOSITION
-#################################################
+
 
 #############################
-#BEGIN NEW IOSSEG
+#IOSSEG
 
 #iosseg
 #center and scale
@@ -1019,9 +1037,10 @@ rule orientToMastIosseg:
         python {input.script} {input.inPly} {input.inMat} {output.outPath} {params.labs}
         """
 
-#END NEW IOSSEG
-#############################
 
+
+#################################
+#TRAIN TEST SETS
 
 #tain test set for teeth3dsIosseg_cSOriMast
 rule trainTestSplit_teeth3dsIosseg_cSOriMast:
@@ -1043,36 +1062,8 @@ rule trainTestSplit_teeth3dsIosseg_cSOriMast:
         python {input.script} {params.newDir} {params.t3dsDir} {params.iosDir}
         """
 
-#THIS IS TEMPORARY
-#iowaExpansion
-#pre full annotated scans CENTER SCALE AND NO ORIENTATION, SEGREADY2
-#rule makeIowaExpFullAnnotPreSegReady2:
-#    input:
-#        #using helper function
-#        inFile = getIowaExpFullAnnotPre,
-#        script = "tools/processes/makeSegmentationReady2.py",
-#        deps = makeSegReadyDeps
-#    output:
-#        outFile = iowaExpSegReadyPreDir2 + "{iowaExpPrePat}Pre_segReady2.ply"
-#    shell:
-#        """
-#        python {input.script} {input.inFile} {output.outFile}
-#        """
-
-#iowaExpansion
-#post full annotated scans CENTER SCALE AND NO ORIENTATION, SEGREADY2
-#rule makeIowaExpFullAnnotPostSegReady2:
-#    input:
-#        #using helper function
-#        inFile = getIowaExpFullAnnotPost,
-#        script = "tools/processes/makeSegmentationReady2.py",
-#        deps = makeSegReadyDeps
-#    output:
-#        outFile = iowaExpSegReadyPostDir2 + "{iowaExpPostPat}Post_segReady2.ply"
-#    shell:
-#        """
-#        python {input.script} {input.inFile} {output.outFile}
-#        """
+################################
+#MASTER ARCHES
 
 #create master arches
 rule createMasterArches:
