@@ -14,7 +14,7 @@ import centroidSize as ceSi
 
 
 #testing
-#dir_ = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/origForm_cSOriMastRemesh/pre/"
+#dir_ = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/origForm_cSOriMastRemesh/post/"
 #outPath = "K:/iowaExpTest/testDir/testPickle.pkl"
 
 #take values from snakemake
@@ -22,9 +22,11 @@ dir_ = sys.argv[1] + "/" #bc of the way snakemake directory() function is set up
 outPath = sys.argv[2]
 
 #create dictionary of patient names and files
-files = os.listdir(dir_)
+filesAll = os.listdir(dir_)
+files = [i for i in filesAll if i.endswith(".ply")]
 pats = [re.search(pattern = r"^pat[0-9]{3}", string = i).group() for i in files]
 pathDict = dict(zip(pats, files))
+
 
 #prepare centroid size data frame
 centSize = pd.DataFrame(np.nan, index=range(len(files)),
