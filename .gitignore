@@ -39,3 +39,8 @@ movement/gaussianProcess/betancourtTutorial/originalTutorial/
 *.pyc
 *.pth
 *log.txt
+snakemakeLogs/
+snakemake.log
+dag.png
+rulegraph.png
+.cache/

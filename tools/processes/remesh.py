@@ -6,7 +6,7 @@ import pyacvd
 import pandas as pd
 
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import trimeshExtractFaceLabels as tefl
 import colorNumFrame as cnf
 import trimeshToDf_labels as ttdl

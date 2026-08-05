@@ -1,0 +1,10 @@
+executor: cluster-generic
+jobs: 25
+cores: 100
+latency-wait: 60
+printshellcmds: true
+
+software-deployment-method:
+  - apptainer
+
+cluster-generic-submit-cmd: "qsub -terse -cwd -j y -o snakemakeLogs -q CODBCB -pe smp {threads}"

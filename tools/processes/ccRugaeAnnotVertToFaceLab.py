@@ -1,7 +1,7 @@
 import trimesh
 import numpy as np
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import trimeshToDfNoLabels as ttdnl
 import dfToPlyExport as dtpe
 

@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import plotArch
 #function that highlights a series of tooth numbers highlights them in color
 #this does not check to make sure the number requested is in that arch, but

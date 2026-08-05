@@ -1,5 +1,5 @@
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import plyToRegistTransformation as prt
 import random
 import pickle

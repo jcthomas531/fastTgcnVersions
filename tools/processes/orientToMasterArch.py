@@ -1,7 +1,7 @@
 import trimesh
 import pickle
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import trimeshExtractFaceLabels as tefl
 import trimeshToDf_labels as ttdl
 import trimeshToDfNoLabels as ttdnl

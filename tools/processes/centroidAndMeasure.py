@@ -1,5 +1,5 @@
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import trimeshToDf_labels as tdl
 import trimesh
 import pickle

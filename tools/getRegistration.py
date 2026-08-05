@@ -3,7 +3,7 @@ import copy
 import trimesh
 import numpy as np
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import  preprocess_point_cloud as ppc
 
 #largely stolen from these tutorials

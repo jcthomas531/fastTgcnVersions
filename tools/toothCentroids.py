@@ -61,7 +61,7 @@ def toothCentroids(face, vertex):
 #example
 # import os
 # import sys
-# sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+# sys.path.append("tools")
 # import plyFunctions as pf
 # os.chdir("P:\\cph\\BIO\\Faculty\\gown\\research\\ThesisProjects\\Thomas\\IOSSegData\\train")
 # l76 = pf.plyRead("076_L.ply")

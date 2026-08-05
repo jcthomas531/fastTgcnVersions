@@ -1,5 +1,5 @@
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import open3d as o3d
 import  preprocess_point_cloud as ppc
 #function to obtain the rotation matrix that aligns a particular scan to the master arch
@@ -8,7 +8,7 @@ import  preprocess_point_cloud as ppc
 def getRotToMaster(filePath):
     
     #load in master arch
-    mPath = "K:/masterArches/masterArch1/mA1Full.ply"
+    mPath = "../../../../Shared/gb_lss/Thomas/masterArches/masterArch1/mA1Full.ply"
     mPc = o3d.io.read_point_cloud(mPath)
     
     #load in arch to rotate (souce)

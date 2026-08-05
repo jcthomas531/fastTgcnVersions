@@ -4,7 +4,7 @@ import os
 import numpy as np
 import open3d as o3d
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import getRotToMaster as grtm
 
 #testing

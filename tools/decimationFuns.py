@@ -95,7 +95,7 @@ def decim(inFile, nFace = 16000):
 #example
 # mesh1 = decim("K:/iowaRme/preDelivAndFinalScans/preDelivScanU/fullScans/pat001u_preD.ply")
 # import sys
-# sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+# sys.path.append("tools")
 # import formatAndExport as fe
 # m1Vert, m1Face = fe.trimeshToDfNoLabels(mesh1)
 # fe.dfToPlyExport(vertDf = m1Vert,

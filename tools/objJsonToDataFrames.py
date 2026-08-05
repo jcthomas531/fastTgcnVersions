@@ -4,7 +4,7 @@ import json
 import numpy as np
 import pandas as pd
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import colorNumFrame as cnf
 import trimeshToDf_labels as ttdl
 

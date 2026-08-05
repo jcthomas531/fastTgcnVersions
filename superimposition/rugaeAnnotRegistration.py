@@ -1,5 +1,5 @@
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import open3d as o3d
 import numpy as np
 import pickle

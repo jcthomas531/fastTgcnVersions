@@ -27,7 +27,7 @@ def centriodSize(x, teeth = "all"):
 
 #example
 # import sys
-# sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+# sys.path.append("tools")
 # import readAndFormat as raf
 # import toothCentroids as toCe
 # import teethToCenterDist as ttcd

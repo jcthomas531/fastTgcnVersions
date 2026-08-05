@@ -1,5 +1,5 @@
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import objJsonToDataFrames as ojtdf
 import dfToPlyExport as dtpe
 

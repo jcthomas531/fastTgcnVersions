@@ -34,7 +34,7 @@ def verticesByToothLabel(vertDat, faceDat):
     
 #example
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import readAndFormat as raf
 prePath = "K:/iowaExpansion/segResults/segResults_remeshT3dsEpoch270/pre/pat001Pre_modelReady_seg.ply"
 postPath = "K:/iowaExpansion/segResults/segResults_remeshT3dsEpoch270/post/pat001Post_modelReady_seg.ply"

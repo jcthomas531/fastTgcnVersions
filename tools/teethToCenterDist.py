@@ -27,7 +27,7 @@ def teethToCenterDist(x, center = "noGum"):
 
 #example
 # import sys
-# sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+# sys.path.append("tools")
 # import readAndFormat as raf
 # import toothCentroids as toCe
 # prePath = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/origForm_cSOriMastRemesh/pre/pat001Pre_formCSOriMastRemesh_seg.ply"

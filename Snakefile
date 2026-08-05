@@ -1,6 +1,11 @@
 import os
 import re
 
+#for running on the hpc
+
+container: "../../containers/lorwyn_eclipsed.sif"
+defaultThreads = 4
+
 #tutorial: https://www.youtube.com/watch?v=r9PWnEmz_tc&t=1247s
 
 #some rules
@@ -28,92 +33,94 @@ def patNamesAndPathDict(dir_, pattern = r'^pat[0-9]{3}', captureGroup = 0):
 #directories
 ##########
 
+grantDir = "../../../../Shared/gb_lss/Thomas/"
+
 #iowaRme
 #original stl directory
-origStlDir = "K:/iowaRme/preDelivAndFinalScans/originalStl/"
+origStlDir = grantDir + "iowaRme/preDelivAndFinalScans/originalStl/"
 
 #iowaRme:
 #preD files and directories
-preDFullScanDir = "K:/iowaRme/preDelivAndFinalScans/preDelivScanU/fullScans/"
+preDFullScanDir = grantDir + "iowaRme/preDelivAndFinalScans/preDelivScanU/fullScans/"
 #fin files and directories
-finFullScanDir = "K:/iowaRme/preDelivAndFinalScans/finalScanU/fullScans/"
+finFullScanDir = grantDir + "iowaRme/preDelivAndFinalScans/finalScanU/fullScans/"
 
 #iowaExpansion
 #full, rugae annotated scans
-iowaExpFullAnnotPreDir = "K:/iowaExpansion/fullRugaeAnnotScans/pre/"
-iowaExpFullAnnotPostDir = "K:/iowaExpansion/fullRugaeAnnotScans/post/"
+iowaExpFullAnnotPreDir = grantDir + "iowaExpansion/fullRugaeAnnotScans/pre/"
+iowaExpFullAnnotPostDir = grantDir + "iowaExpansion/fullRugaeAnnotScans/post/"
 #segmentation model ready scans
-iowaExpSegReadyPreDir = "K:/iowaExpansion/segReadyScans/pre/"
-iowaExpSegReadyPostDir = "K:/iowaExpansion/segReadyScans/post/"
+iowaExpSegReadyPreDir = grantDir + "iowaExpansion/segReadyScans/pre/"
+iowaExpSegReadyPostDir = grantDir + "iowaExpansion/segReadyScans/post/"
 #TEMP
-iowaExpSegReadyPreDir2 = "K:/iowaExpansion/segReadyScans2/pre/"
-iowaExpSegReadyPostDir2 = "K:/iowaExpansion/segReadyScans2/post/"
+iowaExpSegReadyPreDir2 = grantDir + "iowaExpansion/segReadyScans2/pre/"
+iowaExpSegReadyPostDir2 = grantDir + "iowaExpansion/segReadyScans2/post/"
 #iowaExpTest
 #original scans from itero
-iowaExpTestOrigPreDir = "K:/iowaExpTest/scanData/orig/pre/"
-iowaExpTestOrigPostDir = "K:/iowaExpTest/scanData/orig/post/"
-iowaExpTestOrigFormPreDir = "K:/iowaExpTest/scanData/origForm/pre/"
-iowaExpTestOrigFormPostDir = "K:/iowaExpTest/scanData/origForm/post/"
-iowaExpTestOrigFormCSPreDir = "K:/iowaExpTest/scanData/origForm_cS/pre/"
-iowaExpTestOrigFormCSPostDir = "K:/iowaExpTest/scanData/origForm_cS/post/"
-iowaExpTestOrigFormCSPreMastRotMatDir = "K:/iowaExpTest/rotationMatrices/origForm_cS_mastRotMat/pre/"
-iowaExpTestOrigFormCSPostMastRotMatDir = "K:/iowaExpTest/rotationMatrices/origForm_cS_mastRotMat/post/"
-iowaExpTestOrigFormCSOriMastPreDir = "K:/iowaExpTest/scanData/origForm_cSOriMast/pre/"
-iowaExpTestOrigFormCSOriMastPostDir = "K:/iowaExpTest/scanData/origForm_cSOriMast/post/"
-iowaExpTestOrigFormCSOriMastRemeshPreDir = "K:/iowaExpTest/scanData/origForm_cSOriMastRemesh/pre/"
-iowaExpTestOrigFormCSOriMastRemeshPostDir = "K:/iowaExpTest/scanData/origForm_cSOriMastRemesh/post/"
+iowaExpTestOrigPreDir = grantDir + "iowaExpTest/scanData/orig/pre/"
+iowaExpTestOrigPostDir = grantDir + "iowaExpTest/scanData/orig/post/"
+iowaExpTestOrigFormPreDir = grantDir + "iowaExpTest/scanData/origForm/pre/"
+iowaExpTestOrigFormPostDir = grantDir + "iowaExpTest/scanData/origForm/post/"
+iowaExpTestOrigFormCSPreDir = grantDir + "iowaExpTest/scanData/origForm_cS/pre/"
+iowaExpTestOrigFormCSPostDir = grantDir + "iowaExpTest/scanData/origForm_cS/post/"
+iowaExpTestOrigFormCSPreMastRotMatDir = grantDir + "iowaExpTest/rotationMatrices/origForm_cS_mastRotMat/pre/"
+iowaExpTestOrigFormCSPostMastRotMatDir = grantDir + "iowaExpTest/rotationMatrices/origForm_cS_mastRotMat/post/"
+iowaExpTestOrigFormCSOriMastPreDir = grantDir + "iowaExpTest/scanData/origForm_cSOriMast/pre/"
+iowaExpTestOrigFormCSOriMastPostDir = grantDir + "iowaExpTest/scanData/origForm_cSOriMast/post/"
+iowaExpTestOrigFormCSOriMastRemeshPreDir = grantDir + "iowaExpTest/scanData/origForm_cSOriMastRemesh/pre/"
+iowaExpTestOrigFormCSOriMastRemeshPostDir = grantDir + "iowaExpTest/scanData/origForm_cSOriMastRemesh/post/"
 #segmeted directories
-iowaExpTestSegPreDir = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/origForm_cSOriMastRemesh/pre/"
-iowaExpTestSegPostDir = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/origForm_cSOriMastRemesh/post/"
+iowaExpTestSegPreDir = grantDir + "iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/origForm_cSOriMastRemesh/pre/"
+iowaExpTestSegPostDir = grantDir + "iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/origForm_cSOriMastRemesh/post/"
 #centroid size directiories
-iowaExpTestCentSizeDir = "K:/iowaExpTest/centroidSize/"
+iowaExpTestCentSizeDir = grantDir + "iowaExpTest/centroidSize/"
 
 #iowaExpTest
 #rugae annotate (RA) scans
-iowaExpTestRAPreDir = "K:/iowaExpTest/scanData/rugAnnot/pre/"
-iowaExpTestRAPostDir = "K:/iowaExpTest/scanData/rugAnnot/post/"
-iowaExpTestRAFormPreDir = "K:/iowaExpTest/scanData/rugAnnotForm/pre/"
-iowaExpTestRAFormPostDir = "K:/iowaExpTest/scanData/rugAnnotForm/post/"
-iowaExpTestRAFormCSPreDir = "K:/iowaExpTest/scanData/rugAnnotForm_cS/pre/"
-iowaExpTestRAFormCSPostDir = "K:/iowaExpTest/scanData/rugAnnotForm_cS/post/"
-iowaExpTestRAFormCSPreMastRotMatDir = "K:/iowaExpTest/rotationMatrices/rugAnnotForm_cS_mastRotMat/pre/"
-iowaExpTestRAFormCSPostMastRotMatDir = "K:/iowaExpTest/rotationMatrices/rugAnnotForm_cS_mastRotMat/post/"
-iowaExpTestRAFormCSOriMastPreDir = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/"
-iowaExpTestRAFormCSOriMastPostDir = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/"
-iowaExpTestRAFormCSOriMastRemeshPreDir = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/"
-iowaExpTestRAFormCSOriMastRemeshPostDir = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/"
+iowaExpTestRAPreDir = grantDir + "iowaExpTest/scanData/rugAnnot/pre/"
+iowaExpTestRAPostDir = grantDir + "iowaExpTest/scanData/rugAnnot/post/"
+iowaExpTestRAFormPreDir = grantDir + "iowaExpTest/scanData/rugAnnotForm/pre/"
+iowaExpTestRAFormPostDir = grantDir + "iowaExpTest/scanData/rugAnnotForm/post/"
+iowaExpTestRAFormCSPreDir = grantDir + "iowaExpTest/scanData/rugAnnotForm_cS/pre/"
+iowaExpTestRAFormCSPostDir = grantDir + "iowaExpTest/scanData/rugAnnotForm_cS/post/"
+iowaExpTestRAFormCSPreMastRotMatDir = grantDir + "iowaExpTest/rotationMatrices/rugAnnotForm_cS_mastRotMat/pre/"
+iowaExpTestRAFormCSPostMastRotMatDir = grantDir + "iowaExpTest/rotationMatrices/rugAnnotForm_cS_mastRotMat/post/"
+iowaExpTestRAFormCSOriMastPreDir = grantDir + "iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/"
+iowaExpTestRAFormCSOriMastPostDir = grantDir + "iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/"
+iowaExpTestRAFormCSOriMastRemeshPreDir = grantDir + "iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/"
+iowaExpTestRAFormCSOriMastRemeshPostDir = grantDir + "iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/"
 
 #directories for superimposition transformations
-iowaExpTestRATransDir = "K:/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/"
+iowaExpTestRATransDir = grantDir + "iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/"
 #directory for post scans with superimposition transformation applied
-iowaExpTestRASuperimpPostScanDir = "K:/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/"
+iowaExpTestRASuperimpPostScanDir = grantDir + "iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/"
 #directory for html visuals of pre and post scans without superimposition
-iowaExpTestRANoSuperimpVisDir = "K:/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/"
+iowaExpTestRANoSuperimpVisDir = grantDir + "iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/"
 #directory for html visuals of pre and post scans with annoted rugae superimposition
-iowaExpTestRASuperimpVisDir = "K:/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/"
+iowaExpTestRASuperimpVisDir = grantDir + "iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/"
 
 #teeth3ds
 #full plys
-teeth3dsFullDir = "K:/teeth3DS/scanData/upperPly/"
-teeth3dsFullCSDir = "K:/teeth3DS/scanData/upperPly_cS/"
-teeth3dsCSMastRotMatDir = "K:/teeth3DS/rotationMatrices/upperPly_cS_mastRotMat/"
-teeth3dsFullCSOriMastDir = "K:/teeth3DS/scanData/upperPly_cSOriMast/"
-teeth3dsCSOriMastRemeshDir = "K:/teeth3DS/scanData/upperPly_cSOriMastRemesh/"
+teeth3dsFullDir = grantDir + "teeth3DS/scanData/upperPly/"
+teeth3dsFullCSDir = grantDir + "teeth3DS/scanData/upperPly_cS/"
+teeth3dsCSMastRotMatDir = grantDir + "teeth3DS/rotationMatrices/upperPly_cS_mastRotMat/"
+teeth3dsFullCSOriMastDir = grantDir + "teeth3DS/scanData/upperPly_cSOriMast/"
+teeth3dsCSOriMastRemeshDir = grantDir + "teeth3DS/scanData/upperPly_cSOriMastRemesh/"
 #original files
-teeth3dsOrigFilesDir = "K:/teeth3DS/scanData/upper/"
+teeth3dsOrigFilesDir = grantDir + "teeth3DS/scanData/upper/"
 
 #iosseg
 #plys
-iossegCleanUDir = "K:/IOSSegData/scanData/cleanU/"
-iossegCleanUCSDir = "K:/IOSSegData/scanData/cleanU_cS/"
-iossegCleanUCSMastRotMatDir = "K:/IOSSegData/rotationMatrices/cleanU_cS_mastRotMat/"
-iossegCleanUCSOriMastDir = "K:/IOSSegData/scanData/cleanU_cSOriMast/"
+iossegCleanUDir = grantDir + "IOSSegData/scanData/cleanU/"
+iossegCleanUCSDir = grantDir + "IOSSegData/scanData/cleanU_cS/"
+iossegCleanUCSMastRotMatDir = grantDir + "IOSSegData/rotationMatrices/cleanU_cS_mastRotMat/"
+iossegCleanUCSOriMastDir = grantDir + "IOSSegData/scanData/cleanU_cSOriMast/"
 
 #master arches
-masterArchesDir = "K:/masterArches/"
+masterArchesDir = grantDir + "masterArches/"
 
 #train test sets
-trainTestDir_t3dsIosseg_cSOriMast = "K:/trainTestSets/t3dsIosseg_cSOriMast/"
+trainTestDir_t3dsIosseg_cSOriMast = grantDir + "trainTestSets/t3dsIosseg_cSOriMast/"
 
 
 ###############################################################################
@@ -463,7 +470,15 @@ rule superimp:
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
         expand(iowaExpTestRASuperimpVisDir + "{iowaExpTestRABothPats}SuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth)
 
-
+#test rule
+#rule test:
+#    threads: defaultThreads
+#    output:
+#        "test_pwd.txt"
+#    shell:
+#        """
+#        pwd > {output}
+#        """
 
 ###############################################################################
 #pipeline rules
@@ -476,6 +491,7 @@ rule superimp:
 #function that snakemake will not be able to understand without the context of the rule all
 #there are ways around this but this is fine for now
 rule convertPreDStlToPly:
+    threads: defaultThreads
     input: 
         #using preD stl helper function which makes use of wildcards
         inFile = getOrigStlPreD,
@@ -490,6 +506,7 @@ rule convertPreDStlToPly:
 
 #iowaRme: convert original final scan stls to plys
 rule convertFinStlToPly:
+    threads: defaultThreads
     input:
         inFile = getOrigStlFin,
         script = "tools/processes/stlToPly_noLabs.py",
@@ -509,6 +526,7 @@ rule convertFinStlToPly:
 #teeth3ds
 #convert obj/json combos into plys
 rule convertTeeth3dsObjToPly:
+    threads: defaultThreads
     input:
         #using the helper function
         objFile = getOrig3dsObj,
@@ -525,6 +543,7 @@ rule convertTeeth3dsObjToPly:
 #teeth3ds
 #center and scaled
 rule centerAndScaleTeeth3ds:
+    threads: defaultThreads
     input:
         inPath = teeth3dsFullDir + "{teeth3dsName}_U.ply",
         script = "tools/processes/centerAndScale.py",
@@ -541,6 +560,7 @@ rule centerAndScaleTeeth3ds:
 #teeth3ds
 #get rotation matrix to master arch
 rule getRotToMastTeeth3ds:
+    threads: defaultThreads
     input:
         inPath = teeth3dsFullCSDir + "{teeth3dsName}_U_cS.ply",
         script = "tools/processes/getRotMatToMasterArch.py",
@@ -555,6 +575,7 @@ rule getRotToMastTeeth3ds:
 #teeth3ds
 #apply rotation matrix to center and scaled teeth3ds data
 rule orientToMastTeeth3ds:
+    threads: defaultThreads
     input:
         inPly = teeth3dsFullCSDir + "{teeth3dsName}_U_cS.ply",
         inMat = teeth3dsCSMastRotMatDir + "{teeth3dsName}_U_cS_mastRotMat.pkl",
@@ -572,6 +593,7 @@ rule orientToMastTeeth3ds:
 #teeth3ds
 #remesh scans that are rotated, centered, and scaled
 rule remeshTeeth3ds:
+    threads: defaultThreads
     input:
         inPath = teeth3dsFullCSOriMastDir + "{teeth3dsName}_U_cSOriMast.ply",
         script = "tools/processes/remesh.py",
@@ -592,6 +614,7 @@ rule remeshTeeth3ds:
 #iowaExpTest
 #format raw itero scans pre
 rule formatRawIowaExpTestPre:
+    threads: defaultThreads
     input:
         inPath = getIowaExpTestOrigPre,
         script = "tools/processes/formatRawIteroPly.py",
@@ -606,6 +629,7 @@ rule formatRawIowaExpTestPre:
 #iowaExpTest
 #format raw itero scans post
 rule formatRawIowaExpTestPost:
+    threads: defaultThreads
     input:
         inPath = getIowaExpTestOrigPost,
         script = "tools/processes/formatRawIteroPly.py",
@@ -620,6 +644,7 @@ rule formatRawIowaExpTestPost:
 #iowaExpTest
 #cetner and scale pre
 rule centerScaleIowaExpTestPre:
+    threads: defaultThreads
     input:
         inPath = iowaExpTestOrigFormPreDir + "{iowaExpTestPrePat}Pre_form.ply",
         script = "tools/processes/centerAndScale.py",
@@ -636,6 +661,7 @@ rule centerScaleIowaExpTestPre:
 #iowaExpTest
 #cetner and scale post
 rule centerScaleIowaExpTestPost:
+    threads: defaultThreads
     input:
         inPath = iowaExpTestOrigFormPostDir + "{iowaExpTestPostPat}Post_form.ply",
         script = "tools/processes/centerAndScale.py",
@@ -652,6 +678,7 @@ rule centerScaleIowaExpTestPost:
 #iowaExpTest
 #get rotation matrix to master arch, pre
 rule getRotToMastIowaExpTestPre:
+    threads: defaultThreads
     input:
         inPath = iowaExpTestOrigFormCSPreDir + "{iowaExpTestPrePat}Pre_formCS.ply",
         script = "tools/processes/getRotMatToMasterArch.py",
@@ -666,6 +693,7 @@ rule getRotToMastIowaExpTestPre:
 #iowaExpTest
 #get rotation matrix to master arch, post
 rule getRotToMastIowaExpTestPost:
+    threads: defaultThreads
     input:
         inPath = iowaExpTestOrigFormCSPostDir + "{iowaExpTestPostPat}Post_formCS.ply",
         script = "tools/processes/getRotMatToMasterArch.py",
@@ -680,6 +708,7 @@ rule getRotToMastIowaExpTestPost:
 #iowaExpTest
 #apply rotation matrix to center and scaled iowaExpTest pre data
 rule orientToMastIowaExpTestPre:
+    threads: defaultThreads
     input:
         inPly = iowaExpTestOrigFormCSPreDir + "{iowaExpTestPrePat}Pre_formCS.ply",
         inMat = iowaExpTestOrigFormCSPreMastRotMatDir + "{iowaExpTestPrePat}Pre_formCS_mastRotMat.pkl",
@@ -697,6 +726,7 @@ rule orientToMastIowaExpTestPre:
 #iowaExpTest
 #apply rotation matrix to center and scaled iowaExpTest post data
 rule orientToMastIowaExpTestPost:
+    threads: defaultThreads
     input:
         inPly = iowaExpTestOrigFormCSPostDir + "{iowaExpTestPostPat}Post_formCS.ply",
         inMat = iowaExpTestOrigFormCSPostMastRotMatDir + "{iowaExpTestPostPat}Post_formCS_mastRotMat.pkl",
@@ -714,6 +744,7 @@ rule orientToMastIowaExpTestPost:
 #iowaExpTest
 #remesh scans that are rotated, centered, and scaled for pre data
 rule remeshIowaExpTestPre:
+    threads: defaultThreads
     input:
         inPath = iowaExpTestOrigFormCSOriMastPreDir + "{iowaExpTestPrePat}Pre_formCSOriMast.ply",
         script = "tools/processes/remesh.py",
@@ -730,6 +761,7 @@ rule remeshIowaExpTestPre:
 #iowaExpTest
 #remesh scans that are rotated, centered, and scaled for post data
 rule remeshIowaExpTestPost:
+    threads: defaultThreads
     input:
         inPath = iowaExpTestOrigFormCSOriMastPostDir + "{iowaExpTestPostPat}Post_formCSOriMast.ply",
         script = "tools/processes/remesh.py",
@@ -746,6 +778,7 @@ rule remeshIowaExpTestPost:
 #iowaExpTest
 #get centroid size for segmented pre scans
 rule getCentSizeIowaExpTestPre:
+    threads: defaultThreads
     input:
         dir_ = directory(iowaExpTestSegPreDir),
         script = "tools/processes/calculateCentroidSize.py",
@@ -760,6 +793,7 @@ rule getCentSizeIowaExpTestPre:
 #iowaExpTest
 #get centroid size for segmented post scans
 rule getCentSizeIowaExpTestPost:
+    threads: defaultThreads
     input:
         dir_ = directory(iowaExpTestSegPostDir),
         script = "tools/processes/calculateCentroidSize.py",
@@ -778,6 +812,7 @@ rule getCentSizeIowaExpTestPost:
 #iowaExpTestRA
 #format and vert labs to face labs, rugae annot iowa exp test scans pre
 rule formatAndLabsIowaExpTestRAPre:
+    threads: defaultThreads
     input:
         inPath = getIowaExpTestRAPre,
         script = "tools/processes/ccRugaeAnnotVertToFaceLab.py",
@@ -792,6 +827,7 @@ rule formatAndLabsIowaExpTestRAPre:
 #iowaExpTestRA
 #format and vert labs to face labs, rugae annot iowa exp test scans post
 rule formatAndLabsIowaExpTestRAPost:
+    threads: defaultThreads
     input:
         inPath = getIowaExpTestRAPost,
         script = "tools/processes/ccRugaeAnnotVertToFaceLab.py",
@@ -806,6 +842,7 @@ rule formatAndLabsIowaExpTestRAPost:
 #iowaExpTestRA
 #cetner and scale pre
 rule centerScaleIowaExpTestRAPre:
+    threads: defaultThreads
     input:
         inPath = iowaExpTestRAFormPreDir + "{iowaExpTestRAPrePat}Pre_form.ply",
         script = "tools/processes/centerAndScale.py",
@@ -822,6 +859,7 @@ rule centerScaleIowaExpTestRAPre:
 #iowaExpTestRA
 #cetner and scale post
 rule centerScaleIowaExpTestRAPost:
+    threads: defaultThreads
     input:
         inPath = iowaExpTestRAFormPostDir + "{iowaExpTestRAPostPat}Post_form.ply",
         script = "tools/processes/centerAndScale.py",
@@ -838,6 +876,7 @@ rule centerScaleIowaExpTestRAPost:
 #iowaExpTestRA
 #get rotation matrix to master arch, pre
 rule getRotToMastIowaExpTestRAPre:
+    threads: defaultThreads
     input:
         inPath = iowaExpTestRAFormCSPreDir + "{iowaExpTestRAPrePat}Pre_formCS.ply",
         script = "tools/processes/getRotMatToMasterArch.py",
@@ -852,6 +891,7 @@ rule getRotToMastIowaExpTestRAPre:
 #iowaExpTestRA
 #get rotation matrix to master arch, post
 rule getRotToMastIowaExpTestRAPost:
+    threads: defaultThreads
     input:
         inPath = iowaExpTestRAFormCSPostDir + "{iowaExpTestRAPostPat}Post_formCS.ply",
         script = "tools/processes/getRotMatToMasterArch.py",
@@ -866,6 +906,7 @@ rule getRotToMastIowaExpTestRAPost:
 #iowaExpTestRA
 #apply rotation matrix to center and scaled iowaExpTest pre data
 rule orientToMastIowaExpTestRAPre:
+    threads: defaultThreads
     input:
         inPly = iowaExpTestRAFormCSPreDir + "{iowaExpTestRAPrePat}Pre_formCS.ply",
         inMat = iowaExpTestRAFormCSPreMastRotMatDir + "{iowaExpTestRAPrePat}Pre_formCS_mastRotMat.pkl",
@@ -883,6 +924,7 @@ rule orientToMastIowaExpTestRAPre:
 #iowaExpTestRA
 #apply rotation matrix to center and scaled iowaExpTest post data
 rule orientToMastIowaExpTestRAPost:
+    threads: defaultThreads
     input:
         inPly = iowaExpTestRAFormCSPostDir + "{iowaExpTestRAPostPat}Post_formCS.ply",
         inMat = iowaExpTestRAFormCSPostMastRotMatDir + "{iowaExpTestRAPostPat}Post_formCS_mastRotMat.pkl",
@@ -900,6 +942,7 @@ rule orientToMastIowaExpTestRAPost:
 #iowaExpTestRA
 #remesh scans that are rotated, centered, and scaled for pre data
 rule remeshIowaExpTestRAPre:
+    threads: defaultThreads
     input:
         inPath = iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMast.ply",
         script = "tools/processes/remesh.py",
@@ -916,6 +959,7 @@ rule remeshIowaExpTestRAPre:
 #iowaExpTestRA
 #remesh scans that are rotated, centered, and scaled for post data
 rule remeshIowaExpTestRAPost:
+    threads: defaultThreads
     input:
         inPath = iowaExpTestRAFormCSOriMastPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMast.ply",
         script = "tools/processes/remesh.py",
@@ -937,6 +981,7 @@ rule remeshIowaExpTestRAPost:
 #iowaExpTest RA superimp
 #superimposition on annotated rugae region
 rule superimpIowaExpTestRA:
+    threads: defaultThreads
     input:
         #using the helper function
         prePath = iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRABothPats}Pre_formCSOriMast.ply",
@@ -955,6 +1000,7 @@ rule superimpIowaExpTestRA:
 #iowaExpTest RA superimp
 #html visuals for pre and post scans with no superimposition
 rule makeNoSuperimpVisIowaExpTestRA:
+    threads: defaultThreads
     input:
         prePath = iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRABothPats}Pre_formCSOriMast.ply",
         postPath = iowaExpTestRAFormCSOriMastPostDir + "{iowaExpTestRABothPats}Post_formCSOriMast.ply",
@@ -971,6 +1017,7 @@ rule makeNoSuperimpVisIowaExpTestRA:
 #iowaExpTest RA superimp
 #html visuals for pre and post scans with annotated rugae superimposition
 rule makeSuperimpVisIowaExpTestRA:
+    threads: defaultThreads
     input:
         prePath = iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRABothPats}Pre_formCSOriMast.ply",
         postPath = iowaExpTestRASuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMast_rugAnnotSuperimp.ply",
@@ -993,6 +1040,7 @@ rule makeSuperimpVisIowaExpTestRA:
 #iosseg
 #center and scale
 rule centerAndScaleIosseg:
+    threads: defaultThreads
     input:
         inPath = getIossegCleanU,
         script = "tools/processes/centerAndScale.py",
@@ -1009,6 +1057,7 @@ rule centerAndScaleIosseg:
 #iosseg
 #get rotation matrix to master arch
 rule getRotToMastIosseg:
+    threads: defaultThreads
     input:
         inPath = iossegCleanUCSDir + "{iossegCleanUPat}_U_cS.ply",
         script = "tools/processes/getRotMatToMasterArch.py",
@@ -1023,6 +1072,7 @@ rule getRotToMastIosseg:
 #iosseg
 #apply rotation matrix to center and scaled teeth3ds data
 rule orientToMastIosseg:
+    threads: defaultThreads
     input:
         inPly = iossegCleanUCSDir + "{iossegCleanUPat}_U_cS.ply",
         inMat = iossegCleanUCSMastRotMatDir + "{iossegCleanUPat}_U_cS_mastRotMat.pkl",
@@ -1044,6 +1094,7 @@ rule orientToMastIosseg:
 
 #tain test set for teeth3dsIosseg_cSOriMast
 rule trainTestSplit_teeth3dsIosseg_cSOriMast:
+    threads: defaultThreads
     input:
         #require all CSOriMastRemesh teeth3ds files, but they are not input into the script
         t3ds_cSOriMastRemesh = expand(teeth3dsCSOriMastRemeshDir + "{teeth3dsName}_U_cSOriMastRemesh.ply", teeth3dsName = patNames3ds),
@@ -1067,6 +1118,7 @@ rule trainTestSplit_teeth3dsIosseg_cSOriMast:
 
 #create master arches
 rule createMasterArches:
+    threads: defaultThreads
     input:
         script = "tools/processes/createMasterArches.py",
         deps = manipulateAndFormatPack

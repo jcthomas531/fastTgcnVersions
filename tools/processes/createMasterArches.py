@@ -1,5 +1,5 @@
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 import numpy as np
 import trimesh
 import trimeshExtractFaceLabels as tefl
@@ -16,7 +16,7 @@ m1OutPath = sys.argv[1]
 #0AAQ6BO3_U
 
 #load in mesh
-m1Path = "K:/teeth3DS/scanData/upperPly/0AAQ6BO3_U.ply"
+m1Path = "../../../../Shared/gb_lss/Thomas/teeth3DS/scanData/upperPly/0AAQ6BO3_U.ply"
 m1Mesh = trimesh.load(m1Path, process = False)
 #extract labels for later use
 colorDf = tefl.trimeshExtractFaceLabels(m1Mesh)
