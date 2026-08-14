@@ -14,6 +14,7 @@ import getRotToMaster as grtm
 #pull variables from snakemake
 inPath = sys.argv[1]
 outPath = sys.argv[2]
+masterArch = sys.argv[3]
 
 
 #set seed/randomness
@@ -24,7 +25,7 @@ np.random.seed(seed)
 o3d.utility.random.seed(seed)
 
 #obain rotation matrix for orientation to master arch
-mat = grtm.getRotToMaster(filePath = inPath)
+mat = grtm.getRotToMaster(filePath = inPath, masterArchPath = masterArch)
 
 #export rotation matrix
 filePath = open(outPath, "wb")

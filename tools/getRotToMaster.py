@@ -5,10 +5,10 @@ import  preprocess_point_cloud as ppc
 #function to obtain the rotation matrix that aligns a particular scan to the master arch
 #filePath is the file path to the scan you want the registration for
 #things must be centered and scaled prior to using this
-def getRotToMaster(filePath):
+def getRotToMaster(filePath, masterArchPath):
     
     #load in master arch
-    mPath = "../../../../Shared/gb_lss/Thomas/masterArches/masterArch1/mA1Full.ply"
+    mPath = masterArchPath
     mPc = o3d.io.read_point_cloud(mPath)
     
     #load in arch to rotate (souce)

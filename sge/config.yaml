@@ -7,4 +7,8 @@ printshellcmds: true
 software-deployment-method:
   - apptainer
 
-cluster-generic-submit-cmd: "qsub -terse -cwd -j y -o snakemakeLogs -q CODBCB -pe smp {threads}"
+default-resources:
+  - queue=CODBCB
+  - gpus=0
+
+cluster-generic-submit-cmd: "qsub -terse -cwd -j y -o snakemakeLogs -q {resources.queue} -pe smp {threads} -l ngpus={resources.gpus}"

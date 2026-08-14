@@ -2,11 +2,13 @@ import numpy as np
 
 #function to calculate distance from each tooth to a central centroid
 #x is the df output from toothCentroids()
-#teeth is either "all" or a list of numebers for selecting certain teeth ie [5, 7]
-#center is the centroid to measure to, "noGum", "allScan", or "gum"
-def teethToCenterDist(x, center = "noGum"):
-
-    teethNums = list(map(str, list(range(1,17))))
+#teethNums is either "all" or a list of numebers for selecting certain teeth ie ["5", "7"]
+#center is the centroid to measure to, "noGum", "allScan", or "molar"
+def teethToCenterDist(x, teethNums = "all", center = "noGum"):
+    
+    if teethNums == "all":
+        teethNums = list(map(str, list(range(1,17))))
+    
     #filter centroid data to only teeth of interest
     toothDat = x.loc[x["toothNum"].isin(teethNums)].copy()
     centerDat = x.loc[x["toothNum"] == center].copy()

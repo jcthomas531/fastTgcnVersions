@@ -94,6 +94,7 @@ iowaExpTestRAFormCSOriMastRemeshPostDir = grantDir + "iowaExpTest/scanData/rugAn
 iowaExpTestRATransDir = grantDir + "iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/"
 #directory for post scans with superimposition transformation applied
 iowaExpTestRASuperimpPostScanDir = grantDir + "iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/"
+iowaExpTestRARemeshSuperimpPostScanDir = grantDir + "iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/"
 #directory for html visuals of pre and post scans without superimposition
 iowaExpTestRANoSuperimpVisDir = grantDir + "iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/"
 #directory for html visuals of pre and post scans with annoted rugae superimposition
@@ -122,6 +123,8 @@ masterArchesDir = grantDir + "masterArches/"
 #train test sets
 trainTestDir_t3dsIosseg_cSOriMast = grantDir + "trainTestSets/t3dsIosseg_cSOriMast/"
 
+#segmentation directories
+iowaExpTestSegDir = grantDir + "iowaExpTest/segResults/"
 
 ###############################################################################
 #iowRme
@@ -296,10 +299,20 @@ formatNoLabPlyDeps = ["tools/trimeshToDfNoLabels.py", "tools/dfToPlyExport.py"]
 calcCentSizeDeps = [
 "tools/readAndFormat.py",
 "tools/toothCentroids.py",
+"tools/toothGroupCent.py",
 "tools/teethToCenterDist.py",
 "tools/centroidSize.py",
 "tools/toothVars.py",
-"tools/plyRead.py"
+"tools/plyRead.py",
+"tools/archLength.py",
+"tools/centToCentDist.py"
+]
+segDeps = [
+"prediction/fastTgcnEasyPredictFun.py",
+"fastTgcnEasy/dataloader.py",
+"fastTgcnEasy/Baseline.py",
+"fastTgcnEasy/loss.py",
+"fastTgcnEasy/utils.py",
 ]
 
 
@@ -365,9 +378,11 @@ rule all:
         #iowaExpTest centroid size
         #
         #pre centroid size
-        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePre.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/centSizePre.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/archLengthPre.csv",
         #post centroid size
-        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePost.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/centSizePost.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/archLengthPost.csv",
         #
         #process iowaExpTestRA
         #
@@ -388,10 +403,16 @@ rule all:
         expand(iowaExpTestRATransDir + "{iowaExpTestRABothPats}SuperimpPostOnPreTrans_rugAnnot.pkl", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         #iowaExpTestRA, post scans with annotated rugae superimposition transformation applied
         expand(iowaExpTestRASuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMast_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        expand(iowaExpTestRARemeshSuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with no superimposition
         expand(iowaExpTestRANoSuperimpVisDir + "{iowaExpTestRABothPats}NoSuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
-        expand(iowaExpTestRASuperimpVisDir + "{iowaExpTestRABothPats}SuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth)
+        expand(iowaExpTestRASuperimpVisDir + "{iowaExpTestRABothPats}SuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        #
+        #segmentation
+        #
+        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
+        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete"
 
 
 rule masterArches:
@@ -441,9 +462,11 @@ rule processIowaExpTest:
 rule iowaExpTestCentroidSize:
     input:
         #pre centroid size
-        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePre.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/centSizePre.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/archLengthPre.csv",
         #post centroid size
-        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePost.csv"
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/centSizePost.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/archLengthPost.csv"
 
 rule processIowaExpTestRA:
     input:
@@ -456,7 +479,12 @@ rule processIowaExpTestRA:
         expand(iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMast.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
         expand(iowaExpTestRAFormCSOriMastPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMast.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
         expand(iowaExpTestRAFormCSOriMastRemeshPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMastRemesh.ply",  iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
-        expand(iowaExpTestRAFormCSOriMastRemeshPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMastRemesh.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost)
+        expand(iowaExpTestRAFormCSOriMastRemeshPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMastRemesh.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        #iowaExpTestRA, trans to superimp post on pre
+        expand(iowaExpTestRATransDir + "{iowaExpTestRABothPats}SuperimpPostOnPreTrans_rugAnnot.pkl", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        #iowaExpTestRA, post scans with annotated rugae superimposition transformation applied
+        expand(iowaExpTestRASuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMast_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        expand(iowaExpTestRARemeshSuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth)
 
 #rule for just superimposition work
 rule superimp:
@@ -465,6 +493,7 @@ rule superimp:
         expand(iowaExpTestRATransDir + "{iowaExpTestRABothPats}SuperimpPostOnPreTrans_rugAnnot.pkl", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         #iowaExpTestRA, post scans with annotated rugae superimposition transformation applied
         expand(iowaExpTestRASuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMast_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        expand(iowaExpTestRARemeshSuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with no superimposition
         expand(iowaExpTestRANoSuperimpVisDir + "{iowaExpTestRABothPats}NoSuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
@@ -473,12 +502,22 @@ rule superimp:
 #test rule
 #rule test:
 #    threads: defaultThreads
+#    resources:
+#        queue="UI-GPU",
+#        gpus=3
 #    output:
 #        "test_pwd.txt"
 #    shell:
 #        """
 #        pwd > {output}
 #        """
+
+
+rule segmentation:
+    input:
+        expand(iowaExpTestRARemeshSuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
+        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete"
 
 ###############################################################################
 #pipeline rules
@@ -564,12 +603,13 @@ rule getRotToMastTeeth3ds:
     input:
         inPath = teeth3dsFullCSDir + "{teeth3dsName}_U_cS.ply",
         script = "tools/processes/getRotMatToMasterArch.py",
-        deps = getRotToMastDeps
+        deps = getRotToMastDeps,
+        masterArch = masterArchesDir + "masterArch1/mA1Full.ply"
     output:
         outPath = teeth3dsCSMastRotMatDir + "{teeth3dsName}_U_cS_mastRotMat.pkl"
     shell:
         """
-        python {input.script} {input.inPath} {output.outPath}
+        python {input.script} {input.inPath} {output.outPath} {input.masterArch}
         """
 
 #teeth3ds
@@ -579,7 +619,7 @@ rule orientToMastTeeth3ds:
     input:
         inPly = teeth3dsFullCSDir + "{teeth3dsName}_U_cS.ply",
         inMat = teeth3dsCSMastRotMatDir + "{teeth3dsName}_U_cS_mastRotMat.pkl",
-        script = "tools/processes/orientToMasterArch.py",
+        script = "tools/processes/rotate.py",
         deps = manipulateAndFormatPack2
     params:
         labs = True
@@ -682,12 +722,13 @@ rule getRotToMastIowaExpTestPre:
     input:
         inPath = iowaExpTestOrigFormCSPreDir + "{iowaExpTestPrePat}Pre_formCS.ply",
         script = "tools/processes/getRotMatToMasterArch.py",
-        deps = getRotToMastDeps
+        deps = getRotToMastDeps,
+        masterArch = masterArchesDir + "masterArch1/mA1Full.ply"
     output:
         outPath = iowaExpTestOrigFormCSPreMastRotMatDir + "{iowaExpTestPrePat}Pre_formCS_mastRotMat.pkl"
     shell:
         """
-        python {input.script} {input.inPath} {output.outPath}
+        python {input.script} {input.inPath} {output.outPath} {input.masterArch}
         """
 
 #iowaExpTest
@@ -697,12 +738,13 @@ rule getRotToMastIowaExpTestPost:
     input:
         inPath = iowaExpTestOrigFormCSPostDir + "{iowaExpTestPostPat}Post_formCS.ply",
         script = "tools/processes/getRotMatToMasterArch.py",
-        deps = getRotToMastDeps
+        deps = getRotToMastDeps,
+        masterArch = masterArchesDir + "masterArch1/mA1Full.ply"
     output:
         outPath = iowaExpTestOrigFormCSPostMastRotMatDir + "{iowaExpTestPostPat}Post_formCS_mastRotMat.pkl"
     shell:
         """
-        python {input.script} {input.inPath} {output.outPath}
+        python {input.script} {input.inPath} {output.outPath} {input.masterArch}
         """
 
 #iowaExpTest
@@ -712,7 +754,7 @@ rule orientToMastIowaExpTestPre:
     input:
         inPly = iowaExpTestOrigFormCSPreDir + "{iowaExpTestPrePat}Pre_formCS.ply",
         inMat = iowaExpTestOrigFormCSPreMastRotMatDir + "{iowaExpTestPrePat}Pre_formCS_mastRotMat.pkl",
-        script = "tools/processes/orientToMasterArch.py",
+        script = "tools/processes/rotate.py",
         deps = manipulateAndFormatPack2
     params:
         labs = False
@@ -730,7 +772,7 @@ rule orientToMastIowaExpTestPost:
     input:
         inPly = iowaExpTestOrigFormCSPostDir + "{iowaExpTestPostPat}Post_formCS.ply",
         inMat = iowaExpTestOrigFormCSPostMastRotMatDir + "{iowaExpTestPostPat}Post_formCS_mastRotMat.pkl",
-        script = "tools/processes/orientToMasterArch.py",
+        script = "tools/processes/rotate.py",
         deps = manipulateAndFormatPack2
     params:
         labs = False
@@ -775,35 +817,7 @@ rule remeshIowaExpTestPost:
         python {input.script} {input.inPath} {output.outPath} {params.labs}
         """
 
-#iowaExpTest
-#get centroid size for segmented pre scans
-rule getCentSizeIowaExpTestPre:
-    threads: defaultThreads
-    input:
-        dir_ = directory(iowaExpTestSegPreDir),
-        script = "tools/processes/calculateCentroidSize.py",
-        deps = calcCentSizeDeps
-    output:
-        outPath = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePre.csv"
-    shell:
-        """
-        python {input.script} {input.dir_} {output.outPath}
-        """
 
-#iowaExpTest
-#get centroid size for segmented post scans
-rule getCentSizeIowaExpTestPost:
-    threads: defaultThreads
-    input:
-        dir_ = directory(iowaExpTestSegPostDir),
-        script = "tools/processes/calculateCentroidSize.py",
-        deps = calcCentSizeDeps
-    output:
-        outPath = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/centSizePost.csv"
-    shell:
-        """
-        python {input.script} {input.dir_} {output.outPath}
-        """
 
 
 #################################################
@@ -880,12 +894,13 @@ rule getRotToMastIowaExpTestRAPre:
     input:
         inPath = iowaExpTestRAFormCSPreDir + "{iowaExpTestRAPrePat}Pre_formCS.ply",
         script = "tools/processes/getRotMatToMasterArch.py",
-        deps = getRotToMastDeps
+        deps = getRotToMastDeps,
+        masterArch = masterArchesDir + "masterArch1/mA1Full.ply"
     output:
         outPath = iowaExpTestRAFormCSPreMastRotMatDir + "{iowaExpTestRAPrePat}Pre_formCS_mastRotMat.pkl"
     shell:
         """
-        python {input.script} {input.inPath} {output.outPath}
+        python {input.script} {input.inPath} {output.outPath} {input.masterArch}
         """
 
 #iowaExpTestRA
@@ -895,12 +910,13 @@ rule getRotToMastIowaExpTestRAPost:
     input:
         inPath = iowaExpTestRAFormCSPostDir + "{iowaExpTestRAPostPat}Post_formCS.ply",
         script = "tools/processes/getRotMatToMasterArch.py",
-        deps = getRotToMastDeps
+        deps = getRotToMastDeps,
+        masterArch = masterArchesDir + "masterArch1/mA1Full.ply"
     output:
         outPath = iowaExpTestRAFormCSPostMastRotMatDir + "{iowaExpTestRAPostPat}Post_formCS_mastRotMat.pkl"
     shell:
         """
-        python {input.script} {input.inPath} {output.outPath}
+        python {input.script} {input.inPath} {output.outPath} {input.masterArch}
         """
 
 #iowaExpTestRA
@@ -910,7 +926,7 @@ rule orientToMastIowaExpTestRAPre:
     input:
         inPly = iowaExpTestRAFormCSPreDir + "{iowaExpTestRAPrePat}Pre_formCS.ply",
         inMat = iowaExpTestRAFormCSPreMastRotMatDir + "{iowaExpTestRAPrePat}Pre_formCS_mastRotMat.pkl",
-        script = "tools/processes/orientToMasterArch.py",
+        script = "tools/processes/rotate.py",
         deps = manipulateAndFormatPack2
     params:
         labs = True
@@ -928,7 +944,7 @@ rule orientToMastIowaExpTestRAPost:
     input:
         inPly = iowaExpTestRAFormCSPostDir + "{iowaExpTestRAPostPat}Post_formCS.ply",
         inMat = iowaExpTestRAFormCSPostMastRotMatDir + "{iowaExpTestRAPostPat}Post_formCS_mastRotMat.pkl",
-        script = "tools/processes/orientToMasterArch.py",
+        script = "tools/processes/rotate.py",
         deps = manipulateAndFormatPack2
     params:
         labs = True
@@ -974,6 +990,9 @@ rule remeshIowaExpTestRAPost:
         """
 
 
+
+
+
 #################################################
 #IOWAEXPTEST RUGAE ANNOT SUPERIMPOSITION
 
@@ -994,6 +1013,24 @@ rule superimpIowaExpTestRA:
     shell:
         """
         python {input.script} {input.prePath} {input.postPath} {output.transPath} {output.outPlyPath}
+        """
+
+#iowaExpTest RA superimp
+#apply superimposition trans to remeshed data
+rule superimpIowaExpTestRARemesh:
+    threads: defaultThreads
+    input:
+        inPly = iowaExpTestRAFormCSOriMastRemeshPostDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh.ply",
+        inMat = iowaExpTestRATransDir + "{iowaExpTestRABothPats}SuperimpPostOnPreTrans_rugAnnot.pkl",
+        script = "tools/processes/rotate.py",
+        deps = manipulateAndFormatPack2
+    params:
+        labs = True
+    output:
+        outPath = iowaExpTestRARemeshSuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh_rugAnnotSuperimp.ply"
+    shell:
+        """
+        python {input.script} {input.inPly} {input.inMat} {output.outPath} {params.labs}
         """
 
 
@@ -1061,12 +1098,13 @@ rule getRotToMastIosseg:
     input:
         inPath = iossegCleanUCSDir + "{iossegCleanUPat}_U_cS.ply",
         script = "tools/processes/getRotMatToMasterArch.py",
-        deps = getRotToMastDeps
+        deps = getRotToMastDeps,
+        masterArch = masterArchesDir + "masterArch1/mA1Full.ply"
     output:
         outPath = iossegCleanUCSMastRotMatDir + "{iossegCleanUPat}_U_cS_mastRotMat.pkl"
     shell:
         """
-        python {input.script} {input.inPath} {output.outPath}
+        python {input.script} {input.inPath} {output.outPath} {input.masterArch}
         """
 
 #iosseg
@@ -1076,7 +1114,7 @@ rule orientToMastIosseg:
     input:
         inPly = iossegCleanUCSDir + "{iossegCleanUPat}_U_cS.ply",
         inMat = iossegCleanUCSMastRotMatDir + "{iossegCleanUPat}_U_cS_mastRotMat.pkl",
-        script = "tools/processes/orientToMasterArch.py",
+        script = "tools/processes/rotate.py",
         deps = manipulateAndFormatPack2
     params:
         labs = True
@@ -1127,4 +1165,91 @@ rule createMasterArches:
     shell:
         """
         python {input.script} {output.m1OutPath}
+        """
+
+#################################
+#SEGMENTATION
+
+#iowaExpTest
+rule segIowaExpTestRAPre:
+    threads: 16
+    resources:
+        queue="UI-GPU",
+        gpus=3
+    input:
+        inScans = expand(iowaExpTestRAFormCSOriMastRemeshPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMastRemesh.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        script = "prediction/ftePrediction.py",
+        deps = segDeps
+    params:
+        inDir_ = iowaExpTestRAFormCSOriMastRemeshPreDir,
+        outDir_ = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/",
+        predMatDir = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/predMat/"
+    output:
+        #monitoring done by sentinel file
+        touch(iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete")
+    shell:
+        """
+        python {input.script} {params.inDir_} {params.outDir_} {params.predMatDir}
+        """
+
+#iowaExpTest
+rule segIowaExpTestRAPost:
+    threads: 16
+    resources:
+        queue="UI-GPU",
+        gpus=3
+    input:
+        inScans = expand(iowaExpTestRARemeshSuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        script = "prediction/ftePrediction.py",
+        deps = segDeps
+    params:
+        inDir_ = iowaExpTestRARemeshSuperimpPostScanDir,
+        outDir_ = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/",
+        predMatDir = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/predMat/"
+    output:
+        #monitoring done by sentinel file
+        touch(iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete")
+    shell:
+        """
+        python {input.script} {params.inDir_} {params.outDir_} {params.predMatDir}
+        """
+
+
+##################################
+#CENTROID SIZE AND ARCH LENGTH
+
+#iowaExpTestRA
+#get centroid size for segmented pre scans
+rule getCentSizeIowaExpTestPre:
+    threads: defaultThreads
+    input:
+        sentinelFile = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
+        script = "tools/processes/calculateCentroidSize.py",
+        deps = calcCentSizeDeps
+    params:
+        dir_ = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/"
+    output:
+        outCent = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/centSizePre.csv",
+        outLength = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/archLengthPre.csv"
+    shell:
+        """
+        python {input.script} {params.dir_} {output.outCent} {output.outLength}
+        """
+
+#iowaExpTestRA
+#get centroid size for segmented post scans
+rule getCentSizeIowaExpTestPost:
+    threads: defaultThreads
+    input:
+        sentinelFile = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete",
+        script = "tools/processes/calculateCentroidSize.py",
+        deps = calcCentSizeDeps
+    params:
+        dir_ = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/"
+    output:
+        outCent = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/centSizePost.csv",
+        outLength = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/archLengthPost.csv"
+    shell:
+        """
+        python {input.script} {params.dir_} {output.outCent} {output.outLength}
         """

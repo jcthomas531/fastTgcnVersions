@@ -1,18 +1,26 @@
 import sys
-sys.path.append("/Users/jthomas48/dissModels/intraoralSegmentation/prediction/")
+from pathlib import Path
+projectRoot = Path(__file__).resolve().parent.parent
+sys.path.append(str(projectRoot / "prediction/"))
+
+
 import fastTgcnEasyPredictFun as ftep
 
 
-predNote = "iowaExpTest RugAnnotForm_cSOriMastRemesh pre scans, using model t3dsIosseg_cSOriMastEpoch300"
-print(predNote)
+#predNote = "iowaExpTest RugAnnotForm_cSOriMastRemesh pre scans, using model t3dsIosseg_cSOriMastEpoch300"
+#print(predNote)
 
+#pull variables from snakemake
+inDir_ = sys.argv[1]
+outDir_ = sys.argv[2]
+preMatDir = sys.argv[3]
 
-ftep.fastTgcnEasyPredict(inDir = "/Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre",
-                         outDir = "/Shared/gb_lss/Thomas/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre",
-                         predMatOutDir = "/Shared/gb_lss/Thomas/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/predMat",
-                         modelPath = "/Users/jthomas48/dissModels/intraoralSegmentation/fastTgcnEasy/trainedModels/2026_07_09 t3dsIosseg_cSOriMastEpoch300.pth"
+ftep.fastTgcnEasyPredict(inDir = inDir_,
+                         outDir = outDir_,
+                         predMatOutDir = preMatDir,
+                         modelPath = str(projectRoot / "fastTgcnEasy/trainedModels/2026_07_09 t3dsIosseg_cSOriMastEpoch300.pth")
                          )
 
 
 
-print(predNote)
+#print(predNote)

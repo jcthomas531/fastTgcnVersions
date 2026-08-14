@@ -9,7 +9,12 @@
 #when i import this function, i am not sure that it will run these packages up 
 #at the top, i might need to look into a way to do that
 import sys
-sys.path.append("/Users/jthomas48/dissModels/intraoralSegmentation/fastTgcnEasy/")
+from pathlib import Path
+projectRoot = Path(__file__).resolve().parent.parent
+sys.path.append(str(projectRoot / "fastTgcnEasy/"))
+
+
+
 from dataloader import plydataset
 from torch.utils.data import DataLoader
 from Baseline import Baseline

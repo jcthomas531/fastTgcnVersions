@@ -7,8 +7,8 @@ import readAndFormat as raf
 import getRegistration as gr
 
 
-prePath = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/pat001Pre_formCSOriMastRemesh_seg.ply"
-postPath = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/pat001Post_formCSOriMastRemesh_seg.ply"
+prePath = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/pat013Pre_formCSOriMastRemesh_seg.ply"
+postPath = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/pat013Post_formCSOriMastRemesh_rugAnnotSuperimp_seg.ply"
 
 preDat = raf.readAndFormat(prePath, arch = "U")
 postDat = raf.readAndFormat(postPath, arch = "U")
@@ -118,9 +118,68 @@ for i in teethInBoth:
 
 
 
+#can this be easily visualized
+import readAndFormat as raf
+import giveSurf
+import toothCentroids as toCe
+
+#load formatted meshes
+preDf = raf.readAndFormat(file = prePath, arch = "U")
+postDf = raf.readAndFormat(file = postPath, arch = "U")
+
+#find centroids
+preCent = toCe.toothCentroids(face = preDf["face"], vertex = preDf["vert"])
+postCent = toCe.toothCentroids(face = postDf["face"], vertex = postDf["vert"])
+
+#surfaces for pyvista
+preSurf = giveSurf.giveSurf(face = preDf["face"], vertex = preDf["vert"])
+postSurf = giveSurf.giveSurf(face = postDf["face"], vertex = postDf["vert"])
+
+#apply translation from transformation matrix to the centroids
+translation = pd.DataFrame.from_dict(
+    {k: v[:3, 3] for k, v in trans.items()},
+    orient="index",
+    columns=["transX", "transY", "transZ"]
+).reset_index(names="toothNum")
+
+moveDf = translation.merge(preCent, on="toothNum", how = "left")
+moveDf["newX"] = moveDf["x"] + moveDf["transX"]
+moveDf["newY"] = moveDf["y"] + moveDf["transY"]
+moveDf["newZ"] = moveDf["x"] + moveDf["transZ"]
+
+oldPoints = moveDf[["x", "y", "z"]].to_numpy()
+newPoints = moveDf[["newX", "newY", "newZ"]].to_numpy()
+
+#begin plots and add points
+import pyvista as pv
+p1 = pv.Plotter()
+p1.add_mesh(preSurf, scalars = "rgba", rgb = True,  opacity = .6)
+p1.add_mesh(postSurf, scalars = "rgba", rgb = True,  opacity = .6)
+p1.add_points(oldPoints, render_points_as_spheres=True, point_size=10, color = "red")
+p1.add_points(newPoints, render_points_as_spheres=True, point_size=10, color = "green")
+p1.show()
 
 
 
+def transform_point(row):
+    T = trans[str(row["toothNum"])]  # use row["tooth"] directly if the keys are integers
 
+    # Homogeneous point
+    p = np.array([row["x"], row["y"], row["z"], 1.0])
 
+    # Apply transformation
+    p_new = T @ p
 
+    return p_new[:3]
+
+preCent2 = preCent.drop(preCent[preCent.toothNum == "allScan"].index)
+preCent2 = preCent2.drop(preCent2[preCent2.toothNum == "noGum"].index)
+newPoints2 = preCent2.apply(transform_point, axis=1, result_type="expand")
+newPoints2 = np.array(newPoints2)
+
+p2 = pv.Plotter()
+p2.add_mesh(preSurf, scalars = "rgba", rgb = True,  opacity = .6)
+p2.add_mesh(postSurf, scalars = "rgba", rgb = True,  opacity = .6)
+p2.add_points(oldPoints, render_points_as_spheres=True, point_size=10, color = "red")
+p2.add_points(newPoints2, render_points_as_spheres=True, point_size=10, color = "green")
+p2.show()

@@ -28,18 +28,16 @@ Below is a table showing the centroid sizes for each patient in their pre and po
 
 What does this mean for us? The main take away is that this is likely not the correct metric to describe what we are interested in investigating. We know from looking at the superimposed scans that there is expansion, this metric simply does not capture that.
 
-```{r}
-dat |> kablePdf(digits = 3, title = "Centroid Size for Each Patient")
-```
+
 
 ```{r}
-vis1
+centVis1
 ```
 
 One thing to note here is that the values here are generally small which might mean that this metric doesnt really capture anything at all. Below is the results of a basic paired t-test to determine if there is evidence that the true mean is different than 0. The results indicate that there is not sufficient evidence to conclude that the true mean is anything different than zero. Granted we have a limited sample size, but this is reassuring.
 
 ```{r}
-res1
+centSum1
 ```
 
 # Whats next?

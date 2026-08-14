@@ -1,0 +1,133 @@
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+	0[label = "all", color = "0.00 0.6 0.85", style="rounded"];
+	1[label = "createMasterArches", color = "0.13 0.6 0.85", style="rounded"];
+	2[label = "convertPreDStlToPly", color = "0.10 0.6 0.85", style="rounded"];
+	3[label = "convertFinStlToPly", color = "0.09 0.6 0.85", style="rounded"];
+	4[label = "convertTeeth3dsObjToPly", color = "0.12 0.6 0.85", style="rounded"];
+	5[label = "centerAndScaleTeeth3ds", color = "0.03 0.6 0.85", style="rounded"];
+	6[label = "getRotToMastTeeth3ds", color = "0.29 0.6 0.85", style="rounded"];
+	7[label = "orientToMastTeeth3ds", color = "0.42 0.6 0.85", style="rounded"];
+	8[label = "remeshTeeth3ds", color = "0.55 0.6 0.85", style="rounded"];
+	9[label = "centerAndScaleIosseg", color = "0.01 0.6 0.85", style="rounded"];
+	10[label = "getRotToMastIosseg", color = "0.22 0.6 0.85", style="rounded"];
+	11[label = "orientToMastIosseg", color = "0.35 0.6 0.85", style="rounded"];
+	12[label = "trainTestSplit_teeth3dsIosseg_cSOriMast", color = "0.64 0.6 0.85", style="rounded"];
+	13[label = "formatRawIowaExpTestPre", color = "0.18 0.6 0.85", style="rounded"];
+	14[label = "formatRawIowaExpTestPost", color = "0.17 0.6 0.85", style="rounded"];
+	15[label = "centerScaleIowaExpTestPre", color = "0.05 0.6 0.85", style="rounded"];
+	16[label = "centerScaleIowaExpTestPost", color = "0.04 0.6 0.85", style="rounded"];
+	17[label = "getRotToMastIowaExpTestPre", color = "0.25 0.6 0.85", style="rounded"];
+	18[label = "getRotToMastIowaExpTestPost", color = "0.24 0.6 0.85", style="rounded"];
+	19[label = "orientToMastIowaExpTestPre", color = "0.38 0.6 0.85", style="rounded"];
+	20[label = "orientToMastIowaExpTestPost", color = "0.37 0.6 0.85", style="rounded"];
+	21[label = "remeshIowaExpTestPre", color = "0.51 0.6 0.85", style="rounded"];
+	22[label = "remeshIowaExpTestPost", color = "0.50 0.6 0.85", style="rounded"];
+	23[label = "getCentSizeIowaExpTestPre", color = "0.21 0.6 0.85", style="rounded"];
+	24[label = "segIowaExpTestRAPre", color = "0.58 0.6 0.85", style="rounded"];
+	25[label = "remeshIowaExpTestRAPre", color = "0.54 0.6 0.85", style="rounded"];
+	26[label = "orientToMastIowaExpTestRAPre", color = "0.41 0.6 0.85", style="rounded"];
+	27[label = "centerScaleIowaExpTestRAPre", color = "0.08 0.6 0.85", style="rounded"];
+	28[label = "formatAndLabsIowaExpTestRAPre", color = "0.16 0.6 0.85", style="rounded"];
+	29[label = "getRotToMastIowaExpTestRAPre", color = "0.27 0.6 0.85", style="rounded"];
+	30[label = "getCentSizeIowaExpTestPost", color = "0.20 0.6 0.85", style="rounded"];
+	31[label = "formatAndLabsIowaExpTestRAPost", color = "0.14 0.6 0.85", style="rounded"];
+	32[label = "centerScaleIowaExpTestRAPost", color = "0.07 0.6 0.85", style="rounded"];
+	33[label = "getRotToMastIowaExpTestRAPost", color = "0.26 0.6 0.85", style="rounded"];
+	34[label = "orientToMastIowaExpTestRAPost", color = "0.39 0.6 0.85", style="rounded"];
+	35[label = "remeshIowaExpTestRAPost", color = "0.52 0.6 0.85", style="rounded"];
+	36[label = "superimpIowaExpTestRA", color = "0.61 0.6 0.85", style="rounded"];
+	37[label = "superimpIowaExpTestRARemesh", color = "0.63 0.6 0.85", style="rounded"];
+	38[label = "makeNoSuperimpVisIowaExpTestRA", color = "0.31 0.6 0.85", style="rounded"];
+	39[label = "makeSuperimpVisIowaExpTestRA", color = "0.33 0.6 0.85", style="rounded"];
+	40[label = "segIowaExpTestRAPost", color = "0.56 0.6 0.85", style="rounded"];
+	27 -> 0
+	17 -> 0
+	4 -> 0
+	20 -> 0
+	31 -> 0
+	36 -> 0
+	39 -> 0
+	13 -> 0
+	38 -> 0
+	21 -> 0
+	9 -> 0
+	14 -> 0
+	30 -> 0
+	40 -> 0
+	32 -> 0
+	22 -> 0
+	10 -> 0
+	37 -> 0
+	29 -> 0
+	28 -> 0
+	5 -> 0
+	11 -> 0
+	26 -> 0
+	35 -> 0
+	6 -> 0
+	15 -> 0
+	1 -> 0
+	25 -> 0
+	34 -> 0
+	33 -> 0
+	8 -> 0
+	3 -> 0
+	19 -> 0
+	12 -> 0
+	23 -> 0
+	2 -> 0
+	24 -> 0
+	18 -> 0
+	7 -> 0
+	16 -> 0
+	4 -> 5
+	1 -> 6
+	5 -> 6
+	6 -> 7
+	5 -> 7
+	7 -> 8
+	1 -> 10
+	9 -> 10
+	9 -> 11
+	10 -> 11
+	11 -> 12
+	8 -> 12
+	13 -> 15
+	14 -> 16
+	1 -> 17
+	15 -> 17
+	1 -> 18
+	16 -> 18
+	17 -> 19
+	15 -> 19
+	18 -> 20
+	16 -> 20
+	19 -> 21
+	20 -> 22
+	24 -> 23
+	25 -> 24
+	26 -> 25
+	29 -> 26
+	27 -> 26
+	28 -> 27
+	1 -> 29
+	27 -> 29
+	31 -> 32
+	1 -> 33
+	32 -> 33
+	32 -> 34
+	33 -> 34
+	34 -> 35
+	34 -> 36
+	26 -> 36
+	36 -> 37
+	35 -> 37
+	34 -> 38
+	26 -> 38
+	26 -> 39
+	36 -> 39
+	37 -> 40
+}            

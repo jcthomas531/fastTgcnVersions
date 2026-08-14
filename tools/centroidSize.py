@@ -7,18 +7,11 @@ import numpy as np
 
 
 #x is the output from teethToCenterDist()
-#teeth is either "all" or a list of numeric teeth values ie [5,6]
 
-def centriodSize(x, teeth = "all"):
-    #create list of all teeth
-    if teeth == "all":
-        teeth = list(range(1,17))
-
-    #convert tooth numbers to string like in centroid data frame
-    teeth = list(map(str, teeth))
+def centriodSize(x):
     
     #subset data to only teeth of interest
-    toothDat = x.loc[x["toothNum"].isin(teeth)].copy()
+    toothDat = x.copy()
     
     #calculate centroid size, just l2 norm of the l2 norms
     centSize = np.linalg.norm(toothDat["l2Norm"], ord = 2)
@@ -36,4 +29,4 @@ def centriodSize(x, teeth = "all"):
 # tcPre = toCe.toothCentroids(face = datPre["face"], vertex = datPre["vert"])
 # distPre = ttcd.teethToCenterDist(tcPre)
 # centriodSize(distPre)
-# centriodSize(distPre, teeth = [1, 2, 4, 14, 15, 16])
+
