@@ -2,6 +2,7 @@ import open3d as o3d
 import pandas as pd
 import numpy as np
 import sys
+import pyvista as pv
 sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
 import readAndFormat as raf
 import getRegistration as gr
@@ -143,6 +144,7 @@ translation = pd.DataFrame.from_dict(
 ).reset_index(names="toothNum")
 
 moveDf = translation.merge(preCent, on="toothNum", how = "left")
+#THIS IS THE WRONG TRANSFORMATION, SEE TRANSFORM_POINT FOR CORRECT ONE
 moveDf["newX"] = moveDf["x"] + moveDf["transX"]
 moveDf["newY"] = moveDf["y"] + moveDf["transY"]
 moveDf["newZ"] = moveDf["x"] + moveDf["transZ"]
@@ -151,13 +153,12 @@ oldPoints = moveDf[["x", "y", "z"]].to_numpy()
 newPoints = moveDf[["newX", "newY", "newZ"]].to_numpy()
 
 #begin plots and add points
-import pyvista as pv
-p1 = pv.Plotter()
-p1.add_mesh(preSurf, scalars = "rgba", rgb = True,  opacity = .6)
-p1.add_mesh(postSurf, scalars = "rgba", rgb = True,  opacity = .6)
-p1.add_points(oldPoints, render_points_as_spheres=True, point_size=10, color = "red")
-p1.add_points(newPoints, render_points_as_spheres=True, point_size=10, color = "green")
-p1.show()
+# p1 = pv.Plotter()
+# p1.add_mesh(preSurf, scalars = "rgba", rgb = True,  opacity = .6)
+# p1.add_mesh(postSurf, scalars = "rgba", rgb = True,  opacity = .6)
+# p1.add_points(oldPoints, render_points_as_spheres=True, point_size=10, color = "red")
+# p1.add_points(newPoints, render_points_as_spheres=True, point_size=10, color = "green")
+# p1.show()
 
 
 
@@ -172,8 +173,9 @@ def transform_point(row):
 
     return p_new[:3]
 
-preCent2 = preCent.drop(preCent[preCent.toothNum == "allScan"].index)
-preCent2 = preCent2.drop(preCent2[preCent2.toothNum == "noGum"].index)
+
+
+preCent2 = preCent[~preCent.toothNum.isin(["allScan", "noGum", "molar", "premolar", "posterior", "canine", "incisor", "anterior"])]
 newPoints2 = preCent2.apply(transform_point, axis=1, result_type="expand")
 newPoints2 = np.array(newPoints2)
 
