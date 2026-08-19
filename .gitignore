@@ -44,3 +44,4 @@ snakemake.log
 dag.png
 rulegraph.png
 .cache/
+testDir/

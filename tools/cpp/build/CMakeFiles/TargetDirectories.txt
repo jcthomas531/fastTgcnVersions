@@ -1,0 +1,3 @@
+/Users/jthomas48/dissModels/intraoralSegmentation/tools/cpp/build/CMakeFiles/surfNormTest.dir
+/Users/jthomas48/dissModels/intraoralSegmentation/tools/cpp/build/CMakeFiles/edit_cache.dir
+/Users/jthomas48/dissModels/intraoralSegmentation/tools/cpp/build/CMakeFiles/rebuild_cache.dir
