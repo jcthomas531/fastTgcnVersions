@@ -33,26 +33,26 @@ digraph snakemake_dag {
 	28[label = "formatAndLabsIowaExpTestRAPre", color = "0.16 0.6 0.85", style="rounded"];
 	29[label = "getRotToMastIowaExpTestRAPre", color = "0.27 0.6 0.85", style="rounded"];
 	30[label = "getCentSizeIowaExpTestPost", color = "0.20 0.6 0.85", style="rounded"];
-	31[label = "formatAndLabsIowaExpTestRAPost", color = "0.14 0.6 0.85", style="rounded"];
-	32[label = "centerScaleIowaExpTestRAPost", color = "0.07 0.6 0.85", style="rounded"];
-	33[label = "getRotToMastIowaExpTestRAPost", color = "0.26 0.6 0.85", style="rounded"];
+	31[label = "segIowaExpTestRAPost", color = "0.56 0.6 0.85", style="rounded"];
+	32[label = "superimpIowaExpTestRARemesh", color = "0.63 0.6 0.85", style="rounded"];
+	33[label = "remeshIowaExpTestRAPost", color = "0.52 0.6 0.85", style="rounded"];
 	34[label = "orientToMastIowaExpTestRAPost", color = "0.39 0.6 0.85", style="rounded"];
-	35[label = "remeshIowaExpTestRAPost", color = "0.52 0.6 0.85", style="rounded"];
-	36[label = "superimpIowaExpTestRA", color = "0.61 0.6 0.85", style="rounded"];
-	37[label = "superimpIowaExpTestRARemesh", color = "0.63 0.6 0.85", style="rounded"];
-	38[label = "makeNoSuperimpVisIowaExpTestRA", color = "0.31 0.6 0.85", style="rounded"];
-	39[label = "makeSuperimpVisIowaExpTestRA", color = "0.33 0.6 0.85", style="rounded"];
-	40[label = "segIowaExpTestRAPost", color = "0.56 0.6 0.85", style="rounded"];
+	35[label = "centerScaleIowaExpTestRAPost", color = "0.07 0.6 0.85", style="rounded"];
+	36[label = "formatAndLabsIowaExpTestRAPost", color = "0.14 0.6 0.85", style="rounded"];
+	37[label = "getRotToMastIowaExpTestRAPost", color = "0.26 0.6 0.85", style="rounded"];
+	38[label = "superimpIowaExpTestRA", color = "0.61 0.6 0.85", style="rounded"];
+	39[label = "makeNoSuperimpVisIowaExpTestRA", color = "0.31 0.6 0.85", style="rounded"];
+	40[label = "makeSuperimpVisIowaExpTestRA", color = "0.33 0.6 0.85", style="rounded"];
 	4 -> 5
 	1 -> 6
 	5 -> 6
-	6 -> 7
 	5 -> 7
+	6 -> 7
 	7 -> 8
 	1 -> 10
 	9 -> 10
-	9 -> 11
 	10 -> 11
+	9 -> 11
 	11 -> 12
 	8 -> 12
 	13 -> 15
@@ -61,10 +61,10 @@ digraph snakemake_dag {
 	15 -> 17
 	1 -> 18
 	16 -> 18
-	17 -> 19
 	15 -> 19
-	18 -> 20
+	17 -> 19
 	16 -> 20
+	18 -> 20
 	19 -> 21
 	20 -> 22
 	24 -> 23
@@ -75,19 +75,20 @@ digraph snakemake_dag {
 	28 -> 27
 	1 -> 29
 	27 -> 29
-	31 -> 32
-	1 -> 33
-	32 -> 33
-	32 -> 34
-	33 -> 34
-	34 -> 35
-	34 -> 36
-	26 -> 36
-	36 -> 37
+	31 -> 30
+	32 -> 31
+	33 -> 32
+	38 -> 32
+	34 -> 33
+	37 -> 34
+	35 -> 34
+	36 -> 35
+	1 -> 37
 	35 -> 37
 	34 -> 38
 	26 -> 38
+	34 -> 39
 	26 -> 39
-	36 -> 39
-	37 -> 40
+	38 -> 40
+	26 -> 40
 }            
