@@ -1253,3 +1253,43 @@ rule getCentSizeIowaExpTestPost:
         """
         python {input.script} {params.dir_} {output.outCent} {output.outLength}
         """
+
+#####################################
+#testing c++ stuff
+
+
+
+
+
+
+rule compileCmake:
+    threads: 1
+    resources:
+        queue="all.q"
+    input:
+        cmake = "tools/cpp/localDescriptors/CMakeLists.txt",
+        cppFile = "tools/cpp/localDescriptors/surfNormTest.cpp"
+    output:
+        touch("tools/cpp/localDescriptors/surfNormTest_cmake.complete")
+    shell:
+        """
+        rm tools/cpp/build/CMakeCache.txt
+        cmake -S tools/cpp -B tools/cpp/build
+        cmake --build tools/cpp/build
+        """
+
+rule testLocalDesc:
+    threads: 1
+    resources:
+        queue="all.q"
+    input:
+        inFile = "testDir/testRemesh.ply",
+        function = "./tools/cpp/build/surfNormTest"
+    output:
+        outPly = "testDir/snakeOut.ply",
+        outCsv = "testDir/snakeOut.csv"
+    shell:
+        """
+        {input.function} {input.inFile} {output.outPly} {output.outCsv}
+        """
+
