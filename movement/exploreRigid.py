@@ -1,12 +1,13 @@
+import sys
+
+import numpy as np
 import open3d as o3d
 import pandas as pd
-import numpy as np
-import sys
 import pyvista as pv
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
-import readAndFormat as raf
-import getRegistration as gr
 
+sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+import getRegistration as gr
+import readAndFormat as raf
 
 prePath = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/pat013Pre_formCSOriMastRemesh_seg.ply"
 postPath = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/pat013Post_formCSOriMastRemesh_rugAnnotSuperimp_seg.ply"

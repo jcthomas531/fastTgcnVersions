@@ -1,8 +1,10 @@
+import pickle
+import random
 import sys
+
 sys.path.append("tools")
 import plyToRegistTransformation as prt
-import random
-import pickle
+
 random.seed(826)
 
 #pull variables from snakemake
@@ -15,7 +17,7 @@ regResult = prt.plyToRegistTransformation(targetFile = preDPath, sourceFile = fi
 
 #cannot export the entire object easily, just exporting transformation now but
 #can return here later to export more pieces of the object if they become necessary
-filePath = open(outFile, "wb")
+filePath = open(outFile, "wb")  # noqa: SIM115
 pickle.dump(obj = regResult.transformation,
             file = filePath)
 filePath.close()
