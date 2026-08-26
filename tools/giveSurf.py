@@ -1,6 +1,8 @@
+import numpy as np
 import pandas as pd
 import pyvista as pv
-import numpy as np
+
+
 #a function like plotArch that returns the surface instead of the image so that
 #you can manipulate it and plot it later
 def giveSurf(face, vertex):
@@ -15,7 +17,10 @@ def giveSurf(face, vertex):
     #make the vertices for the shape into columns
     faceCExpand = pd.DataFrame(faceC["vertex_indices"].tolist(),
                  columns=["v1", "v2", "v3"])
-    faceC = faceC.join(faceCExpand)
+    #
+    faceCExpand["origIndex"] = faceC.index
+    #
+    faceC = faceC.join(faceCExpand.set_index("origIndex"))
     #order the data in the way that pyvista expects it and remove extra pieces
     #the color codes come at a different step
     faceCPV = faceC[["nVert", "v1", "v2", "v3"]]

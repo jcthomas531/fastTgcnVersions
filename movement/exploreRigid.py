@@ -26,18 +26,35 @@ def restrictMeshToTooth(dat, toothNum):
     fDat = dat["face"]
     
     #restrict face data to only those with number of interest
-    fDatRest = fDat.loc[fDat["toothNum"] == toothNum]
+    fDatRest = fDat.loc[fDat["toothNum"] == toothNum].copy()
     
     #index of associated vertices
-    vertIndRest = list(set(
+    vertIndRest = [
         vert
         for sublist in fDatRest["vertex_indices"]
         for vert in sublist
-        ))
-    
+        ]
+    #only unique values, no duplicate vertices
+    #this would also work with list(set(vertIndRest)), it just orders things a bit differently
+    vertIndRest = list(dict.fromkeys(vertIndRest)) 
     #restrict vertex data to only those associated with tooth of interest
-    vDatRest = vDat.iloc[vertIndRest]
+    vDatRest = vDat.iloc[vertIndRest].copy()
+
+
+
+
+
+    #change vertex indices in face data to correspond to newly reset vertex ordering
+    aaa = dict(zip(vDatRest.index, range(len(vDatRest.index))))
+    fDatRest["vertex_indices"] = fDatRest["vertex_indices"].apply(
+        lambda inds: [aaa[i] for i in inds]
+        )
     
+    #reset indices of both data frames
+    fDatRest = fDatRest.reset_index(drop = True)
+    vDatRest = vDatRest.reset_index(drop = True)
+    
+
     return {"vert": vDatRest, "face": fDatRest}
 
 
@@ -181,8 +198,8 @@ newPoints2 = preCent2.apply(transform_point, axis=1, result_type="expand")
 newPoints2 = np.array(newPoints2)
 
 p2 = pv.Plotter()
-p2.add_mesh(preSurf, scalars = "rgba", rgb = True,  opacity = .6)
-p2.add_mesh(postSurf, scalars = "rgba", rgb = True,  opacity = .6)
+p2.add_mesh(preSurf, color = "white",  opacity = .9)
+p2.add_mesh(postSurf, color = "green",  opacity = .6)
 p2.add_points(oldPoints, render_points_as_spheres=True, point_size=10, color = "red")
 p2.add_points(newPoints2, render_points_as_spheres=True, point_size=10, color = "green")
 p2.show()

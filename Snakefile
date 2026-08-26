@@ -15,10 +15,16 @@ defaultThreads = 4
 #helper functions
 ##########
 #for getting the directory dictionaries used in the initial helper functions for raw data
-def patNamesAndPathDict(dir_, pattern = r'^pat[0-9]{3}', captureGroup = 0):
+def patNamesAndPathDict(dir_, pattern = r'^pat[0-9]{3}', captureGroup = 0, fileExt = "all"):
     
     #get files and make file paths
     files = os.listdir(dir_)
+    
+    # filter by file extension
+    if fileExt != "all":
+        files = [file_ for file_ in files if file_.endswith(fileExt)]
+    
+    #make file paths
     paths = [dir_ + file_ for file_ in files]
     
     #extract patient names
@@ -125,6 +131,11 @@ trainTestDir_t3dsIosseg_cSOriMast = grantDir + "trainTestSets/t3dsIosseg_cSOriMa
 
 #segmentation directories
 iowaExpTestSegDir = grantDir + "iowaExpTest/segResults/"
+iowaExpTestSeg1Dir_pre = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/"
+iowaExpTestSeg1Dir_post = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/"
+
+#spatialTrans
+iowaExpTestSpatialTransDir = grantDir + "iowaExpTest/spatialTrans/"
 
 ###############################################################################
 #iowRme
@@ -233,6 +244,14 @@ def getIowaExpTestRAPost(wildcards):
 #patient names for just the patients with both a pre and a post
 iowaExpTestRAPatsBoth = list(set(iowaExpTestRAPatsPre) & set(iowaExpTestRAPatsPost))
 
+#helper function for iowaExpTestRA files after then are segmented
+iowaExpTestRAPatsPre_seg1, iowaExpTestRAPathDictPre_seg1 = patNamesAndPathDict(iowaExpTestSeg1Dir_pre, fileExt = ".ply")
+iowaExpTestRAPatsPost_seg1, iowaExpTestRAPathDictPost_seg1 = patNamesAndPathDict(iowaExpTestSeg1Dir_post, fileExt = ".ply")
+#create helper functions
+def getIowaExpTestSeg1Pre(wildcards):
+    return iowaExpTestRAPathDictPre_seg1[wildcards.seg1Pat]
+def getIowaExpTestSeg1Post(wildcards):
+    return iowaExpTestRAPathDictPost_seg1[wildcards.seg1Pat]
 
 ###############################################################################
 #teeth3ds
@@ -313,6 +332,15 @@ segDeps = [
 "fastTgcnEasy/Baseline.py",
 "fastTgcnEasy/loss.py",
 "fastTgcnEasy/utils.py",
+]
+spatialTransDeps = [
+"tools/restrictMeshToTooth.py",
+"tools/readAndFormat.py",
+"tools/toothVars.py",
+"tools/colorNumFrame.py",
+"tools/plyRead.py",
+"tools/getRegistration.py",
+"tools/preprocess_point_cloud.py"
 ]
 
 
@@ -412,7 +440,11 @@ rule all:
         #segmentation
         #
         iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
-        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete"
+        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete",
+        #
+        #spatial transformation matrices
+        #
+        expand(iowaExpTestSpatialTransDir + "{seg1Pat}SpatialTransMats.pkl", seg1Pat = iowaExpTestRAPatsBoth)
 
 
 rule masterArches:
@@ -518,6 +550,10 @@ rule segmentation:
         expand(iowaExpTestRARemeshSuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
         iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete"
+
+rule spatialTrans:
+    input:
+        expand(iowaExpTestSpatialTransDir + "{seg1Pat}SpatialTransMats.pkl", seg1Pat = iowaExpTestRAPatsBoth)
 
 ###############################################################################
 #pipeline rules
@@ -1253,6 +1289,35 @@ rule getCentSizeIowaExpTestPost:
         """
         python {input.script} {params.dir_} {output.outCent} {output.outLength}
         """
+
+
+
+
+
+
+##################################
+#get rigid registration spatial transformation matrix
+
+rule getSpatialTransMats_iowaExpTestRA:
+    threads: defaultThreads
+    input:
+        preSentinel = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
+        postSentinel = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete",
+        prePath = getIowaExpTestSeg1Pre,
+        postPath = getIowaExpTestSeg1Post,
+        script = "movement/getSpatialTransMats.py",
+        deps = spatialTransDeps
+    output:
+        outPath = iowaExpTestSpatialTransDir + "{seg1Pat}SpatialTransMats.pkl"
+    shell:
+        """
+        python {input.script} {input.prePath} {input.postPath} {output.outPath}
+        """
+
+
+
+
+
 
 #####################################
 #testing c++ stuff

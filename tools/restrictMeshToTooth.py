@@ -9,16 +9,33 @@ def restrictMeshToTooth(dat, toothNum):
     fDat = dat["face"]
     
     #restrict face data to only those with number of interest
-    fDatRest = fDat.loc[fDat["toothNum"] == toothNum]
+    fDatRest = fDat.loc[fDat["toothNum"] == toothNum].copy()
     
     #index of associated vertices
-    vertIndRest = list({
+    vertIndRest = [
         vert
         for sublist in fDatRest["vertex_indices"]
         for vert in sublist
-        })
-    
+        ]
+    #only unique values, no duplicate vertices
+    #this would also work with list(set(vertIndRest)), it just orders things a bit differently
+    vertIndRest = list(dict.fromkeys(vertIndRest)) 
     #restrict vertex data to only those associated with tooth of interest
-    vDatRest = vDat.iloc[vertIndRest]
+    vDatRest = vDat.iloc[vertIndRest].copy()
+
+
+
+
+
+    #change vertex indices in face data to correspond to newly reset vertex ordering
+    aaa = dict(zip(vDatRest.index, range(len(vDatRest.index))))
+    fDatRest["vertex_indices"] = fDatRest["vertex_indices"].apply(
+        lambda inds: [aaa[i] for i in inds]
+        )
     
+    #reset indices of both data frames
+    fDatRest = fDatRest.reset_index(drop = True)
+    vDatRest = vDatRest.reset_index(drop = True)
+    
+
     return {"vert": vDatRest, "face": fDatRest}
