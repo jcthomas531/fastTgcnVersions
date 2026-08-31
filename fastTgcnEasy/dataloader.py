@@ -158,7 +158,7 @@ def generate_plyfile(index_face, point_face, label_face, arch, path= " "):
     unique_index = np.unique(index_face.flatten())  # get unique points index
     flag = np.zeros([unique_index.max()+1, 2]).astype('uint64')
     order = 0
-    with open(path, "a") as f:
+    with open(path, "w") as f:
         f.write("ply\n")
         f.write("format ascii 1.0\n")
         f.write("comment VCGLIB generated\n")
