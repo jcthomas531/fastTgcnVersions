@@ -33,12 +33,12 @@ def verticesByToothLabel(vertDat, faceDat):
             "toothVertXyz": toothVertexDfsXYZ}
     
 #example
-import sys
-sys.path.append("tools")
-import readAndFormat as raf
-prePath = "K:/iowaExpansion/segResults/segResults_remeshT3dsEpoch270/pre/pat001Pre_modelReady_seg.ply"
-postPath = "K:/iowaExpansion/segResults/segResults_remeshT3dsEpoch270/post/pat001Post_modelReady_seg.ply"
-preDf = raf.readAndFormat(file = prePath)
-preDfFace = preDf["face"]
-preDfVert = preDf["vert"]
-aaa = verticesByToothLabel(vertDat = preDfVert, faceDat = preDfFace)
+# import sys
+# sys.path.append("tools")
+# import readAndFormat as raf
+# prePath = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/pat001Pre_formCSOriMastRemesh_seg.ply"
+# #postPath = "K:/iowaExpansion/segResults/segResults_remeshT3dsEpoch270/post/pat001Post_modelReady_seg.ply"
+# preDf = raf.readAndFormat(file = prePath)
+# preDfFace = preDf["face"]
+# preDfVert = preDf["vert"]
+# aaa = verticesByToothLabel(vertDat = preDfVert, faceDat = preDfFace)
