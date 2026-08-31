@@ -6,7 +6,7 @@ import trimeshToDfNoLabels as ttdnl
 import dfToPlyExport as dtpe
 
 #testing
-# inPath = "K:/iowaExpTest/scanData/rugaeAnnot/pre/pat001Pre_annot.ply"
+# inPath = "K:/iowaExpTest/scanData/rugAnnot/pre/pat001Pre_annot.ply"
 # outPath = "K:/iowaExpTest/testDir/testLabs.ply"
 
 #bring in snakemake variables
@@ -23,8 +23,12 @@ vertLabs = mesh.metadata["_ply_raw"]["vertex"]["data"]["scalar_Classification"]
 #create empty list for face labels
 faceLabs = []
 for i in mesh.faces:
+    #extract the point labels for a face
     labs = vertLabs[i]
-    if np.any(labs == 1):
+    #how many of the points are labeled as rugae
+    countRugLabeled = np.sum(labs == 1)
+    #impliment majority rules to map vertex labels to face labels
+    if countRugLabeled >= 2:
         faceLabs.append(1)
     else:
         faceLabs.append(0)
