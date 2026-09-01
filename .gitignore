@@ -45,3 +45,4 @@ dag.png
 rulegraph.png
 .cache/
 testDir/
+tools/cpp/localDescriptors/build/
