@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 	//require the command line input
 	if (argc != 4)
 	{
-		std::cerr << "Usage: surfNormTest <input.ply> <output.ply> <output.csv>" << std::endl;
+		std::cerr << "Usage: localDescriptors <input.ply> <output.ply> <output.csv>" << std::endl;
 		return 1;
 	}
 	

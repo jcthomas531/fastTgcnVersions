@@ -1342,9 +1342,9 @@ localDescr1OutputsPly = [
 ]
 
 
-rule testCpp:
+rule localDescriptors:
     input:
-        "tools/cpp/localDescriptors/build/surfNormTest",
+        "tools/cpp/localDescriptors/build/localDescriptors",
         localDescr1OutputsCsv,
         localDescr1OutputsPly
 
@@ -1352,28 +1352,28 @@ rule testCpp:
 #this was in before and seemed necessary when switching from local machine to hpc
 #rm tools/cpp/localDescriptors/build/CMakeCache.txt
 #
-#touch("tools/cpp/localDescriptors/surfNormTest_cmake.complete")
-rule compileCmake:
+#touch("tools/cpp/localDescriptors/localDescriptors_cmake.complete")
+rule compileCmakeLocalDescriptors:
     threads: 1
     resources:
         queue="all.q"
     input:
         cmake = "tools/cpp/localDescriptors/CMakeLists.txt",
-        cppFile = "tools/cpp/localDescriptors/surfNormTest.cpp"
+        cppFile = "tools/cpp/localDescriptors/localDescriptors.cpp"
     output:
         #this function is created in the process but not explicitly used in the bash code
-        outFunction = "tools/cpp/localDescriptors/build/surfNormTest"
+        outFunction = "tools/cpp/localDescriptors/build/localDescriptors"
     shell:
         """
         cmake -S tools/cpp/localDescriptors -B tools/cpp/localDescriptors/build
         cmake --build tools/cpp/localDescriptors/build
         """
 
-rule testLocalDesc:
+rule extractLocalDescriptors:
     threads: defaultThreads
     input:
         inFile = iowaExpTestRAFormCSOriMastRemeshDir + "{phase}/{pat}{CPhase}_formCSOriMastRemesh.ply",
-        function = "tools/cpp/localDescriptors/build/surfNormTest"
+        function = "tools/cpp/localDescriptors/build/localDescriptors"
     output:
         outPly = localDescrDir1 + "{phase}/{pat}{CPhase}_localDescr.ply",
         outCsv = localDescrDir1 + "{phase}/{pat}{CPhase}_localDescr.csv"
