@@ -95,7 +95,7 @@ iowaExpTestRAFormCSOriMastPreDir = grantDir + "iowaExpTest/scanData/rugAnnotForm
 iowaExpTestRAFormCSOriMastPostDir = grantDir + "iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/"
 iowaExpTestRAFormCSOriMastRemeshPreDir = grantDir + "iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/"
 iowaExpTestRAFormCSOriMastRemeshPostDir = grantDir + "iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/"
-
+iowaExpTestRAFormCSOriMastRemeshDir = grantDir + "iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/"
 #directories for superimposition transformations
 iowaExpTestRATransDir = grantDir + "iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/"
 #directory for post scans with superimposition transformation applied
@@ -1321,12 +1321,38 @@ rule getSpatialTransMats_iowaExpTestRA:
 
 #####################################
 #testing c++ stuff
+#THIS IS A PERFECT EXAMPLE OF HOW TO HAVE A SINGLE RULE RUN FOR MULTIPLE WILDCARDS
+#AND NOT HAVE TO MAKE SEPARATE RULES FOR EACH WILDCARD COMBO
+localDescrDir1 = grantDir + "iowaExpTest/localDescriptors/rugAnnotForm_cSOriMastRemesh_localDescr/"
+
+#phase and patient combinations
+iowaExpTestRAPhasePatCombos = (
+    [("pre", "Pre", pat) for pat in iowaExpTestRAPatsPre]
+    + [("post", "Post", pat) for pat in iowaExpTestRAPatsPre]
+    )
+#csv output files
+localDescr1OutputsCsv = [
+    localDescrDir1 + f"{phase}/{pat}{CPhase}_localDescr.csv"
+    for phase, CPhase, pat in iowaExpTestRAPhasePatCombos
+]
+#ply output files
+localDescr1OutputsPly = [
+    localDescrDir1 + f"{phase}/{pat}{CPhase}_localDescr.ply"
+    for phase, CPhase, pat in iowaExpTestRAPhasePatCombos
+]
 
 
+rule testCpp:
+    input:
+        "tools/cpp/localDescriptors/build/surfNormTest",
+        localDescr1OutputsCsv,
+        localDescr1OutputsPly
 
 
-
-
+#this was in before and seemed necessary when switching from local machine to hpc
+#rm tools/cpp/localDescriptors/build/CMakeCache.txt
+#
+#touch("tools/cpp/localDescriptors/surfNormTest_cmake.complete")
 rule compileCmake:
     threads: 1
     resources:
@@ -1335,24 +1361,22 @@ rule compileCmake:
         cmake = "tools/cpp/localDescriptors/CMakeLists.txt",
         cppFile = "tools/cpp/localDescriptors/surfNormTest.cpp"
     output:
-        touch("tools/cpp/localDescriptors/surfNormTest_cmake.complete")
+        #this function is created in the process but not explicitly used in the bash code
+        outFunction = "tools/cpp/localDescriptors/build/surfNormTest"
     shell:
         """
-        rm tools/cpp/build/CMakeCache.txt
-        cmake -S tools/cpp -B tools/cpp/build
-        cmake --build tools/cpp/build
+        cmake -S tools/cpp/localDescriptors -B tools/cpp/localDescriptors/build
+        cmake --build tools/cpp/localDescriptors/build
         """
 
 rule testLocalDesc:
-    threads: 1
-    resources:
-        queue="all.q"
+    threads: defaultThreads
     input:
-        inFile = "testDir/testRemesh.ply",
-        function = "./tools/cpp/build/surfNormTest"
+        inFile = iowaExpTestRAFormCSOriMastRemeshDir + "{phase}/{pat}{CPhase}_formCSOriMastRemesh.ply",
+        function = "tools/cpp/localDescriptors/build/surfNormTest"
     output:
-        outPly = "testDir/snakeOut.ply",
-        outCsv = "testDir/snakeOut.csv"
+        outPly = localDescrDir1 + "{phase}/{pat}{CPhase}_localDescr.ply",
+        outCsv = localDescrDir1 + "{phase}/{pat}{CPhase}_localDescr.csv"
     shell:
         """
         {input.function} {input.inFile} {output.outPly} {output.outCsv}

@@ -13,6 +13,7 @@
 //test edit
 // now set up to take command line arguements
 
+
 int main(int argc, char** argv)
 {
 	//require the command line input
