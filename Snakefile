@@ -342,6 +342,7 @@ spatialTransDeps = [
 "tools/getRegistration.py",
 "tools/preprocess_point_cloud.py"
 ]
+rafDeps = ["tools/readAndFormat.py"]
 
 
 ###############################################################################
@@ -1330,23 +1331,29 @@ iowaExpTestRAPhasePatCombos = (
     [("pre", "Pre", pat) for pat in iowaExpTestRAPatsPre]
     + [("post", "Post", pat) for pat in iowaExpTestRAPatsPre]
     )
-#csv output files
+#raw csv output files
 localDescr1OutputsCsv = [
     localDescrDir1 + f"{phase}/{pat}{CPhase}_localDescr.csv"
     for phase, CPhase, pat in iowaExpTestRAPhasePatCombos
 ]
-#ply output files
+#raw ply output files
 localDescr1OutputsPly = [
     localDescrDir1 + f"{phase}/{pat}{CPhase}_localDescr.ply"
     for phase, CPhase, pat in iowaExpTestRAPhasePatCombos
 ]
 
+#labeled csvs 
+labeledDescr1Csv = [
+    localDescrDir1 + f"{phase}LabeledCsv/{pat}{CPhase}_localDescrLabel.csv"
+    for phase, CPhase, pat in iowaExpTestRAPhasePatCombos
+]
 
 rule localDescriptors:
     input:
         "tools/cpp/localDescriptors/build/localDescriptors",
         localDescr1OutputsCsv,
-        localDescr1OutputsPly
+        localDescr1OutputsPly,
+        labeledDescr1Csv
 
 
 #this was in before and seemed necessary when switching from local machine to hpc
@@ -1380,5 +1387,19 @@ rule extractLocalDescriptors:
     shell:
         """
         {input.function} {input.inFile} {output.outPly} {output.outCsv}
+        """
+
+rule localDescrLabeledCsv:
+    threads: defaultThreads
+    input:
+        meshPath = iowaExpTestRAFormCSOriMastRemeshDir + "{phase}/{pat}{CPhase}_formCSOriMastRemesh.ply",
+        ldPath = localDescrDir1 + "{phase}/{pat}{CPhase}_localDescr.csv",
+        script = "rugaeDetect/processes/produceLabeledDescriptorCsv.py",
+        deps = rafDeps
+    output:
+        outPath = localDescrDir1 + "{phase}LabeledCsv/{pat}{CPhase}_localDescrLabel.csv"
+    shell:
+        """
+        python {input.script} {input.meshPath} {input.ldPath} {output.outPath}
         """
 

@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <iomanip>
+#include <limits>
 #include <pcl/point_types.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/io/ply_io.h>
@@ -153,6 +155,9 @@ int main(int argc, char** argv)
 	//data
 	//it is interesting that here we do not use the PCLPointCloud2 objects
 	//i wonder if there is a reason not to, for now i am stinking with this
+	
+	//setting percision for the csv
+	csv << std::setprecision(std::numeric_limits<float>::max_digits10);
 	for (std::size_t i = 0; i < cloud->size(); ++i)
 	{
 		csv << cloud->points[i].x << ","
