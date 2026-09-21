@@ -11,6 +11,7 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/common/io.h>
 #include <fstream>
+#include <cmath>
 
 //test edit
 // now set up to take command line arguements
@@ -19,16 +20,78 @@
 int main(int argc, char** argv)
 {
 	//require the command line input
-	if (argc != 4)
+	if (argc != 6)
 	{
-		std::cerr << "Usage: localDescriptors <input.ply> <output.ply> <output.csv>" << std::endl;
+		std::cerr << "Usage: localDescriptors <input.ply> <output.csv> <input.surfAreaFile> <input.alpha> <input.radiusRatio>" << std::endl;
 		return 1;
 	}
 	
 	//get arguements from command line
+	//arguement 1 is input ply file
+	//arguement 2 is output csvFile
+	//arguement 3 is a txt file with a single value that is the surface area of the ply
+	//this could probably be improved
+	//arguement 4 is the alpha number for calculating the support radius as described by Zaharescu et al. (2012)
+	//arguement 5 is a number describing the ratio of descriptor search radius to normal radius
 	std::string inputFile = argv[1];
-	std::string outputFile = argv[2];
-	std::string outputCsv = argv[3];
+	std::string outputCsv = argv[2];
+	std::string surfAreaFile = argv[3];
+	double alpha = std::stod(argv[4]);
+	double radiusRatio = std::stod(argv[5]);
+	
+	//check arguemnets
+	if (radiusRatio <= 1) {
+		std::cerr << "Error: radius ratio must be greater than 1 (descriptor radius must be greater than normal radius)." << std::endl;
+		return 1;
+	}
+	
+	
+	//----------------------------------------------------------------------------
+	//set descriptor and normal search radius
+	//----------------------------------------------------------------------------
+	
+	// Read surface area from text file
+	std::ifstream file(surfAreaFile);
+	//check if surface area file can be opened
+	if (!file) {
+		std::cerr << "Error: could not open surface area file: " << surfAreaFile << std::endl;
+		return 1;
+	}
+	//create variable for surface area
+	double surfArea;
+	//make sure the surface are can be read in
+	//this if step reads in the file (file >> surfArea) but also errors out if it cant
+	if(!(file >> surfArea)) {
+		std::cerr << "Error: could not read surface area file: " << surfAreaFile << std::endl;
+		return 1;
+	}
+	file.close();
+	//print surface area value
+	std::cout << "Surface area: " << surfArea << std::endl;
+	
+	//calculate normal radius
+	//get value of pi
+	//following method from Zaharescu et al 2012 and used in Guo et al 2016
+	//there are other methods for determining this region that use a point density informed distance, see Li et al 2016
+	double pi = M_PI; //if this doesnt work there are other options for getting pi
+	double areaFrac = (alpha * surfArea)/pi;
+	double normRad = std::sqrt(areaFrac);
+	//print normal radius
+	std::cout << "Normal search radius: " << normRad << std::endl;
+	
+	//calculate descriptor radius
+	//this must be larger than the normal radius
+	double descrRad = normRad * radiusRatio;
+	//print descriptor search radius
+	std::cout << "Descriptor to normal search radius ratio: " << radiusRatio << std::endl;
+	std::cout << "Descriptor search radius: " << descrRad << std::endl;
+	
+	
+	
+	
+	//----------------------------------------------------------------------------
+	//read in point cloud
+	//----------------------------------------------------------------------------
 
 	//this creates an empty point cloud object to store our point cloud in
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
@@ -44,6 +107,10 @@ int main(int argc, char** argv)
 	
 	std::cout << "Loaded " << cloud->size() << " points." << std::endl;
 	
+	//----------------------------------------------------------------------------
+	//estimate normals
+	//----------------------------------------------------------------------------
+	
 	// Create the normal estimation class, and pass the input dataset to it
 	pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
 	ne.setInputCloud (cloud);
@@ -56,8 +123,8 @@ int main(int argc, char** argv)
 	// Output datasets
 	pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
 	
-	// Use all neighbors in a sphere of radius 3cm
-	ne.setRadiusSearch (0.03);
+	// Use all neighbors in radius
+	ne.setRadiusSearch (normRad);
 	
 	// Compute the features
 	ne.compute (*cloud_normals);
@@ -65,14 +132,11 @@ int main(int argc, char** argv)
 	// cloud_normals->size () should have the same size as the input cloud->size ()
 	std::cout << "Computed " << cloud_normals->size() << " surface normals." << std::endl;
 	
-	//removing as concat comes later with PCLPointCloud2
-	// combining points and normals into one ply for output
-	//first step is initializing and empty point cloud to store this new set it
-	//pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);
-	//now combine original set with normals
-	//pcl::concatenateFields(*cloud,*cloud_normals,*cloud_with_normals);
 	
-	//begin pfh features
+	//----------------------------------------------------------------------------
+	//pfh features
+	//----------------------------------------------------------------------------
+	
 	//following this tutorial, with augmentations to fit with what we have made previous
 	//https://pointclouds.org/documentation/tutorials/pfh_estimation.html#pfh-estimation
 	//there is a way to do the pfh features using a combined point and normal cloud but for now
@@ -88,19 +152,22 @@ int main(int argc, char** argv)
 	// Output datasets
 	pcl::PointCloud<pcl::PFHSignature125>::Ptr pfhs (new pcl::PointCloud<pcl::PFHSignature125> ());
 	
-	// Use all neighbors in a sphere of radius 5cm
+	// Use all neighbors in radius
 	// IMPORTANT: the radius used here has to be larger than the radius used to estimate the surface normals!!!
-	pfh.setRadiusSearch (0.05);
+	pfh.setRadiusSearch (descrRad);
 	
 	// Compute the PFH features
 	pfh.compute (*pfhs);
 	
 	// output message about pfh features
 	std::cout << "Computed " << pfhs->size() << " pfh features." << std::endl;
-	//finish pfh features
 	
 	
-	//begin output to ply file
+	
+	//----------------------------------------------------------------------------
+	//output
+	//----------------------------------------------------------------------------
+	
 	//convert point cloud and extracted features into more flexible PCLPointCloud2 objects
 	//initialize objects
 	pcl::PCLPointCloud2 cloud_pcl;
@@ -118,21 +185,6 @@ int main(int argc, char** argv)
 	//add pfh features
 	pcl::PCLPointCloud2 featureDat_pcl;
 	pcl::concatenateFields(cloudWithNormals_pcl, pfhs_pcl, featureDat_pcl);
-	
-	// now output as ply
-	if (pcl::io::savePLYFile(outputFile, featureDat_pcl) == -1)
-	{
-		PCL_ERROR("Could not save output ply file\n");
-		return 1;
-	}
-
-	//previous hardcode output
-	//pcl::io::savePLYFile("../../data/remeshNormals.ply",*cloud_with_normals);
-
-	//output message
-	std::cout << "Saved point cloud with features to " << outputFile << std::endl;
-	//finish output to ply file
-	
 	
 	
 	//begin output to csv file
