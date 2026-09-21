@@ -48,3 +48,13 @@ testDir/
 tools/cpp/localDescriptors/build/
 *.png
 *.dot
+
+# Ignore everything inside writing task directories
+writing/*/*
+
+# Allow Git to traverse directories
+!writing/*/*/
+
+# Track .tex files
+!writing/*/*.tex
+!writing/*/**/*.tex

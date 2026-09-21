@@ -1,0 +1,203 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[table]{xcolor}
+\usepackage[font=small,labelfont=bf,tableposition=top]{caption}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+\usepackage{booktabs}
+\oddsidemargin0in
+\textwidth6.5in
+\addtolength{\topmargin}{-.75in}
+\textheight 8.5in
+ 
+\renewcommand{\labelenumi}{\roman{enumi}.}
+\theoremstyle{definition}
+\newtheorem{problem}{Problem}
+\title{Rugae Classification Pipeline Experimental Outline}
+\author{J. C. Thomas}
+\begin{document}
+\maketitle
+
+Notes in italics are notes to myself for the future.
+
+\section{Introduction}
+
+\subsection{Goal}
+
+Goal: Determine the best pipeline for classifying palatal rugae region on intraoral scan of maxillary arch.
+
+\subsection{Background}
+
+The first step to assessing orthodontic tooth movement via intraoral scans is aligning scans across different time points. Since the teeth are moving, alignment must be based on a stable region of the maxilla (\textit{ensure this is proper term, is maxilla just teeth or whole upper portion}). The palatal rugae are considered stable during growth and orthodontic treatment (\textit{references, see stableRugae folder or Sara}) and are considered a suitable region on which to base scan alignment (\textit{references, see stableRugae folder or Sara}). The palatal rugae are defined as “nonidentical mucosal elevations seen on the anterior third of the palate.” (Shailaja, 2018). In layman’s terms, it is the ridged region towards the front of the roof of the mouth. Up until this point, alignment of intraoral scans has relied on identification of the palatal rugae by manual segmentation performed by a dentist (\textit{get references}). This is not an optimal workflow as it uses the time of a professional to perform a task that is well defined and menial. Manual segmentation is also subject to unmeasurable human error. 
+
+Since the palatal rugae are such a geometrically distinctive feature of the maxilla, it stands to reason that the geometric features of this area could be used to distinguish it from the rest of a maxillary intraoral scan. Intraoral scans present as a 3D mesh where scanned points are connected in triangles to form a surface. It is our goal to classify the points from these meshes as either belonging to or not belonging to the palatal rugae region. We define the palatal rugae region as (\textit{see sara protocol for manual segmentation}).
+
+\subsection{Local Feature Descriptors}
+
+The geometric properties of a 3D scan can be quantified by extracting local feature descriptors for each point in the mesh. Many local feature descriptors have been proposed, each with distinctive benefits and drawbacks for describing local geometry. 
+
+\textit{This section should describe the archetypes of local descriptors such as histogram based, ect ect as well as a few details about each feature descriptor chosen, what makes it a reasonable choice (things like performance and descriptiveness) as well as the dimension of the output. I have a number of papers that describe local descriptors and their classes as well as evaluate them against each other and discuss properties (see localDescriptor folder and papers named evaluateLocalDescriptor).}
+
+For the rugae classification pipeline, we will consider the following local descriptors:
+\begin{itemize}
+    \item Rotational porjection statistics (RoPS)
+    \item Tri-spin images (TriSI) (\textit{maybe not, havent found an implementation but this is a high performing descriptor})
+    \item Unique shape context (USC)
+    \item Signature of histograms of orientations (SHOT) (\textit{might use color information which we have, however this would require retaining color thru the processing steps which is not how it is currently set up, i believe it can also be done without but unsure})
+    \item Point feature histograms (PFH)
+    \item Fast point feature historgrams (FPFH). 
+\end{itemize}
+
+\textit{There are also things called spectral descriptors that I have ran across, not exactly sure what they are but worth looking in to}
+
+It is possible that multiple sets of local desriptors will improve model performance, with each set of local descriptor contributing its unique strengths to the classification task. This will also be assessed.
+
+\subsection{Search Radii}
+
+A common thread in local feature descriptors is their use of surface normals and search radii in their feature extraction process. To determine the surface normal at a point, a neighborhood with a specified radius is created around the point that defines the area in which the surface normal generally defines the orientation of the surface. The size of the radius determines the granularity of the measure of orientation. Large radii include more points but give a more general sense of orientation. Small radii include less points but give a more specific sense of orientation. Since the surface normal is crucial in creating the local descriptors, the search radius for the surface normal may play an important role in creating features that adequately describe the geometry of a region. In addition to using a search radius for calculating the surface normal, a larger search radius is also needed to establish the region in which the local feature descriptors are calculated (\textit{this will probably need explaining as to why these values are different}). Thus, to calculate local descriptors for a set of points, two search radi must be defined. 
+
+To define the search radius $r_s$ for the surface normals, we will use the approach from Zaharescu 2012:
+$$r_s = \sqrt{\frac{\alpha_r A_M}{\pi}}$$
+where $A_M$ is the total surface area of the mesh $M$ and $alpha_r$ is a proportion (\textit{also used in Guo 2015}). It is not challenging to see that choosing a radius using this approach creates circular local neighborhoods around a point that each have an area that is $\alpha_r$ of the total surface area:
+$$\pi r_s^2 = \alpha_r A_M.$$
+The choice for $\alpha_r$ is a parameter that can be optimized in the classification pipeline. Values $\alpha_r$ will be low with Zaharescu 2012 using $\alpha_r == 0.02$ and Guo 2015 varying $alpha_r$ in $[0.008, 0.014]$. There are also other ways of setting the search radius for the surface normal such as the one used in Li 2016 that is based on point density. 
+
+The search radius for the local descriptors $r_d$ can be defined by its relation to the search radius for the surface normals $r_s$. As the search radius for the local descriptors must be larger than the search radius for the surface normals, we will define the latter radius as a multiple (with the parameter $\gamma$) of the former (\textit{parameter letter can be changed, there is no standard}). Guidance on this relationship is sparse (\textit{more referenes, i also have some applied examples}) but some sources (Li 2016) use a multiple of $\gamma = 1.25$ to set the radius for the local descriptors as:
+$$r_d = \gamma r_s.$$
+For our pipeline, we will consider values of $\gamma$ in $[1.1, 1.5]$ (\textit{no basis for this, just thinking}). 
+
+\subsection{Point cloud density}
+
+The original intraoral scans are extremely dense point clouds. For many applications, the high density of these scans makes them computationally untenable. Thus, reducing the density of these meshes is essential. Reduction in density comes with a reduction in resolution and the extent and method of the reduction is important when creating local descriptors downstream. If the resolution is decreased too much, the local geometry will be smoothed away and potentially important information contained in local descriptors will be lost. Another important consideration when choosing search radi is the density of the mesh. Dense meshses with large search radi will require a lot of time to produce the local descriptors. In addition to the accuracy of the classification, processing time is also an important endpoint.
+
+We will consider two approaches to mesh density reduction in our pipeline: isotropic remeshing and decimation. Isotrophic remeshing reduces the density of a mesh in such a way that points are approximently evenly distributed across the surface. This creates mesh triangles that are approximently the same size and ensures each are of the mesh has the potential to contain the same amount of information. This even distribution of information is a desirable characteristic in some learning models (\textit{bc it makes it generalizable i beleive, find reference for this, i have seen it discussed before}). The other approach, decimation, reduces the density but does so in such a way to best preserve the original geometry. This means that the distribution of points on the surface will not be unifrom; areas with less smoothness will have more points in order to capture the original angles. \textit{see links in references to documentation and papers} 
+
+Both remeshing and decimation take desired resolution as an input. However, the algorithms we are using for remeshing and for decimation both take this information in a slightly different format. The remeshing algorithm asks for a specification on the number of desired points in the new mesh whereas the decimation algorithm asks for a specification on the number of desired faces. These two values do not map to each other in a one-to-one manner in practice, however, a mesh with $x$ points will generally have approximately $2x$ faces. We will consider resolutions of $[8500, 25000]$ points (\textit{potentially more like 20k on the high end}) in our pipeline. In preliminary testing, these resolutions are able to have local descriptors calculated in a reasonable amount of time (\textit{will want to do a bit more testing on this with more reasonable high ends of $\alpha_r$ to determine processing time}).
+
+\subsection{Models}
+
+\textit{Still need to do work on determining what models are best for this situation but there are ones currently being considered:}
+
+A few models will be considered, each one serving as a representative for its general model class.
+
+\begin{itemize}
+    \item XGBoost
+    \item SVM, polynomial kernel
+    \item SVM, radial basis kernel
+    \item KNN
+\end{itemize}
+
+\textit{We also need to consider which hyperparameters will be tuned in each model and describe their search space below. For a first pass, we can use mostly defaults so that we can get some preliminary results.}
+
+\subsection{Training, test, and validation}
+
+For the time being, I am going to start with basic CV, just stratified on point label so we have even information in training and test groups. If we see that the test performance is much higher than the validation performance, then we will know that we have a data leakage issue that needs to be reconsidered.
+
+In our preliminary data set we have 8 patients. Each patient has a pre and a post scan. Thus, we have a total of 16 scans. This gets tricky when we consider validation. The problem is that our sample size is relatively limited. If we had more patients, it would be easy enough to just leave a few patients out as validation. However, if we leave just one patient out here as a validation set, we are removing about 12\% of our data from the training/testing process which is not ideal. However, since we may have data leakage in our training/test set up, the validation set being completely independent of the training/test set is crucial so we can detect any data leakage. 
+
+One option for a validation set is to continue ignoring the experimental unit grouping (patient) and just randomly subset into training/test/validation. However, if there is data leakage, we will not be able to tell as our validation set would also be affected by the leakage. A better option is to leave out an entire patient for validation and let the other 7 patients serve as training/test. This puts more of a limit on generalizability (especially to an applied audience) but protects us more from overstating success. With this approach, we would have 14 scans (7 patients) in the training/test sets and two scans (1 patient) in the validation set.
+
+So, in summary, we have concerns about data leakage that from 3 sources:
+\begin{itemize}
+    \item \textbf{Patient level:} we are not grouping or accounting for patient in any way in our CV. Thus, it is possible that the information in the training set is shared by the test set leading to over-optimistic results.
+    \item \textbf{Time level:} our CV is not accounting for the fact that the same patient will contain similar information across both scans. Even if we were accounting for dependence at the patient level in our CV, we would still not be protected from over-optimism due to information shared across time which may be in both our training and our test set.
+    \item \textbf{Spatial level:} we are not accounting for spatial relationships in the CV. However, I believe this is less of a concern than the other two. Information learned purely based on spatial dependencies will still be applicable in validation sets since they will have the same general spatial make up. We are not applying this model to anything that doesnt have a similar shape and location of the rugae.
+\end{itemize}
+
+By keeping the pre and the post scan from a single patient out of the training/test, we should be able to detect data leakage in the validation. If we see good performance in the test sets and poor performance in the validation set, we will know that a more complex treatment of the CV is necessary.
+
+
+\textit{The purpose of cross validation is to choose a model, not fit a model. Once cross validation is finished, we fit the chosen model on the full data.}
+
+\textit{Spatial cross validation is something to be considered. Though I do have questions about it. Wouldnt it make more sense to stratify by each patient in CV rather than the points spatial position? Isnt the point to train the data on something like the test data? Think of the scan in 2D and separating into 4 quadrants for CV and how that would effect training and testing.}
+
+\href{https://towardsdatascience.com/spatial-cross-validation-using-scikit-learn-74cb8ffe0ab9/}{Basic article on spatial CV}
+
+
+\section{Procedure}
+
+\subsection{Factors}
+
+Determining the best pipeline for rugae classification will be performed as a crossed factor experiment with the following factors:
+
+\begin{table}[ht]
+    \centering
+    \caption{Pipeline optimization factors}
+    \label{tab:pipeFacts}
+    \begin{tabular}{l|c|c}
+        \toprule
+        \textbf{Factor} & \textbf{No. Levels} & \textbf{Levels} \\
+        \midrule
+        Local descriptors & 5+ & RoPS, TriSi, USC, PFH, FPFH, some combinations \\
+        Surface normal radius prop. $\alpha_r$ & 4 & 0.008, 0.012, 0.016, 0.02 \\
+        Feature descriptor radius multiple $\gamma$ & 4 & 1.05, 1.1, 1.3, 1.5 \\
+        Density reduction method & 2 & isotropic remeshing, decimation \\
+        Point cloud densities & 5 & 8500, 12000, 15000, 20000, 25000 \\
+        Classification model & 4+ & XGBoost, SVM poly., SVM radial, KNN\\
+        Feature selection & 4+ & None, PCA, Lin. Comb., High Corr. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Performance}
+
+Best pipeline performance will be based on both measures of accuracy and time.
+
+\newpage
+
+\section{Notes}
+
+\subsection{Areas for improvement}
+
+\begin{itemize}
+    \item Model accuracy could potentially be improved by exploiting known information about mouth shape and rugae placement in the mouth. 
+    \begin{itemize}
+        \item We know that there is approximate bilateral symmetry in the mouth. This means that the classification of a point on one side of the mouth should generally be the same as its "corresponding" point (or area) on the opposite side of the mouth. 
+        \item The rugae is in the same general location in all mouths. Knowing this, we could provide the model with an informed initial guess as to the labels of points. If this does not improve accuracy, perhaps it would improve computation time.
+    \end{itemize}
+    \item Cross validation could be improved by accounting for known sources of dependency.
+\end{itemize}
+
+\subsection{General notes}
+
+\begin{itemize}
+    \item I will try combining some local descriptors for classification but before trying every possible combination, I will experiment with a few pairs and see if this approach actually has any viability
+    \item Another aspect to consider when modeling is feature selection: pca, linear combination filter, high correlation filter
+    \item If we want to try multiple models, which I think would be wise, using MachineShop in R is a good option. Easy to fit multiple models and compile metrics. Used it in my masters.
+    \item I anticipate that the most time consuming process of this will be creating the local descriptors. However, they only need to be created once for each of the combinations. Obviously, CV and model tuning will also take some time. 
+\end{itemize}
+
+\newpage
+
+\section{References}
+
+Shailaja, 2018: Assessment of palatal rugae pattern and its significance in orthodontics and forensic odontology
+
+Zaharescu 2012: Keypoints and Local Descriptors of Scalar Functions on 2D Manifolds
+
+Guo 2015: A Comprehensive Performance Evaluation of 3D Local Feature Descriptors
+
+Li 2016: Improved algorithm for point cloud registration based on fast point feature histograms
+
+\subsection{Density reduction}
+
+pyvista decimate uses vtkQuadraticDecimation, \href{https://docs.pyvista.org/api/core/_autosummary/pyvista.polydatafilters.decimate}{decimate documentation}, \href{https://vtk.org/doc/nightly/html/classvtkQuadricDecimation.html}{algorithm}
+
+pyvista decimate\_pro uses algorithm described in paper: \href{https://docs.pyvista.org/api/core/_autosummary/pyvista.polydatafilters.decimate_pro}{decimate\_pro documentation}, \href{https://dl.acm.org/doi/10.1145/133994.134010}{paper}
+
+\end{document}
