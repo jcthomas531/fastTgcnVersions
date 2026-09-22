@@ -12,6 +12,7 @@
 #include <pcl/common/io.h>
 #include <fstream>
 #include <cmath>
+#include <pcl/features/rops_estimation.h>
 
 //test edit
 // now set up to take command line arguements
@@ -90,21 +91,8 @@ int main(int argc, char** argv)
 	
 	
 	//----------------------------------------------------------------------------
-	//read in point cloud
+	//read in ply file
 	//----------------------------------------------------------------------------
-	//this creates an empty point cloud object to store our point cloud in
-	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
-	
-	// Read the PLY file
-	//this bit is from chatgpt
-	//previous hardcoded version just used "../../data/fileName" instead of inputFile
-	//if (pcl::io::loadPLYFile<pcl::PointXYZ>(inputFile, *cloud) == -1)
-	//{
-	//	PCL_ERROR("Could not read input.ply\n");
-	//	return -1;
-	//}
-	
-	//std::cout << "Loaded " << cloud->size() << " points." << std::endl;
 	
 	//new
 	//create a polygonMesh object named mesh
@@ -185,19 +173,56 @@ int main(int argc, char** argv)
 	
 	
 	
+	
+	//----------------------------------------------------------------------------
+	//RoPs features
+	//----------------------------------------------------------------------------
+	
+	//setting some hyperparams, using values following tutorial on pcl
+	//https://pcl.readthedocs.io/projects/tutorials/en/master/rops_feature.html#rops-feature
+	//these hyperparams are related to the number of features created (specified in estimation class)
+	//though i am not 100% of the exact relationship
+	unsigned int number_of_partition_bins = 5;
+	unsigned int number_of_rotations = 3;
+	
+	// create RoPs estimateion class
+	pcl::ROPSEstimation <pcl::PointXYZ, pcl::Histogram <135> > rops;
+	//pass it argumenets
+	//features calculated at every point so no need to supply setIndices
+	rops.setSearchMethod (tree);
+	rops.setRadiusSearch (descrRad);
+	rops.setSupportRadius (descrRad);
+	rops.setSearchSurface (cloud);
+	rops.setInputCloud (cloud);
+	rops.setTriangles (mesh.polygons);
+	rops.setNumberOfPartitionBins (number_of_partition_bins);
+	rops.setNumberOfRotations (number_of_rotations);
+	
+	//compute features
+	pcl::PointCloud<pcl::Histogram <135> >::Ptr ropsFeats (new pcl::PointCloud <pcl::Histogram <135> > ());
+	rops.compute (*ropsFeats);
+	
+	// output message about pfh features
+	std::cout << "Computed " << ropsFeats->size() << " RoPs features." << std::endl;
+	
+	
 	//----------------------------------------------------------------------------
 	//output
 	//----------------------------------------------------------------------------
 	
 	//convert point cloud and extracted features into more flexible PCLPointCloud2 objects
+	//will not work for ropsFeats as they contain some metadata that PCLPointCloud2 doesnt use
+	//this is fine tho bc these objects are never used in the output process... why are they here? idk it was suggested, leaving for now
 	//initialize objects
 	pcl::PCLPointCloud2 cloud_pcl;
 	pcl::PCLPointCloud2 normals_pcl;
 	pcl::PCLPointCloud2 pfhs_pcl;
+	//pcl::PCLPointCloud2 ropsFeats_pcl;
 	
 	pcl::toPCLPointCloud2(*cloud, cloud_pcl);
 	pcl::toPCLPointCloud2(*cloud_normals, normals_pcl);
 	pcl::toPCLPointCloud2(*pfhs, pfhs_pcl);
+	//pcl::toPCLPointCloud2(*ropsFeats, ropsFeats_pcl);
 	
 	//combine points and normals
 	pcl::PCLPointCloud2 cloudWithNormals_pcl;
@@ -207,10 +232,16 @@ int main(int argc, char** argv)
 	pcl::PCLPointCloud2 featureDat_pcl;
 	pcl::concatenateFields(cloudWithNormals_pcl, pfhs_pcl, featureDat_pcl);
 	
+	//add rops features
+	//pcl::PCLPointCloud2 featureDat2_pcl;
+	//pcl::concatenateFields(featureDat_pcl, ropsFeats_pcl, featureDat2_pcl);
+	//the above stuff is never used and doesnt work with rops, i am going to stop adding to it
+	
 	
 	//begin output to csv file
-	//number of features in pfhs
+	//number of features for each discriptor
 	int nPfhs = sizeof(pfhs->points[0].histogram)/sizeof(pfhs->points[0].histogram[0]);
+	int nRopsFeats = sizeof(ropsFeats->points[0].histogram)/sizeof(ropsFeats->points[0].histogram[0]);
 	//open csv
 	std::ofstream csv(outputCsv);
 	if (!csv.is_open())
@@ -223,6 +254,10 @@ int main(int argc, char** argv)
 	for (int i = 0; i < nPfhs; ++i)
 	{
 		csv << ",pfh_" << i + 1;
+	}
+	for (int i = 0; i < nRopsFeats; ++i)
+	{
+		csv << ",rops_" << i + 1;
 	}
 	csv << "\n";
 	//data
@@ -242,6 +277,10 @@ int main(int argc, char** argv)
 		for (int j = 0; j < nPfhs; ++j)
 		{
 			csv << "," << pfhs->points[i].histogram[j];
+		}
+		for (int j = 0; j < nRopsFeats; ++j)
+		{
+			csv << "," << ropsFeats->points[i].histogram[j];
 		}
 		csv << "\n";
 	}
