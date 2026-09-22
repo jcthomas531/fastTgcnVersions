@@ -92,20 +92,41 @@ int main(int argc, char** argv)
 	//----------------------------------------------------------------------------
 	//read in point cloud
 	//----------------------------------------------------------------------------
-
 	//this creates an empty point cloud object to store our point cloud in
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+	//pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
 	
 	// Read the PLY file
 	//this bit is from chatgpt
 	//previous hardcoded version just used "../../data/fileName" instead of inputFile
-	if (pcl::io::loadPLYFile<pcl::PointXYZ>(inputFile, *cloud) == -1)
+	//if (pcl::io::loadPLYFile<pcl::PointXYZ>(inputFile, *cloud) == -1)
+	//{
+	//	PCL_ERROR("Could not read input.ply\n");
+	//	return -1;
+	//}
+	
+	//std::cout << "Loaded " << cloud->size() << " points." << std::endl;
+	
+	//new
+	//create a polygonMesh object named mesh
+	pcl::PolygonMesh mesh;
+	
+	//load ply into mesh and create error if cannot
+	if (pcl::io::loadPLYFile(inputFile, mesh) == -1)
 	{
 		PCL_ERROR("Could not read input.ply\n");
 		return -1;
 	}
 	
+	//create empty point cloud object to store just point data from mesh
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	//extract point data from mesh
+	pcl::fromPCLPointCloud2(mesh.cloud, *cloud);
+	//output information
 	std::cout << "Loaded " << cloud->size() << " points." << std::endl;
+	std::cout << "Loaded " << mesh.polygons.size() << " polygons." << std::endl;
+	//end new
+	
+	
 	
 	//----------------------------------------------------------------------------
 	//estimate normals
