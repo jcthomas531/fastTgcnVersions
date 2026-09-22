@@ -13,6 +13,7 @@
 #include <fstream>
 #include <cmath>
 #include <pcl/features/rops_estimation.h>
+#include <pcl/features/usc.h>
 
 //test edit
 // now set up to take command line arguements
@@ -207,6 +208,42 @@ int main(int argc, char** argv)
 	
 	
 	//----------------------------------------------------------------------------
+	//usc features
+	//----------------------------------------------------------------------------
+	
+	//following tutorial: https://robotica.unileon.es/index.php?title=PCL/OpenNI_tutorial_4:_3D_object_recognition_(descriptors)
+	//setting some hpyerparams
+	//it also seems the pcl has some defaults? see "protected attributes" section of the api, but may be too large
+	unsigned int minRadScale = 10;
+	unsigned int densRadScale = 5;
+	
+	
+	
+	//create usc estimateion object
+	pcl::UniqueShapeContext<pcl::PointXYZ, pcl::UniqueShapeContext1960, pcl::ReferenceFrame> usc;
+	usc.setSearchMethod (tree);
+	usc.setInputCloud (cloud);
+	// Search radius, to look for neighbors. It will also be the radius of the support sphere.
+	usc.setRadiusSearch (descrRad);
+	// Set the radius to compute the Local Reference Frame.
+	usc.setLocalRadius(descrRad);
+	// The minimal radius value for the search sphere, to avoid being too sensitive
+	// in bins close to the center of the sphere.
+	usc.setMinimalRadius(descrRad / minRadScale);
+	// Radius used to compute the local point density for the neighbors
+	// (the density is the number of points within that radius).
+	usc.setPointDensityRadius(descrRad / densRadScale);
+	
+	//compute features
+	pcl::PointCloud<pcl::UniqueShapeContext1960>::Ptr uscFeats (new pcl::PointCloud<pcl::UniqueShapeContext1960>());
+	usc.compute(*uscFeats);
+	
+	//note that the usc features have a different format than the previous features
+	//you can see that info here: https://pointclouds.org/documentation/structpcl_1_1_unique_shape_context1960.html
+	//it has one attribute named discriptor with 1960 length "vector" and an attribute named rf with 9 length "vector"
+	//not entirely sure if the rf (reference frame) is important but outputting anyway
+	
+	//----------------------------------------------------------------------------
 	//output
 	//----------------------------------------------------------------------------
 	
@@ -214,9 +251,11 @@ int main(int argc, char** argv)
 	//and concatenate them together but not using that right now, see commit: d6b87cd
 	
 	//begin output to csv file
-	//number of features for each discriptor
+	//number of features for each discriptor, this divides it by number of bytes to get the actual size of the object, not the size of the storage
 	int nPfhs = sizeof(pfhs->points[0].histogram)/sizeof(pfhs->points[0].histogram[0]);
 	int nRopsFeats = sizeof(ropsFeats->points[0].histogram)/sizeof(ropsFeats->points[0].histogram[0]);
+	int nUscFeats_desc = uscFeats->points[0].descriptorSize();
+	int nUscFeats_rf = sizeof(uscFeats->points[0].rf)/sizeof(uscFeats->points[0].rf[0]);
 	//open csv
 	std::ofstream csv(outputCsv);
 	if (!csv.is_open())
@@ -234,9 +273,16 @@ int main(int argc, char** argv)
 	{
 		csv << ",rops_" << i + 1;
 	}
+	for (int i = 0; i < nUscFeats_desc; ++i)
+	{
+		csv << ",usc_desc_" << i + 1;
+	}
+	for (int i = 0; i < nUscFeats_rf; ++i)
+	{
+		csv << ",usc_rf_" << i + 1;
+	}
 	csv << "\n";
 	//data
-	
 	//setting percision for the csv
 	csv << std::setprecision(std::numeric_limits<float>::max_digits10);
 	for (std::size_t i = 0; i < cloud->size(); ++i)
@@ -254,6 +300,14 @@ int main(int argc, char** argv)
 		for (int j = 0; j < nRopsFeats; ++j)
 		{
 			csv << "," << ropsFeats->points[i].histogram[j];
+		}
+		for (int j = 0; j < nUscFeats_desc; ++j)
+		{
+			csv << "," << uscFeats->points[i].descriptor[j];
+		}
+		for (int j = 0; j < nUscFeats_rf; ++j)
+		{
+			csv << "," << uscFeats->points[i].rf[j];
 		}
 		csv << "\n";
 	}
