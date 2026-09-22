@@ -210,33 +210,8 @@ int main(int argc, char** argv)
 	//output
 	//----------------------------------------------------------------------------
 	
-	//convert point cloud and extracted features into more flexible PCLPointCloud2 objects
-	//will not work for ropsFeats as they contain some metadata that PCLPointCloud2 doesnt use
-	//this is fine tho bc these objects are never used in the output process... why are they here? idk it was suggested, leaving for now
-	//initialize objects
-	pcl::PCLPointCloud2 cloud_pcl;
-	pcl::PCLPointCloud2 normals_pcl;
-	pcl::PCLPointCloud2 pfhs_pcl;
-	//pcl::PCLPointCloud2 ropsFeats_pcl;
-	
-	pcl::toPCLPointCloud2(*cloud, cloud_pcl);
-	pcl::toPCLPointCloud2(*cloud_normals, normals_pcl);
-	pcl::toPCLPointCloud2(*pfhs, pfhs_pcl);
-	//pcl::toPCLPointCloud2(*ropsFeats, ropsFeats_pcl);
-	
-	//combine points and normals
-	pcl::PCLPointCloud2 cloudWithNormals_pcl;
-	pcl::concatenateFields(cloud_pcl, normals_pcl, cloudWithNormals_pcl);
-	
-	//add pfh features
-	pcl::PCLPointCloud2 featureDat_pcl;
-	pcl::concatenateFields(cloudWithNormals_pcl, pfhs_pcl, featureDat_pcl);
-	
-	//add rops features
-	//pcl::PCLPointCloud2 featureDat2_pcl;
-	//pcl::concatenateFields(featureDat_pcl, ropsFeats_pcl, featureDat2_pcl);
-	//the above stuff is never used and doesnt work with rops, i am going to stop adding to it
-	
+	//there is a way to convert these features to a more flexible class called PCLPointCloud2
+	//and concatenate them together but not using that right now, see commit: d6b87cd
 	
 	//begin output to csv file
 	//number of features for each discriptor
@@ -261,8 +236,6 @@ int main(int argc, char** argv)
 	}
 	csv << "\n";
 	//data
-	//it is interesting that here we do not use the PCLPointCloud2 objects
-	//i wonder if there is a reason not to, for now i am stinking with this
 	
 	//setting percision for the csv
 	csv << std::setprecision(std::numeric_limits<float>::max_digits10);
