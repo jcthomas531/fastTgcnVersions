@@ -14,6 +14,9 @@
 #include <cmath>
 #include <pcl/features/rops_estimation.h>
 #include <pcl/features/usc.h>
+#include <pcl/features/shot.h>
+#include <pcl/features/fpfh.h>
+#include <chrono>
 
 //test edit
 // now set up to take command line arguements
@@ -21,6 +24,11 @@
 
 int main(int argc, char** argv)
 {
+	
+	//timing
+	std::chrono::steady_clock::time_point beginAll = std::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point beginSetup = std::chrono::steady_clock::now();
+	
 	//require the command line input
 	if (argc != 6)
 	{
@@ -89,11 +97,13 @@ int main(int argc, char** argv)
 	std::cout << "Descriptor search radius: " << descrRad << std::endl;
 	
 	
-	
+	std::chrono::steady_clock::time_point endSetup = std::chrono::steady_clock::now();
 	
 	//----------------------------------------------------------------------------
 	//read in ply file
 	//----------------------------------------------------------------------------
+	
+	std::chrono::steady_clock::time_point beginRead = std::chrono::steady_clock::now();
 	
 	//new
 	//create a polygonMesh object named mesh
@@ -115,7 +125,7 @@ int main(int argc, char** argv)
 	std::cout << "Loaded " << mesh.polygons.size() << " polygons." << std::endl;
 	//end new
 	
-	
+	std::chrono::steady_clock::time_point endRead = std::chrono::steady_clock::now();
 	
 	//----------------------------------------------------------------------------
 	//estimate normals
@@ -170,10 +180,32 @@ int main(int argc, char** argv)
 	pfh.compute (*pfhs);
 	
 	// output message about pfh features
-	std::cout << "Computed " << pfhs->size() << " pfh features." << std::endl;
+	std::cout << "Computed " << pfhs->size() << " PFH features." << std::endl;
 	
+	//----------------------------------------------------------------------------
+	//fpfh features
+	//----------------------------------------------------------------------------
 	
+	//follow these tutorials
+	//https://pcl.readthedocs.io/projects/tutorials/en/master/fpfh_estimation.html#fpfh-estimation
+	//https://robotica.unileon.es/index.php?title=PCL/OpenNI_tutorial_4:_3D_object_recognition_(descriptors)#FPFH
 	
+	//create estimation object 
+	pcl::FPFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> fpfh;
+	fpfh.setInputCloud (cloud);
+	fpfh.setInputNormals (cloud_normals);
+	fpfh.setSearchMethod (tree);
+	fpfh.setRadiusSearch (descrRad);
+	
+	//compute descriptors
+	pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhFeats (new pcl::PointCloud<pcl::FPFHSignature33>());
+	fpfh.compute (*fpfhFeats);
+	
+	//output is just a histogram like fph
+	//https://pointclouds.org/documentation/structpcl_1_1_f_p_f_h_signature33.html
+	
+	//output message 
+	std::cout << "Computed " << fpfhFeats->size() << " FPFH features." << std::endl;
 	
 	//----------------------------------------------------------------------------
 	//RoPs features
@@ -203,7 +235,7 @@ int main(int argc, char** argv)
 	pcl::PointCloud<pcl::Histogram <135> >::Ptr ropsFeats (new pcl::PointCloud <pcl::Histogram <135> > ());
 	rops.compute (*ropsFeats);
 	
-	// output message about pfh features
+	// output message about RoPs features
 	std::cout << "Computed " << ropsFeats->size() << " RoPs features." << std::endl;
 	
 	
@@ -243,6 +275,33 @@ int main(int argc, char** argv)
 	//it has one attribute named discriptor with 1960 length "vector" and an attribute named rf with 9 length "vector"
 	//not entirely sure if the rf (reference frame) is important but outputting anyway
 	
+	
+	//output message
+	std::cout << "Computed " << uscFeats->size() << " USC features and local reference frame." << std::endl;
+	
+	//----------------------------------------------------------------------------
+	//shot descriptor
+	//----------------------------------------------------------------------------
+	
+	
+	//following tutorial: https://robotica.unileon.es/index.php?title=PCL/OpenNI_tutorial_4:_3D_object_recognition_(descriptors)
+	//create estimation object
+	pcl::SHOTEstimation<pcl::PointXYZ, pcl::Normal, pcl::SHOT352> shot;
+	shot.setInputCloud (cloud);
+	shot.setInputNormals (cloud_normals);
+	shot.setSearchMethod (tree);
+	shot.setRadiusSearch (descrRad);
+	
+	//compute features
+	pcl::PointCloud<pcl::SHOT352>::Ptr shotFeats (new pcl::PointCloud<pcl::SHOT352>());
+	shot.compute(*shotFeats);
+	
+	//similar to usc, the output from shot has a descriptor array of length 352 and a reference frame array of 9
+	//https://pointclouds.org/documentation/structpcl_1_1_s_h_o_t352.html
+	
+	//output message
+	std::cout << "Computed " << shotFeats->size() << " SHOT features and local reference frame." << std::endl;
+	
 	//----------------------------------------------------------------------------
 	//output
 	//----------------------------------------------------------------------------
@@ -253,9 +312,12 @@ int main(int argc, char** argv)
 	//begin output to csv file
 	//number of features for each discriptor, this divides it by number of bytes to get the actual size of the object, not the size of the storage
 	int nPfhs = sizeof(pfhs->points[0].histogram)/sizeof(pfhs->points[0].histogram[0]);
+	int nFpfh = sizeof(fpfhFeats->points[0].histogram)/sizeof(fpfhFeats->points[0].histogram[0]);
 	int nRopsFeats = sizeof(ropsFeats->points[0].histogram)/sizeof(ropsFeats->points[0].histogram[0]);
 	int nUscFeats_desc = uscFeats->points[0].descriptorSize();
 	int nUscFeats_rf = sizeof(uscFeats->points[0].rf)/sizeof(uscFeats->points[0].rf[0]);
+	int nShotFeats_desc = sizeof(shotFeats->points[0].descriptor)/sizeof(shotFeats->points[0].descriptor[0]);
+	int nShotFeats_rf = sizeof(shotFeats->points[0].rf)/sizeof(shotFeats->points[0].rf[0]);
 	//open csv
 	std::ofstream csv(outputCsv);
 	if (!csv.is_open())
@@ -269,6 +331,10 @@ int main(int argc, char** argv)
 	{
 		csv << ",pfh_" << i + 1;
 	}
+	for (int i = 0; i < nFpfh; ++i)
+	{
+		csv << ",fpfh_" << i + 1;
+	}
 	for (int i = 0; i < nRopsFeats; ++i)
 	{
 		csv << ",rops_" << i + 1;
@@ -280,6 +346,14 @@ int main(int argc, char** argv)
 	for (int i = 0; i < nUscFeats_rf; ++i)
 	{
 		csv << ",usc_rf_" << i + 1;
+	}
+	for (int i = 0; i < nShotFeats_desc; ++i)
+	{
+		csv << ",shot_desc_" << i + 1;
+	}
+	for (int i = 0; i < nShotFeats_rf; ++i)
+	{
+		csv << ",shot_rf_" << i + 1;
 	}
 	csv << "\n";
 	//data
@@ -297,6 +371,10 @@ int main(int argc, char** argv)
 		{
 			csv << "," << pfhs->points[i].histogram[j];
 		}
+		for (int j = 0; j < nFpfh; ++j)
+		{
+			csv << "," << fpfhFeats->points[i].histogram[j];
+		}
 		for (int j = 0; j < nRopsFeats; ++j)
 		{
 			csv << "," << ropsFeats->points[i].histogram[j];
@@ -309,12 +387,36 @@ int main(int argc, char** argv)
 		{
 			csv << "," << uscFeats->points[i].rf[j];
 		}
+		for (int j = 0; j < nShotFeats_desc; ++j)
+		{
+			csv << "," << shotFeats->points[i].descriptor[j];
+		}
+		for (int j = 0; j < nShotFeats_rf; ++j)
+		{
+			csv << "," << shotFeats->points[i].rf[j];
+		}
 		csv << "\n";
 	}
 	//close csv
 	csv.close();
 	std::cout << "saved csv to " << outputCsv << std::endl;
 	//end output to csv
+	
+	
+	
+	
+	
+	std::chrono::steady_clock::time_point endAll = std::chrono::steady_clock::now();
+	
+	
+	
+	
+	
+	
+	//----------------------------------------------------------------------------
+	//timing
+	//----------------------------------------------------------------------------
+	
 	
 	
 	
