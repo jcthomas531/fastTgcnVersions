@@ -55,15 +55,12 @@ The geometric properties of a 3D scan can be quantified by extracting local feat
 
 For the rugae classification pipeline, we will consider the following local descriptors:
 \begin{itemize}
-    \item Rotational porjection statistics (RoPS)
-    \item Tri-spin images (TriSI) (\textit{maybe not, havent found an implementation but this is a high performing descriptor})
-    \item Unique shape context (USC)
-    \item Signature of histograms of orientations (SHOT) (\textit{might use color information which we have, however this would require retaining color thru the processing steps which is not how it is currently set up, i believe it can also be done without but unsure})
     \item Point feature histograms (PFH)
-    \item Fast point feature historgrams (FPFH). 
+    \item Fast point feature historgrams (FPFH)
+    \item Rotational porjection statistics (RoPS)
+    \item Unique shape context (USC)
+    \item Signature of histograms of orientations (SHOT)
 \end{itemize}
-
-\textit{There are also things called spectral descriptors that I have ran across, not exactly sure what they are but worth looking in to}
 
 It is possible that multiple sets of local desriptors will improve model performance, with each set of local descriptor contributing its unique strengths to the classification task. This will also be assessed.
 
@@ -169,8 +166,23 @@ Best pipeline performance will be based on both measures of accuracy and time.
     \begin{itemize}
         \item We know that there is approximate bilateral symmetry in the mouth. This means that the classification of a point on one side of the mouth should generally be the same as its "corresponding" point (or area) on the opposite side of the mouth. 
         \item The rugae is in the same general location in all mouths. Knowing this, we could provide the model with an informed initial guess as to the labels of points. If this does not improve accuracy, perhaps it would improve computation time.
+        \item The models make no use to the graphical structure of the meshes, working purely on point clouds. Could incorporate adjacency matrix.
+        \item Color is present in the data and could be used in classification.
     \end{itemize}
     \item Cross validation could be improved by accounting for known sources of dependency.
+    \item Improvements to local feature descriptors and other possible descriptors:
+    \begin{itemize}
+        \item Wanted to use tri-spin images (TriSI) descriptor, however, I could not find an implementation of it.
+        \item Using color information in local descriptors. I believe at least SHOT descriptors are capable of this.
+        \item There are also things called spectral descriptors that I have ran across, not exactly sure what they are but could be useful.
+        \item There are other things listed in \href{https://pcl.readthedocs.io/projects/tutorials/en/master/#features}{features tutorial section} on PCL that I have not investigated.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Progress}
+
+\begin{itemize}
+    \item Local descriptors PFH, FPFG, RoPs, USC, and SHOT all implemented in C++ with timing.
 \end{itemize}
 
 \subsection{General notes}
@@ -180,7 +192,18 @@ Best pipeline performance will be based on both measures of accuracy and time.
     \item Another aspect to consider when modeling is feature selection: pca, linear combination filter, high correlation filter
     \item If we want to try multiple models, which I think would be wise, using MachineShop in R is a good option. Easy to fit multiple models and compile metrics. Used it in my masters.
     \item I anticipate that the most time consuming process of this will be creating the local descriptors. However, they only need to be created once for each of the combinations. Obviously, CV and model tuning will also take some time. 
+    \item I was using PFH to determine how long feature extraction would take at different mesh density levels. It turns out that this is by far the slowest of the feature extraction methods. At 20,000 points, PFH takes about 7 minutes but things like SHOT and USC take about 3 seconds. If we end up seeing higher performance as we mesh density, we can expand our search grid upwards and exclude PFH from the comparison.
 \end{itemize}
+
+\subsection{Possible concerns}
+
+Things that could have gone wrong in the process to check if outcomes are strangely poor.
+
+\begin{itemize}
+    \item Matching of labels to points and matching of points to descriptors and matching of descriptors to other descriptors. I know at least the descriptor to descriptor relies on the points being in the same order (c++), though I believe this is reasonable given it is all using a singular data object.
+    \item Values in the local descriptor csvs are sometimes stored in scientific notation.
+\end{itemize}
+
 
 \newpage
 
@@ -201,3 +224,4 @@ pyvista decimate uses vtkQuadraticDecimation, \href{https://docs.pyvista.org/api
 pyvista decimate\_pro uses algorithm described in paper: \href{https://docs.pyvista.org/api/core/_autosummary/pyvista.polydatafilters.decimate_pro}{decimate\_pro documentation}, \href{https://dl.acm.org/doi/10.1145/133994.134010}{paper}
 
 \end{document}
+
