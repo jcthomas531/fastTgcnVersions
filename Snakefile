@@ -1365,6 +1365,13 @@ rule getSpatialTransMats_iowaExpTestRA:
 #AND NOT HAVE TO MAKE SEPARATE RULES FOR EACH WILDCARD COMBO
 #SEE FACILITOR OBJECTS ABOVE
 
+
+
+###############extractLocalDescriptor will not work in its current state
+#the executable was updated with search radius information after these rules were written
+#the rule will need to be updated to accomidate new arguements
+
+
 rule compileCmakeLocalDescriptors:
     threads: 1
     resources:
@@ -1414,19 +1421,21 @@ rule localDescrLabeledCsv:
 #########################
 #remesh and feature extraction timing
 
-remeshPointsList = [8500, 10000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
+remeshPointsList = [8500, 10000, 15000, 20000]
 rule timeTest:
     input:
+        "tools/cpp/localDescriptors/build/localDescriptors",
         expand(grantDir + "iowaExpTest/remeshDescriptorTesting/remesh/pat004Pre_remesh{remeshPoints}.ply", remeshPoints=remeshPointsList),
         expand(grantDir + "iowaExpTest/remeshDescriptorTesting/localDescriptors/pat004Pre_remesh{remeshPoints}_ld.csv", remeshPoints=remeshPointsList),
         expand(grantDir + "iowaExpTest/remeshDescriptorTesting/times/ldExtractRemesh{remeshPoints}Time.txt", remeshPoints=remeshPointsList),
         expand(grantDir + "iowaExpTest/remeshDescriptorTesting/labeledCsv/pat004Pre_remesh{remeshPoints}_labeld.csv", remeshPoints=remeshPointsList),
         expand(grantDir + "iowaExpTest/remeshDescriptorTesting/times/labelCsvRemesh{remeshPoints}Time.txt", remeshPoints=remeshPointsList),
-        expand(grantDir + "iowaExpTest/remeshDescriptorTesting/testMeshes/tempFiles/pat007Pre_remesh{remeshPoints}.ply", remeshPoints=remeshPointsList),
-        expand(grantDir + "iowaExpTest/remeshDescriptorTesting/testMeshes/tempFiles/pat007Pre_remesh{remeshPoints}_ld.csv", remeshPoints=remeshPointsList),
-        expand(grantDir + "iowaExpTest/remeshDescriptorTesting/testMeshes/pat007Pre_remesh{remeshPoints}_labeld.csv", remeshPoints=remeshPointsList),
+        #expand(grantDir + "iowaExpTest/remeshDescriptorTesting/testMeshes/tempFiles/pat007Pre_remesh{remeshPoints}.ply", remeshPoints=remeshPointsList),
+        #expand(grantDir + "iowaExpTest/remeshDescriptorTesting/testMeshes/tempFiles/pat007Pre_remesh{remeshPoints}_ld.csv", remeshPoints=remeshPointsList),
+        #expand(grantDir + "iowaExpTest/remeshDescriptorTesting/testMeshes/pat007Pre_remesh{remeshPoints}_labeld.csv", remeshPoints=remeshPointsList),
         expand(grantDir + "iowaExpTest/remeshDescriptorTesting/surfaceAreas/pat004Pre_remesh{remeshPoints}SurfArea.txt", remeshPoints=remeshPointsList),
-        expand(grantDir + "iowaExpTest/remeshDescriptorTesting/testMeshes/tempFiles/pat007Pre_remesh{remeshPoints}SurfArea.txt", remeshPoints=remeshPointsList)
+        #expand(grantDir + "iowaExpTest/remeshDescriptorTesting/testMeshes/tempFiles/pat007Pre_remesh{remeshPoints}SurfArea.txt", remeshPoints=remeshPointsList),
+        expand(grantDir + "iowaExpTest/remeshDescriptorTesting/times/descriptorTimes_remesh{remeshPoints}.csv", remeshPoints=remeshPointsList)
 
 
 #various remesh point densities
@@ -1465,11 +1474,12 @@ rule remeshLocalDescriptors_timeTest:
         surfArea = grantDir + "iowaExpTest/remeshDescriptorTesting/surfaceAreas/pat004Pre_remesh{remeshPoints}SurfArea.txt"
     output:
         outCsv = grantDir + "iowaExpTest/remeshDescriptorTesting/localDescriptors/pat004Pre_remesh{remeshPoints}_ld.csv",
-        timeTxt = grantDir + "iowaExpTest/remeshDescriptorTesting/times/ldExtractRemesh{remeshPoints}Time.txt"
+        timeTxt = grantDir + "iowaExpTest/remeshDescriptorTesting/times/ldExtractRemesh{remeshPoints}Time.txt",
+        cppTimeOut = grantDir + "iowaExpTest/remeshDescriptorTesting/times/descriptorTimes_remesh{remeshPoints}.csv"
     shell:
         """
         {{ echo "REMESH TO {wildcards.remeshPoints} POINTS"; }} > {output.timeTxt}
-        {{ time {input.function} {input.inFile} {output.outCsv} {input.surfArea} .014 1.25; }} 2>> {output.timeTxt}
+        {{ time {input.function} {input.inFile} {input.surfArea} {output.outCsv} {output.cppTimeOut} .014 1.25; }} 2>> {output.timeTxt}
         """
 
 rule labeledCsv_timeTest:
