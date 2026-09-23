@@ -30,24 +30,25 @@ int main(int argc, char** argv)
 	std::chrono::steady_clock::time_point beginSetup = std::chrono::steady_clock::now();
 	
 	//require the command line input
-	if (argc != 6)
+	if (argc != 7)
 	{
-		std::cerr << "Usage: localDescriptors <input.ply> <output.csv> <input.surfAreaFile> <input.alpha> <input.radiusRatio>" << std::endl;
+		std::cerr << "Usage: localDescriptors <input.ply> <input.surfAreaFile> <output.outputCsv> <output.timeCsv> <input.alpha> <input.radiusRatio>" << std::endl;
 		return 1;
 	}
 	
 	//get arguements from command line
 	//arguement 1 is input ply file
-	//arguement 2 is output csvFile
-	//arguement 3 is a txt file with a single value that is the surface area of the ply
-	//this could probably be improved
-	//arguement 4 is the alpha number for calculating the support radius as described by Zaharescu et al. (2012)
-	//arguement 5 is a number describing the ratio of descriptor search radius to normal radius
+	//arguement 2 is a txt file with a single value that is the surface area of the ply
+	//arguement 3 is output csv file for descriptors
+	//arguement 4 is output csv file for times
+	//arguement 5 is the alpha number for calculating the support radius as described by Zaharescu et al. (2012)
+	//arguement 6 is a number describing the ratio of descriptor search radius to normal radius
 	std::string inputFile = argv[1];
-	std::string outputCsv = argv[2];
-	std::string surfAreaFile = argv[3];
-	double alpha = std::stod(argv[4]);
-	double radiusRatio = std::stod(argv[5]);
+	std::string surfAreaFile = argv[2];
+	std::string outputCsv = argv[3];
+	std::string timeCsv = argv[4];
+	double alpha = std::stod(argv[5]);
+	double radiusRatio = std::stod(argv[6]);
 	
 	//check arguemnets
 	if (radiusRatio <= 1) {
@@ -76,8 +77,6 @@ int main(int argc, char** argv)
 		return 1;
 	}
 	file.close();
-	//print surface area value
-	std::cout << "Surface area: " << surfArea << std::endl;
 	
 	//calculate normal radius
 	//get value of pi
@@ -86,23 +85,30 @@ int main(int argc, char** argv)
 	double pi = M_PI; //if this doesnt work there are other options for getting pi
 	double areaFrac = (alpha * surfArea)/pi;
 	double normRad = std::sqrt(areaFrac);
-	//print normal radius
-	std::cout << "Normal search radius: " << normRad << std::endl;
 	
 	//calculate descriptor radius
 	//this must be larger than the normal radius
 	double descrRad = normRad * radiusRatio;
+	
+	//timing
+	std::chrono::steady_clock::time_point endSetup = std::chrono::steady_clock::now();
+	
+	//print surface area value
+	std::cout << "Surface area: " << surfArea << std::endl;
+	//print normal radius
+	std::cout << "Normal search radius: " << normRad << std::endl;
 	//print descriptor search radius
 	std::cout << "Descriptor to normal search radius ratio: " << radiusRatio << std::endl;
 	std::cout << "Descriptor search radius: " << descrRad << std::endl;
 	
 	
-	std::chrono::steady_clock::time_point endSetup = std::chrono::steady_clock::now();
+	
 	
 	//----------------------------------------------------------------------------
 	//read in ply file
 	//----------------------------------------------------------------------------
 	
+	//timing
 	std::chrono::steady_clock::time_point beginRead = std::chrono::steady_clock::now();
 	
 	//new
@@ -120,16 +126,20 @@ int main(int argc, char** argv)
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 	//extract point data from mesh
 	pcl::fromPCLPointCloud2(mesh.cloud, *cloud);
+	
+	//timing
+	std::chrono::steady_clock::time_point endRead = std::chrono::steady_clock::now();
+	
 	//output information
 	std::cout << "Loaded " << cloud->size() << " points." << std::endl;
 	std::cout << "Loaded " << mesh.polygons.size() << " polygons." << std::endl;
-	//end new
-	
-	std::chrono::steady_clock::time_point endRead = std::chrono::steady_clock::now();
 	
 	//----------------------------------------------------------------------------
 	//estimate normals
 	//----------------------------------------------------------------------------
+	
+	//timing
+	std::chrono::steady_clock::time_point beginNormals = std::chrono::steady_clock::now();
 	
 	// Create the normal estimation class, and pass the input dataset to it
 	pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
@@ -149,13 +159,19 @@ int main(int argc, char** argv)
 	// Compute the features
 	ne.compute (*cloud_normals);
 	
+	//timing
+	std::chrono::steady_clock::time_point endNormals = std::chrono::steady_clock::now();
+	
 	// cloud_normals->size () should have the same size as the input cloud->size ()
 	std::cout << "Computed " << cloud_normals->size() << " surface normals." << std::endl;
-	
 	
 	//----------------------------------------------------------------------------
 	//pfh features
 	//----------------------------------------------------------------------------
+	
+	
+	//timing
+	std::chrono::steady_clock::time_point beginPfh = std::chrono::steady_clock::now();
 	
 	//following this tutorial, with augmentations to fit with what we have made previous
 	//https://pointclouds.org/documentation/tutorials/pfh_estimation.html#pfh-estimation
@@ -179,12 +195,18 @@ int main(int argc, char** argv)
 	// Compute the PFH features
 	pfh.compute (*pfhs);
 	
+	//timing
+	std::chrono::steady_clock::time_point endPfh = std::chrono::steady_clock::now();
+	
 	// output message about pfh features
 	std::cout << "Computed " << pfhs->size() << " PFH features." << std::endl;
 	
 	//----------------------------------------------------------------------------
 	//fpfh features
 	//----------------------------------------------------------------------------
+	
+	//timing
+	std::chrono::steady_clock::time_point beginFpfh = std::chrono::steady_clock::now();
 	
 	//follow these tutorials
 	//https://pcl.readthedocs.io/projects/tutorials/en/master/fpfh_estimation.html#fpfh-estimation
@@ -204,12 +226,18 @@ int main(int argc, char** argv)
 	//output is just a histogram like fph
 	//https://pointclouds.org/documentation/structpcl_1_1_f_p_f_h_signature33.html
 	
+	//timing
+	std::chrono::steady_clock::time_point endFpfh = std::chrono::steady_clock::now();
+	
 	//output message 
 	std::cout << "Computed " << fpfhFeats->size() << " FPFH features." << std::endl;
 	
 	//----------------------------------------------------------------------------
 	//RoPs features
 	//----------------------------------------------------------------------------
+	
+	//timing
+	std::chrono::steady_clock::time_point beginRops = std::chrono::steady_clock::now();
 	
 	//setting some hyperparams, using values following tutorial on pcl
 	//https://pcl.readthedocs.io/projects/tutorials/en/master/rops_feature.html#rops-feature
@@ -235,6 +263,9 @@ int main(int argc, char** argv)
 	pcl::PointCloud<pcl::Histogram <135> >::Ptr ropsFeats (new pcl::PointCloud <pcl::Histogram <135> > ());
 	rops.compute (*ropsFeats);
 	
+	//timing
+	std::chrono::steady_clock::time_point endRops = std::chrono::steady_clock::now();
+	
 	// output message about RoPs features
 	std::cout << "Computed " << ropsFeats->size() << " RoPs features." << std::endl;
 	
@@ -243,13 +274,14 @@ int main(int argc, char** argv)
 	//usc features
 	//----------------------------------------------------------------------------
 	
+	//timing
+	std::chrono::steady_clock::time_point beginUsc = std::chrono::steady_clock::now();
+	
 	//following tutorial: https://robotica.unileon.es/index.php?title=PCL/OpenNI_tutorial_4:_3D_object_recognition_(descriptors)
 	//setting some hpyerparams
 	//it also seems the pcl has some defaults? see "protected attributes" section of the api, but may be too large
 	unsigned int minRadScale = 10;
 	unsigned int densRadScale = 5;
-	
-	
 	
 	//create usc estimateion object
 	pcl::UniqueShapeContext<pcl::PointXYZ, pcl::UniqueShapeContext1960, pcl::ReferenceFrame> usc;
@@ -275,6 +307,8 @@ int main(int argc, char** argv)
 	//it has one attribute named discriptor with 1960 length "vector" and an attribute named rf with 9 length "vector"
 	//not entirely sure if the rf (reference frame) is important but outputting anyway
 	
+	//timing
+	std::chrono::steady_clock::time_point endUsc = std::chrono::steady_clock::now();
 	
 	//output message
 	std::cout << "Computed " << uscFeats->size() << " USC features and local reference frame." << std::endl;
@@ -283,6 +317,8 @@ int main(int argc, char** argv)
 	//shot descriptor
 	//----------------------------------------------------------------------------
 	
+	//timing
+	std::chrono::steady_clock::time_point beginShot = std::chrono::steady_clock::now();
 	
 	//following tutorial: https://robotica.unileon.es/index.php?title=PCL/OpenNI_tutorial_4:_3D_object_recognition_(descriptors)
 	//create estimation object
@@ -299,12 +335,18 @@ int main(int argc, char** argv)
 	//similar to usc, the output from shot has a descriptor array of length 352 and a reference frame array of 9
 	//https://pointclouds.org/documentation/structpcl_1_1_s_h_o_t352.html
 	
+	
+	//timing
+	std::chrono::steady_clock::time_point endShot = std::chrono::steady_clock::now();
 	//output message
 	std::cout << "Computed " << shotFeats->size() << " SHOT features and local reference frame." << std::endl;
 	
 	//----------------------------------------------------------------------------
 	//output
 	//----------------------------------------------------------------------------
+	
+	//timing
+	std::chrono::steady_clock::time_point beginOutput = std::chrono::steady_clock::now();
 	
 	//there is a way to convert these features to a more flexible class called PCLPointCloud2
 	//and concatenate them together but not using that right now, see commit: d6b87cd
@@ -399,25 +441,81 @@ int main(int argc, char** argv)
 	}
 	//close csv
 	csv.close();
-	std::cout << "saved csv to " << outputCsv << std::endl;
+	
+	//timing
+	std::chrono::steady_clock::time_point endOutput = std::chrono::steady_clock::now();
+	
+	std::cout << "Output csv saved to " << outputCsv << std::endl;
 	//end output to csv
 	
-	
-	
-	
-	
+	//timing
 	std::chrono::steady_clock::time_point endAll = std::chrono::steady_clock::now();
 	
 	
-	
-	
-	
-	
 	//----------------------------------------------------------------------------
-	//timing
+	//time differences
 	//----------------------------------------------------------------------------
 	
+	//calculate differences
+	std::chrono::seconds timeAll = std::chrono::duration_cast<std::chrono::seconds>(endAll - beginAll);
+	std::chrono::seconds timeSetup = std::chrono::duration_cast<std::chrono::seconds>(endSetup - beginSetup);
+	std::chrono::seconds timeRead = std::chrono::duration_cast<std::chrono::seconds>(endRead - beginRead);
+	std::chrono::seconds timeNormals = std::chrono::duration_cast<std::chrono::seconds>(endNormals - beginNormals);
+	std::chrono::seconds timePfh = std::chrono::duration_cast<std::chrono::seconds>(endPfh - beginPfh);
+	std::chrono::seconds timeFpfh = std::chrono::duration_cast<std::chrono::seconds>(endFpfh - beginFpfh);
+	std::chrono::seconds timeRops = std::chrono::duration_cast<std::chrono::seconds>(endRops - beginRops);
+	std::chrono::seconds timeUsc = std::chrono::duration_cast<std::chrono::seconds>(endUsc - beginUsc);
+	std::chrono::seconds timeShot = std::chrono::duration_cast<std::chrono::seconds>(endShot - beginShot);
+	std::chrono::seconds timeOutput = std::chrono::duration_cast<std::chrono::seconds>(endOutput - beginOutput);
 	
+	//print times to console
+	std::cout << "Total time: " << timeAll.count() << " seconds" << std::endl;
+	std::cout << "Setup time: " << timeSetup.count() << " seconds" << std::endl;
+	std::cout << "Read time: " << timeRead.count() << " seconds" << std::endl;
+	std::cout << "Calculate normals: " << timeNormals.count() << " seconds" << std::endl;
+	std::cout << "Calculate PFH: " << timePfh.count() << " seconds" << std::endl;
+	std::cout << "Calculate FPFH: " << timeFpfh.count() << " seconds" << std::endl;
+	std::cout << "Calculate RoPs: " << timeRops.count() << " seconds" << std::endl;
+	std::cout << "Calculate USC: " << timeUsc.count() << " seconds" << std::endl;
+	std::cout << "Calculate SHOT: " << timeShot.count() << " seconds" << std::endl;
+	std::cout << "Output time: " << timeOutput.count() << " seconds" << std::endl;
+	
+	//output times to csv
+	//open csv
+	std::ofstream csv2(timeCsv);
+	if (!csv2.is_open())
+	{
+		std::cerr << "Could not open time csv file: " << timeCsv << std::endl;
+		return 1;
+	}
+	//make header
+	csv2 << "task,timeSeconds";
+	csv2 << "\n";
+	//populate row by row
+	csv2 << "total," << timeAll.count();
+	csv2 << "\n";
+	csv2 << "setup," << timeSetup.count();
+	csv2 << "\n";
+	csv2 << "read," << timeRead.count();
+	csv2 << "\n";
+	csv2 << "normals," << timeNormals.count();
+	csv2 << "\n";
+	csv2 << "pfh," << timePfh.count();
+	csv2 << "\n";
+	csv2 << "fpfh," << timeFpfh.count();
+	csv2 << "\n";
+	csv2 << "rops," << timeRops.count();
+	csv2 << "\n";
+	csv2 << "usc," << timeUsc.count();
+	csv2 << "\n";
+	csv2 << "shot," << timeShot.count();
+	csv2 << "\n";
+	csv2 << "output," << timeOutput.count();
+	csv2 << "\n";
+	//close csv
+	csv2.close();
+	
+	std::cout << "Time csv saved to " << timeCsv << std::endl;
 	
 	
 	return 0;
