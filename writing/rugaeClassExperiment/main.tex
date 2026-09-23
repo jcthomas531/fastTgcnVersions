@@ -193,6 +193,18 @@ Best pipeline performance will be based on both measures of accuracy and time.
     \item If we want to try multiple models, which I think would be wise, using MachineShop in R is a good option. Easy to fit multiple models and compile metrics. Used it in my masters.
     \item I anticipate that the most time consuming process of this will be creating the local descriptors. However, they only need to be created once for each of the combinations. Obviously, CV and model tuning will also take some time. 
     \item I was using PFH to determine how long feature extraction would take at different mesh density levels. It turns out that this is by far the slowest of the feature extraction methods. At 20,000 points, PFH takes about 7 minutes but things like SHOT and USC take about 3 seconds. If we end up seeing higher performance as we mesh density, we can expand our search grid upwards and exclude PFH from the comparison.
+    \item The true rugae annotations, annotated in CloudCompare, are labels on the points. In the scan pre-processing steps, the point labels are changed to face labels. There is no express reason for this besides convention. For the segmentation model, labels must be attached to the faces. However, rugae classification is done at the point level. Switching between point and face labels - which I have been doing with a majority rules algorithm - introduces a bit of slop into the process. When scan density is reduced by remeshing, points are re-distributed evenly over the surface.Because of this, there will always need to be some sort of label re-assignment no matter if it was to faces or points so there will always be some imprecision. When scan density is reduced by decimation, the points are simply subset (or this is at least the case for decimate\_pro from pyvista). Thus, the original point labels could be retained all the way to the modeling process. However, the current scan pre-processing pipeline is set up to work with face labels and converting this to work with point labels seems like an unwise use of time for something that is likely only marginally important. This does introduce some slop into the process but it is important to remember that slop is at the "truth" level and wont actually effect model performance. It just means that what we are saying is the rugae region will have some imprecision. Though given the granularity we are working with, I doubt very much that this is perceptible to a dental practitioner and would be within the range of human error anyway. For clarity, the path that labels will take in the decimation process is as follows:
+    \begin{enumerate}
+        \item Points are labeled in cloud compare
+        \item Point labels are changed to face labels in the scan pre-processing
+        \item Face labels are changed to point labels to facilitate label retention through the decimation
+        \begin{itemize}
+            \item This is not a strictly necessary re-labeling, even in the current process. A KD tree could be created with the face labels and queried to by the decimated faces. However, I believe that the conversion at the highest possible granularity is a desirable property of the re-labeling that is superior to using the closest old face label for the new faces. The KD tree and proximity runs a higher risk of mislabeling large new faces. There is risk for the point to face conversion method, however, things stay anchored at the truth a bit better. 
+        \end{itemize}
+        \item Point labels are changed to face labels to conform to the existing pipeline format
+        \item Face labels are changed to point labels for the modeling process.
+    \end{enumerate}
+    All of the re-labeling above is done via a majority rules algorithm. As I mentioned, all this re-labeling is not strictly necessary for the process to work, but it is the current state of the pipeline. It would be a useful check to see if re-labeling in this way causes general expansion or contraction of the area labeled as rugae region. 
 \end{itemize}
 
 \subsection{Possible concerns}
@@ -224,4 +236,3 @@ pyvista decimate uses vtkQuadraticDecimation, \href{https://docs.pyvista.org/api
 pyvista decimate\_pro uses algorithm described in paper: \href{https://docs.pyvista.org/api/core/_autosummary/pyvista.polydatafilters.decimate_pro}{decimate\_pro documentation}, \href{https://dl.acm.org/doi/10.1145/133994.134010}{paper}
 
 \end{document}
-
