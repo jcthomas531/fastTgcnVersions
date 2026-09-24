@@ -6,6 +6,7 @@ import pandas as pd
 
 sys.path.append("tools")
 import readAndFormat as raf
+from faceToPointLabel_2Color import faceToPointLabel_2Color
 
 #for testing
 meshPath = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat001Pre_formCSOriMastRemesh.ply"
@@ -17,46 +18,11 @@ meshPath = sys.argv[1]
 ldPath = sys.argv[2]
 outPath = sys.argv[3]
 
-#read in data
-meshDat = raf.readAndFormat(file = meshPath, arch = "U")
+
+#change face labels to point labels
+meshDat = faceToPointLabel_2Color(inFile = meshPath, labelColor='255-000-127', nonlabelColor='255-255-255')
 vDat = meshDat["vert"]
 fDat = meshDat["face"]
-nVert = vDat.shape[0]
-
-#this is majority rules for all faces associated with the vertex
-#combine the vertex indices for the face and color information into a list of tuples
-#iterate through each of the tuples
-#within each tuple, iterate through the three vertex indices for the face
-#for each vertex index within the face, if the face is labeld, go to the vertexs entry in the 
-#labeled dictionary and add one. if the face is not labeled, go to the vertexs entry in the 
-#non-labeled dictionary and add one. This keeps a running tally for each vertex of the number
-#of faces it is associated with that are both labeled and non-labled. Thus, as we iterate
-#through the tuples and that particular vertex index comes up again, we keep adding to its
-#value in the dictionary, notice calling labelCounts[55] finds the value for the 
-#dictionary key 55 rather than the value for the 55th index
-#NOTE THAT THIS IS HARD CODED WITH THE COLOR RGB VALUE AND IF THAT CHANGES THIS WILL BREAK
-
-#create dictionaries
-labelCounts = defaultdict(int)
-notCounts = defaultdict(int)
-
-#create tuple
-faceColorTuple = zip(fDat["vertex_indices"], fDat["color"])
-
-#double iteration
-for verts, color in faceColorTuple:
-    for v in verts:
-        if color == "255-000-127":
-            labelCounts[v] += 1
-        elif color == "255-255-255":
-            notCounts[v] += 1
-
-#fill in the vertex lables in an efficent manner
-#notice calling labelCounts[55] finds the value for the dictionary key 55 rather than the value for the 55th index
-vDat["label"] = [
-    1 if labelCounts[i] >= notCounts[i] else 0
-    for i in range(nVert)
-]
 
 #remove normals in favor of other normals which will be joined
 vDat = vDat.drop(["nx", "ny", "nz"], axis = 1)
