@@ -343,6 +343,15 @@ spatialTransDeps = [
 "tools/preprocess_point_cloud.py"
 ]
 rafDeps = ["tools/readAndFormat.py"]
+decimRugaeAnnotDeps = [
+"tools/trimeshToDfNoLabels.py",
+"tools/faceToPointLabel_2Color.py",
+"tools/readAndFormat.py",
+"tools/toothVars.py",
+"tools/colorNumFrame.py",
+"tools/plyRead.py",
+"tools/dfToPlyExport.py"
+]
 
 
 ##############################################################################
@@ -1367,9 +1376,7 @@ rule getSpatialTransMats_iowaExpTestRA:
 
 
 
-###############extractLocalDescriptor will not work in its current state
-#the executable was updated with search radius information after these rules were written
-#the rule will need to be updated to accomidate new arguements
+
 
 
 rule compileCmakeLocalDescriptors:
@@ -1387,6 +1394,10 @@ rule compileCmakeLocalDescriptors:
         cmake -S tools/cpp/localDescriptors -B tools/cpp/localDescriptors/build
         cmake --build tools/cpp/localDescriptors/build
         """
+
+###############extractLocalDescriptor will not work in its current state
+#the executable was updated with search radius information after these rules were written
+#the rule will need to be updated to accomidate new arguements
 
 rule extractLocalDescriptors:
     threads: defaultThreads
@@ -1522,3 +1533,150 @@ rule createTestMeshes_timeTest:
         {input.functionLd} {output.remeshPath} {output.outCsvLd} {output.surfaceAreaTxt} .014 1.25
         python {input.scriptLabels} {output.remeshPath} {output.outCsvLd} {output.outLabeled}
         """
+
+
+
+#########################
+#rugae classification pipeline optimization experiment
+
+reduct = ["decim", "remesh"]
+pointDens = [8500, 12000, 15000, 20000]
+normRadProp = [0.008, 0.012, 0.016, 0.02]
+descRadMult = [1.05, 1.1, 1.3, 1.5]
+
+
+rugaePipeOptimDir = grantDir + "iowaExpTest/rugaePipeOptim/"
+
+#factor combinations
+#phase, patient, density combinations
+phasePatDensCombos_rpo = (
+    [("pre", "Pre", pat, dens) 
+        for pat in iowaExpTestRAPatsPre
+        for dens in pointDens]
+    + [("post", "Post", pat, dens) 
+        for pat in iowaExpTestRAPatsPost
+        for dens in pointDens]
+    )
+#phase, patient, density, reduction combinations
+phasePatDensReductCombos_rpo = (
+    [("pre", "Pre", pat, dens, red) 
+        for pat in iowaExpTestRAPatsPre
+        for dens in pointDens
+        for red in reduct]
+    + [("post", "Post", pat, dens, red) 
+        for pat in iowaExpTestRAPatsPost
+        for dens in pointDens
+        for red in reduct]
+    )
+#phase, patient, density, reduction, normal radius prop, descriptor radius mult combinations
+phasePatDensReductNormDescCombos_rpo = (
+    [("pre", "Pre", pat, dens, red, norm, desc) 
+        for pat in iowaExpTestRAPatsPre
+        for dens in pointDens
+        for red in reduct
+        for norm in normRadProp
+        for desc in descRadMult]
+    + [("post", "Post", pat, dens, red, norm, desc) 
+        for pat in iowaExpTestRAPatsPost
+        for dens in pointDens
+        for red in reduct
+        for norm in normRadProp
+        for desc in descRadMult]
+    )
+
+#file paths
+remeshFiles_rpo = [
+    rugaePipeOptimDir + f"reducedScans/{phase}/remesh{density}/{patient}{CPhase}.ply"
+    for phase, CPhase, patient, density in phasePatDensCombos_rpo
+]
+decimFiles_rpo = [
+    rugaePipeOptimDir + f"reducedScans/{phase}/decim{density}/{patient}{CPhase}.ply"
+    for phase, CPhase, patient, density in phasePatDensCombos_rpo
+]
+surfAreaFiles_rpo = [
+    rugaePipeOptimDir + f"other/surfArea/{phase}/{reduction}{density}/{patient}{CPhase}.txt"
+    for phase, CPhase, patient, density, reduction in phasePatDensReductCombos_rpo
+]
+featDescFiles_rpo = [
+    rugaePipeOptimDir + f"descriptors/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/{patient}{CPhase}.csv"
+    for phase, CPhase, patient, density, reduction, normal, descrip in phasePatDensReductNormDescCombos_rpo
+]
+featDescTimeFiles_rpo = [
+    rugaePipeOptimDir + f"times/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/{patient}{CPhase}.csv"
+    for phase, CPhase, patient, density, reduction, normal, descrip in phasePatDensReductNormDescCombos_rpo
+]
+
+
+#overall rule for the experiment
+rule rugaePipeOptim:
+    input:
+        "tools/cpp/localDescriptors/build/localDescriptors",
+        remeshFiles_rpo,
+        decimFiles_rpo,
+        surfAreaFiles_rpo,
+        featDescFiles_rpo,
+        featDescTimeFiles_rpo
+
+
+rule remesh_rpo:
+    threads: defaultThreads
+    input:
+        inPath = grantDir + "iowaExpTest/scanData/rugAnnotForm_cSOriMast/{phase}/{patient}{CPhase}_formCSOriMast.ply",
+        script = "tools/processes/remesh2.py",
+        deps = remeshDeps
+    params:
+        labs = True,
+        points = "{density}"
+    output:
+        outPath = rugaePipeOptimDir + "reducedScans/{phase}/remesh{density}/{patient}{CPhase}.ply"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath} {params.labs} {params.points}
+        """
+
+rule decim_rpo:
+    threads: defaultThreads
+    input:
+        inFile = grantDir + "iowaExpTest/scanData/rugAnnotForm_cSOriMast/{phase}/{patient}{CPhase}_formCSOriMast.ply",
+        script = "tools/processes/decimRugaeAnnot.py",
+        deps = decimRugaeAnnotDeps
+    params:
+        nPoints = "{density}"
+    output:
+        outFile = rugaePipeOptimDir + "reducedScans/{phase}/decim{density}/{patient}{CPhase}.ply"
+    shell:
+        """
+        python {input.script} {input.inFile} {output.outFile} {params.nPoints}
+        """
+
+rule surfArea_rpo:
+    threads: defaultThreads
+    input:
+        inPath = rugaePipeOptimDir + "reducedScans/{phase}/{reduction}{density}/{patient}{CPhase}.ply",
+        script = "tools/processes/surfaceAreaTextfile.py"
+    output:
+        outPath = rugaePipeOptimDir + "other/surfArea/{phase}/{reduction}{density}/{patient}{CPhase}.txt"
+    shell:
+        """
+        python {input.script} {input.inPath} {output.outPath}
+        """
+
+rule localDesc_rpo:
+    threads: defaultThreads
+    input:
+        inFile = rugaePipeOptimDir + "reducedScans/{phase}/{reduction}{density}/{patient}{CPhase}.ply",
+        surfArea = rugaePipeOptimDir + "other/surfArea/{phase}/{reduction}{density}/{patient}{CPhase}.txt",
+        function = "tools/cpp/localDescriptors/build/localDescriptors"
+    params:
+        normal = "{normal}",
+        descrip = "{descrip}"
+    output:
+        descCsv = rugaePipeOptimDir + "descriptors/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/{patient}{CPhase}.csv",
+        timeCsv = rugaePipeOptimDir + "times/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/{patient}{CPhase}.csv"
+    shell:
+        """
+        {input.function} {input.inFile} {input.surfArea} {output.descCsv} {output.timeCsv} {params.normal} {params.descrip}
+        """
+
+
+

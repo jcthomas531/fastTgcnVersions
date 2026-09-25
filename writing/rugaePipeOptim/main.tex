@@ -217,6 +217,33 @@ Things that could have gone wrong in the process to check if outcomes are strang
 \end{itemize}
 
 
+\subsection{File structure and organization}
+
+Main directory (for initial test data) for intermediary steps and results is: \\
+\texttt{gb\_lss/Thomas/iowaExpTest/rugaePipeOptim} \\
+The processed scans (formatted, center, scaled, rotated to master) will be stored at their original locations: \\
+\texttt{gb\_lss/Thomas/iowaExpTest/scanData/rugAnnotForm\_cSOriMast} \\
+Folders are set up as follows:
+
+\begin{itemize}
+    \item \textbf{descriptors:} csv files holding the local feature descriptors for each patient and combo of processing
+    \item \textbf{other:} a catch all for holding files that are not part of the primary analysis but are important to the analysis. Currently has the following sub-folders:
+    \begin{itemize}
+        \item \textbf{surfaceArea:} text files for each patient and combo of processing that contain the surface area of the scan
+    \end{itemize}
+    \item \textbf{reducedScans:} ply files for each patient and combo of processing that contain density reduced versions of the original rugae annotated scans
+    \item \textbf{times:} timing for various steps of the pipeline
+\end{itemize}
+
+All folders are organized into the following levels
+\begin{itemize}
+    \item \texttt{pre/post} 
+    \item \texttt{reductionTechniqueXXXXX}, for example \texttt{decim8500} for decimation to 8500 points
+    \item files downstream of feature extraction will also have a subfolder \texttt{normRadPropYYYY\_descRadMultZZZZ} for combinations of normal radius proportion parameter $\alpha$ and descriptor radius multiple with values \texttt{YYYY} and \texttt{ZZZ} respectively
+    \item files named \texttt{patQQQ[Pre/Post]\_otherinfo} where \texttt{QQQ} is patient number
+\end{itemize}
+
+
 \newpage
 
 \section{References}

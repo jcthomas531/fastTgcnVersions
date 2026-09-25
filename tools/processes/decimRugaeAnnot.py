@@ -17,7 +17,8 @@ from vtk.util.numpy_support import vtk_to_numpy
 #bring in snakemake variables
 inFile = sys.argv[1]
 outFile = sys.argv[2]
-nPoints = sys.argv[3]
+#sys.argv only accepts strings so converting to numeric
+nPoints = int(sys.argv[3])
 
 
 #convert number of points to number of faces (approximate)
