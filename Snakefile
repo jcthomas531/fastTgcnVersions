@@ -1419,7 +1419,7 @@ rule localDescrLabeledCsv:
     input:
         meshPath = iowaExpTestRAFormCSOriMastRemeshDir + "{phase}/{pat}{CPhase}_formCSOriMastRemesh.ply",
         ldPath = localDescrDir1 + "{phase}/{pat}{CPhase}_localDescr.csv",
-        script = "rugaeDetect/processes/produceLabeledDescriptorCsv.py",
+        script = "tools/processes/produceLabeledDescriptorCsv.py",
         deps = rafDeps
     output:
         outPath = localDescrDir1 + "{phase}LabeledCsv/{pat}{CPhase}_localDescrLabel.csv"
@@ -1498,7 +1498,7 @@ rule labeledCsv_timeTest:
     input:
         meshPath = grantDir + "iowaExpTest/remeshDescriptorTesting/remesh/pat004Pre_remesh{remeshPoints}.ply",
         ldPath = grantDir + "iowaExpTest/remeshDescriptorTesting/localDescriptors/pat004Pre_remesh{remeshPoints}_ld.csv",
-        script = "rugaeDetect/processes/produceLabeledDescriptorCsv.py",
+        script = "tools/processes/produceLabeledDescriptorCsv.py",
         deps = rafDeps
     output:
         outPath = grantDir + "iowaExpTest/remeshDescriptorTesting/labeledCsv/pat004Pre_remesh{remeshPoints}_labeld.csv",
@@ -1517,7 +1517,7 @@ rule createTestMeshes_timeTest:
         deps = remeshDeps,
         scriptSurfArea = "tools/processes/surfaceAreaTextfile.py",
         functionLd = "tools/cpp/localDescriptors/build/localDescriptors",
-        scriptLabels = "rugaeDetect/processes/produceLabeledDescriptorCsv.py",
+        scriptLabels = "tools/processes/produceLabeledDescriptorCsv.py",
         depsLabels = rafDeps
     params:
         labs = True
