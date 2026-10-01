@@ -1584,6 +1584,22 @@ phasePatDensReductNormDescCombos_rpo = (
         for desc in descRadMult]
     )
 
+#combos of everything but patient
+phaseDensReductNormDescCombos_rpo = (
+    [("pre", dens, red, norm, desc) 
+        for dens in pointDens
+        for red in reduct
+        for norm in normRadProp
+        for desc in descRadMult]
+    + [("post", dens, red, norm, desc) 
+        for dens in pointDens
+        for red in reduct
+        for norm in normRadProp
+        for desc in descRadMult]
+    )
+
+
+
 #file paths
 remeshFiles_rpo = [
     rugaePipeOptimDir + f"reducedScans/{phase}/remesh{density}/{patient}{CPhase}.ply"
@@ -1605,7 +1621,14 @@ featDescTimeFiles_rpo = [
     rugaePipeOptimDir + f"times/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/{patient}{CPhase}.csv"
     for phase, CPhase, patient, density, reduction, normal, descrip in phasePatDensReductNormDescCombos_rpo
 ]
-
+labeledDescFiles_rpo = [
+    rugaePipeOptimDir + f"labeledDescriptors/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/{patient}{CPhase}.csv"
+    for phase, CPhase, patient, density, reduction, normal, descrip in phasePatDensReductNormDescCombos_rpo
+]
+combinedDescFiles_rpo = [
+    rugaePipeOptimDir + f"combinedDescriptors/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/combinedDesc.csv"
+    for phase, density, reduction, normal, descrip in phaseDensReductNormDescCombos_rpo
+]
 
 #overall rule for the experiment
 rule rugaePipeOptim:
@@ -1615,7 +1638,9 @@ rule rugaePipeOptim:
         decimFiles_rpo,
         surfAreaFiles_rpo,
         featDescFiles_rpo,
-        featDescTimeFiles_rpo
+        featDescTimeFiles_rpo,
+        labeledDescFiles_rpo,
+        combinedDescFiles_rpo
 
 
 rule remesh_rpo:
@@ -1678,5 +1703,39 @@ rule localDesc_rpo:
         {input.function} {input.inFile} {input.surfArea} {output.descCsv} {output.timeCsv} {params.normal} {params.descrip}
         """
 
+rule labelLocalDesc_rpo:
+    threads: defaultThreads
+    input:
+        meshPath = rugaePipeOptimDir + "reducedScans/{phase}/{reduction}{density}/{patient}{CPhase}.ply",
+        ldPath = rugaePipeOptimDir + "descriptors/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/{patient}{CPhase}.csv",
+        script = "tools/processes/produceLabeledDescriptorCsv.py",
+        deps = rafDeps
+    output:
+        outPath = rugaePipeOptimDir + "labeledDescriptors/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/{patient}{CPhase}.csv"
+    shell:
+        """
+        python {input.script} {input.meshPath} {input.ldPath} {output.outPath}
+        """
 
-
+#patient argument within the input should eventually be changed to handle both the pre and the post patients in case there is ever a descrepency between the two
+rule combineDesc_rpo:
+    threads: defaultThreads
+    input:
+        #using the expand function within an input uses only the wildcards prescribed by the output
+        inFiles = lambda wc: expand(
+        rugaePipeOptimDir + "labeledDescriptors/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/{patient}{CPhase}.csv",
+        phase=wc.phase,
+        reduction=wc.reduction,
+        density=wc.density,
+        normal=wc.normal,
+        descrip=wc.descrip,
+        patient=iowaExpTestRAPatsPre,
+        CPhase=wc.phase.capitalize()
+        ),
+        script = "tools/processes/stackLabeledDesc.py"
+    output:
+        outPath = rugaePipeOptimDir + "combinedDescriptors/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/combinedDesc.csv"
+    shell:
+        """
+        python {input.script} {output.outPath} {input.inFiles}
+        """
