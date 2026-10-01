@@ -29,6 +29,16 @@ d8["pat"] = "015"
 dAll = pd.concat([d1, d2, d4, d5, d6, d7, d8])
 
 
+#testing other set
+# dFull = pd.read_csv("K:/iowaExpTest/rugaePipeOptim/combinedDescriptors/post/decim8500/norm0.02_desc1.3/combinedDesc.csv")
+# dFull = dFull.rename(columns={"patId": "pat"})
+# dFull = dFull.loc[:, dFull.columns.str.startswith("pfh") | dFull.columns.isin(["label", "pat", "nx", "ny", "z", "x", "nz", "y"])]
+# dAll = dFull[dFull["pat"] != "pat007Post"]
+
+
+
+
+
 #following this guide
 #https://xgboost.readthedocs.io/en/stable/python/python_intro.html
 
@@ -88,6 +98,8 @@ clf_xgb.fit(
     eval_set = [(X_test, y_test)]
     )
 
+#param values: clf_xgb.get_booster().save_config()
+
 #see performance on test set
 testPred = clf_xgb.predict(X_test)
 cm = confusion_matrix(y_test, testPred, labels = clf_xgb.classes_)
@@ -95,8 +107,15 @@ cmDisp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=clf_xgb.clas
 cmDisp.plot()
 
 #see performance on a new mouth
+#
+#first data set
+#
 d3 = pd.read_csv(inDir + "preLabeledCsv/pat007Pre_localDescrLabel.csv")
 d3["pat"] = "007"
+#
+#other data set
+# d3 = dFull[dFull["pat"] == "pat007Post"]
+#
 XNew = d3.drop(columns=["label", "pat"]).copy()
 yNew = d3["label"].copy()
 #data checking
