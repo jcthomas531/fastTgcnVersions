@@ -1,0 +1,54 @@
+---
+title: "Auto vs manual inter-tooth distance measures"
+author: "J. C. Thomas"
+date: "`r Sys.Date()`"
+format: 
+  pdf:
+    number-sections: true
+execute:
+  warning: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, comment = NULL)
+here::i_am("centroidSize/autoCentroidVsManualDistanceReport.qmd")
+library(here)
+source(here("centroidSize/autoCentroidVsManualDistanceComp.R"))
+```
+
+\newpage
+
+# Graphics
+
+## Pre
+```{r}
+distPlotPre
+diffPlotPre
+```
+
+\newpage
+
+## Post
+
+```{r}
+distPlotPost
+diffPlotPost
+```
+
+\newpage
+
+# Tests
+
+## Pre
+
+```{r}
+preTest
+```
+
+\newpage
+
+## Post
+
+```{r}
+postTest
+```
