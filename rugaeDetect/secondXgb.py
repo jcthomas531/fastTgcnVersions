@@ -60,3 +60,19 @@ cmDisp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=clf_xgb.clas
 cmDisp.plot()
 
 
+
+
+#predict class probability
+predNew = clf_xgb.predict(X_test)
+predProbNew = clf_xgb.predict_proba(X_test)
+predProb0New = predProbNew[:,0]
+predProb1New = predProbNew[:,1]
+newDf = pd.DataFrame(y_test)
+newDf["pred"] = predNew
+newDf["predProb0"] = predProb0New
+newDf["predProb1"] = predProb1New
+
+#auc for new mouth
+from sklearn import metrics
+fpr, tpr, thresholds = metrics.roc_curve(newDf["label"], newDf["predProb1"])
+metrics.auc(fpr, tpr)

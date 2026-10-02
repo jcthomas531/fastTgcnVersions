@@ -246,6 +246,14 @@ All folders are organized into the following levels
 
 \newpage
 
+\section{Results}
+
+\subsection{Cross validation}
+
+For initial testing, a basic train/test/validate scheme was implemented. A single patient is excluded from the data and the remainder is split without regard to patient with a 75/25 train/test split. An xgboost model was fit on the train/test data using all default hyperparameter values. Test AUC values were around 0.95. When predicting on the validation data, AUC performance was around 0.9. This performance decrease makes sense due to information leakage between the training and sets sets.
+
+Grouped leave-one-out cross validation was the first CV scheme considered for model training. The motivation behind this being that since we have a relatively small sample size (in the initial data), setting aside an entire patient for a validation set is not an efficient use of data. In an effort recreate something similar but use the data more efficiently, grouped leave-one-out cross validation was implemented where groups are patients. Each patient serves as a "validation" set to the rest of the patients in the training process. Then, the test performance should give a good idea validation performance. Preformance around 0.3.
+
 \section{References}
 
 Shailaja, 2018: Assessment of palatal rugae pattern and its significance in orthodontics and forensic odontology
