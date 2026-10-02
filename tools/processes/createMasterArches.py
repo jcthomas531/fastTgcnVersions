@@ -23,9 +23,11 @@ colorDf = tefl.trimeshExtractFaceLabels(m1Mesh)
 
 #center mesh
 m1Mesh.apply_translation(-m1Mesh.centroid)
+
+#REMOVING SCALING AS IT REMOVES ABILITY TO DETECT EXPANSION
 #scale mesh to 1
-scaleFac = 1/np.max(m1Mesh.extents)
-m1Mesh.apply_scale(scaleFac)
+# scaleFac = 1/np.max(m1Mesh.extents)
+# m1Mesh.apply_scale(scaleFac)
 
 #rotations to orient in desired manner
 #https://www.brainvoyager.com/bv/doc/UsersGuide/CoordsAndTransforms/SpatialTransformationMatrices.html

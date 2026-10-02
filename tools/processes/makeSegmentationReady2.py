@@ -63,10 +63,11 @@ meshIsoTri = pv.to_trimesh(meshIso)
 
 #center mesh
 meshIsoTri.apply_translation(-meshIsoTri.centroid)
+#REMOVING SCALING AS IT REMOVES ABILITY TO DETECT EXPANSION
 #obtain scaling factor
-scaleFac = 1/np.max(meshIsoTri.extents)
+# scaleFac = 1/np.max(meshIsoTri.extents)
 #scale mesh
-meshIsoTri.apply_scale(scaleFac)
+# meshIsoTri.apply_scale(scaleFac)
 
 #format and export
 transVert, transFace = tdnl.trimeshToDfNoLabels(meshIsoTri)

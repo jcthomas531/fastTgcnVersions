@@ -30,10 +30,12 @@ if labs == True:
 #center mesh
 mesh.apply_translation(-mesh.centroid)
 
+
+#REMOVING SCALING AS IT REMOVES ABILITY TO DETECT EXPANSION
 #obtain scaling factor
-scaleFac = 1/np.max(mesh.extents)
+# scaleFac = 1/np.max(mesh.extents)
 #scale mesh
-mesh.apply_scale(scaleFac)
+# mesh.apply_scale(scaleFac)
 
 
 #export

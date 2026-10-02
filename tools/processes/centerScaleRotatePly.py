@@ -51,10 +51,11 @@ colorDf = tefl.trimeshExtractFaceLabels(mesh)
 mesh.apply_translation(-mesh.centroid)
 #obtain scaling factor
 scaleFac = 1/np.max(mesh.extents)
+#REMOVING SCALING AS IT REMOVES ABILITY TO DETECT EXPANSION
 #scale mesh
-mesh.apply_scale(scaleFac)
+# mesh.apply_scale(scaleFac)
 #apply random rotation
-mesh.apply_transform(rotMat)
+# mesh.apply_transform(rotMat)
 
 #export
 vertDf, faceDf = ttdl.trimeshToDf_labels(mesh, colorDf = colorDf)
