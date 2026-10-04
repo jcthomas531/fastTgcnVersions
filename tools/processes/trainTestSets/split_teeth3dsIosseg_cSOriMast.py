@@ -18,10 +18,9 @@ iosDir = sys.argv[3]
 
 
 
-
 ###############################################################################
 #teeth3ds
-#files in teeth3ds remesh center, scale, random rotate directory
+#files in teeth3ds remesh center, scale directory
 t3dsFiles = os.listdir(t3dsDir)
 
 #generate random order of files

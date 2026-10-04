@@ -1273,6 +1273,7 @@ rule orientToMastIosseg:
 #TRAIN TEST SETS
 
 #tain test set for teeth3dsIosseg_cSOriMast
+#this will clear out directories before populating them
 rule trainTestSplit_teeth3dsIosseg_cSOriMast:
     threads: defaultThreads
     input:
@@ -1290,6 +1291,7 @@ rule trainTestSplit_teeth3dsIosseg_cSOriMast:
         touch(trainTestDir_t3dsIosseg_cSOriMast + "t3dsIosseg_cSOriMast_trainTestSplit.complete")
     shell:
         """
+        rm -f "{params.newDir}/train/"*.ply "{params.newDir}/test/"*.ply
         python {input.script} {params.newDir} {params.t3dsDir} {params.iosDir}
         """
 
