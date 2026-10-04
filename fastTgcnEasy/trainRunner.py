@@ -7,7 +7,7 @@
 
 
 #
-runNote = "training on remeshed teeth3dsIosseg_cSOriMast data, proportional 80/20 split from both teeth3ds and iosseg sets"
+runNote = "SCALING REMOVED training on remeshed teeth3dsIosseg_cSOriMast data, proportional 80/20 split from both teeth3ds and iosseg sets"
 #
 
 
