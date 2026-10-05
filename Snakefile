@@ -456,6 +456,65 @@ rule all:
         #
         expand(iowaExpTestSpatialTransDir + "{seg1Pat}SpatialTransMats.pkl", seg1Pat = iowaExpTestRAPatsBoth)
 
+#rule for all processing
+rule allProcess:
+    input:
+        #master arches
+        #
+        masterArchesDir + "masterArch1/mA1Full.ply",
+        #
+        #iowaRme:
+        #
+        #upper scans converted from the original stls
+        #preD
+        expand(preDFullScanDir + "{preDPat}u_preD.ply", preDPat = patNamesPreD),
+        #fin
+        expand(finFullScanDir + "{finPat}u_fin.ply", finPat = patNamesFin),
+        #
+        #process teeth3ds
+        #
+        expand(teeth3dsFullDir + "{teeth3dsName}_U.ply", teeth3dsName = patNames3ds),
+        expand(teeth3dsFullCSDir + "{teeth3dsName}_U_cS.ply", teeth3dsName = patNames3ds),
+        expand(teeth3dsCSMastRotMatDir + "{teeth3dsName}_U_cS_mastRotMat.pkl", teeth3dsName = patNames3ds),
+        expand(teeth3dsFullCSOriMastDir + "{teeth3dsName}_U_cSOriMast.ply", teeth3dsName = patNames3ds),
+        expand(teeth3dsCSOriMastRemeshDir + "{teeth3dsName}_U_cSOriMastRemesh.ply", teeth3dsName = patNames3ds),
+        #
+        #process Iosseg
+        #
+        expand(iossegCleanUCSDir + "{iossegCleanUPat}_U_cS.ply", iossegCleanUPat = allIossegCleanUPats),
+        expand(iossegCleanUCSMastRotMatDir + "{iossegCleanUPat}_U_cS_mastRotMat.pkl", iossegCleanUPat = allIossegCleanUPats),
+        expand(iossegCleanUCSOriMastDir + "{iossegCleanUPat}_U_cSOriMast.ply", iossegCleanUPat = allIossegCleanUPats),
+        #
+        #train test splits
+        #
+        trainTestDir_t3dsIosseg_cSOriMast + "t3dsIosseg_cSOriMast_trainTestSplit.complete",
+        #
+        #process iowaExptTest
+        #
+        expand(iowaExpTestOrigFormPreDir + "{iowaExpTestPrePat}Pre_form.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormPostDir + "{iowaExpTestPostPat}Post_form.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
+        expand(iowaExpTestOrigFormCSPreDir + "{iowaExpTestPrePat}Pre_formCS.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormCSPostDir + "{iowaExpTestPostPat}Post_formCS.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
+        expand(iowaExpTestOrigFormCSPreMastRotMatDir + "{iowaExpTestPrePat}Pre_formCS_mastRotMat.pkl", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormCSPostMastRotMatDir + "{iowaExpTestPostPat}Post_formCS_mastRotMat.pkl", iowaExpTestPostPat = iowaExpTestPatsPost),
+        expand(iowaExpTestOrigFormCSOriMastPreDir + "{iowaExpTestPrePat}Pre_formCSOriMast.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormCSOriMastPostDir + "{iowaExpTestPostPat}Post_formCSOriMast.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
+        expand(iowaExpTestOrigFormCSOriMastRemeshPreDir + "{iowaExpTestPrePat}Pre_formCSOriMastRemesh.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
+        expand(iowaExpTestOrigFormCSOriMastRemeshPostDir + "{iowaExpTestPostPat}Post_formCSOriMastRemesh.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
+        #
+        #process iowaExpTestRA
+        #
+        expand(iowaExpTestRAFormPreDir + "{iowaExpTestRAPrePat}Pre_form.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormPostDir + "{iowaExpTestRAPostPat}Post_form.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        expand(iowaExpTestRAFormCSPreDir + "{iowaExpTestRAPrePat}Pre_formCS.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormCSPostDir + "{iowaExpTestRAPostPat}Post_formCS.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        expand(iowaExpTestRAFormCSPreMastRotMatDir + "{iowaExpTestRAPrePat}Pre_formCS_mastRotMat.pkl", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormCSPostMastRotMatDir + "{iowaExpTestRAPostPat}Post_formCS_mastRotMat.pkl", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        expand(iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMast.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormCSOriMastPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMast.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
+        expand(iowaExpTestRAFormCSOriMastRemeshPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMastRemesh.ply",  iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
+        expand(iowaExpTestRAFormCSOriMastRemeshPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMastRemesh.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost)
+
 
 rule masterArches:
     input:
@@ -521,72 +580,8 @@ rule processIowaExpTestRA:
         expand(iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMast.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
         expand(iowaExpTestRAFormCSOriMastPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMast.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
         expand(iowaExpTestRAFormCSOriMastRemeshPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMastRemesh.ply",  iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
-        expand(iowaExpTestRAFormCSOriMastRemeshPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMastRemesh.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
-        #iowaExpTestRA, trans to superimp post on pre
-        expand(iowaExpTestRATransDir + "{iowaExpTestRABothPats}SuperimpPostOnPreTrans_rugAnnot.pkl", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
-        #iowaExpTestRA, post scans with annotated rugae superimposition transformation applied
-        expand(iowaExpTestRASuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMast_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
-        expand(iowaExpTestRARemeshSuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth)
-
-
-#rule for all processing
-rule allProcess:
-    input:
-        #master arches
-        #
-        masterArchesDir + "masterArch1/mA1Full.ply",
-        #
-        #iowaRme:
-        #
-        #upper scans converted from the original stls
-        #preD
-        expand(preDFullScanDir + "{preDPat}u_preD.ply", preDPat = patNamesPreD),
-        #fin
-        expand(finFullScanDir + "{finPat}u_fin.ply", finPat = patNamesFin),
-        #
-        #process teeth3ds
-        #
-        expand(teeth3dsFullDir + "{teeth3dsName}_U.ply", teeth3dsName = patNames3ds),
-        expand(teeth3dsFullCSDir + "{teeth3dsName}_U_cS.ply", teeth3dsName = patNames3ds),
-        expand(teeth3dsCSMastRotMatDir + "{teeth3dsName}_U_cS_mastRotMat.pkl", teeth3dsName = patNames3ds),
-        expand(teeth3dsFullCSOriMastDir + "{teeth3dsName}_U_cSOriMast.ply", teeth3dsName = patNames3ds),
-        expand(teeth3dsCSOriMastRemeshDir + "{teeth3dsName}_U_cSOriMastRemesh.ply", teeth3dsName = patNames3ds),
-        #
-        #process Iosseg
-        #
-        expand(iossegCleanUCSDir + "{iossegCleanUPat}_U_cS.ply", iossegCleanUPat = allIossegCleanUPats),
-        expand(iossegCleanUCSMastRotMatDir + "{iossegCleanUPat}_U_cS_mastRotMat.pkl", iossegCleanUPat = allIossegCleanUPats),
-        expand(iossegCleanUCSOriMastDir + "{iossegCleanUPat}_U_cSOriMast.ply", iossegCleanUPat = allIossegCleanUPats),
-        #
-        #train test splits
-        #
-        trainTestDir_t3dsIosseg_cSOriMast + "t3dsIosseg_cSOriMast_trainTestSplit.complete",
-        #
-        #process iowaExptTest
-        #
-        expand(iowaExpTestOrigFormPreDir + "{iowaExpTestPrePat}Pre_form.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
-        expand(iowaExpTestOrigFormPostDir + "{iowaExpTestPostPat}Post_form.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
-        expand(iowaExpTestOrigFormCSPreDir + "{iowaExpTestPrePat}Pre_formCS.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
-        expand(iowaExpTestOrigFormCSPostDir + "{iowaExpTestPostPat}Post_formCS.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
-        expand(iowaExpTestOrigFormCSPreMastRotMatDir + "{iowaExpTestPrePat}Pre_formCS_mastRotMat.pkl", iowaExpTestPrePat = iowaExpTestPatsPre),
-        expand(iowaExpTestOrigFormCSPostMastRotMatDir + "{iowaExpTestPostPat}Post_formCS_mastRotMat.pkl", iowaExpTestPostPat = iowaExpTestPatsPost),
-        expand(iowaExpTestOrigFormCSOriMastPreDir + "{iowaExpTestPrePat}Pre_formCSOriMast.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
-        expand(iowaExpTestOrigFormCSOriMastPostDir + "{iowaExpTestPostPat}Post_formCSOriMast.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
-        expand(iowaExpTestOrigFormCSOriMastRemeshPreDir + "{iowaExpTestPrePat}Pre_formCSOriMastRemesh.ply", iowaExpTestPrePat = iowaExpTestPatsPre),
-        expand(iowaExpTestOrigFormCSOriMastRemeshPostDir + "{iowaExpTestPostPat}Post_formCSOriMastRemesh.ply", iowaExpTestPostPat = iowaExpTestPatsPost),
-        #
-        #process iowaExpTestRA
-        #
-        expand(iowaExpTestRAFormPreDir + "{iowaExpTestRAPrePat}Pre_form.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
-        expand(iowaExpTestRAFormPostDir + "{iowaExpTestRAPostPat}Post_form.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
-        expand(iowaExpTestRAFormCSPreDir + "{iowaExpTestRAPrePat}Pre_formCS.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
-        expand(iowaExpTestRAFormCSPostDir + "{iowaExpTestRAPostPat}Post_formCS.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
-        expand(iowaExpTestRAFormCSPreMastRotMatDir + "{iowaExpTestRAPrePat}Pre_formCS_mastRotMat.pkl", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
-        expand(iowaExpTestRAFormCSPostMastRotMatDir + "{iowaExpTestRAPostPat}Post_formCS_mastRotMat.pkl", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
-        expand(iowaExpTestRAFormCSOriMastPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMast.ply", iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
-        expand(iowaExpTestRAFormCSOriMastPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMast.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost),
-        expand(iowaExpTestRAFormCSOriMastRemeshPreDir + "{iowaExpTestRAPrePat}Pre_formCSOriMastRemesh.ply",  iowaExpTestRAPrePat = iowaExpTestRAPatsPre),
         expand(iowaExpTestRAFormCSOriMastRemeshPostDir + "{iowaExpTestRAPostPat}Post_formCSOriMastRemesh.ply", iowaExpTestRAPostPat = iowaExpTestRAPatsPost)
+
 
 #rule for just superimposition work
 rule superimp:
@@ -601,23 +596,8 @@ rule superimp:
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
         expand(iowaExpTestRASuperimpVisDir + "{iowaExpTestRABothPats}SuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth)
 
-#test rule
-#rule test:
-#    threads: defaultThreads
-#    resources:
-#        queue="UI-GPU",
-#        gpus=3
-#    output:
-#        "test_pwd.txt"
-#    shell:
-#        """
-#        pwd > {output}
-#        """
-
-
 rule segmentation:
     input:
-        expand(iowaExpTestRARemeshSuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
         iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete"
 
