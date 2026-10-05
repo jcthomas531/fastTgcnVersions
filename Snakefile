@@ -354,32 +354,6 @@ decimRugaeAnnotDeps = [
 ]
 
 
-##############################################################################
-#facilitating objects for local descriptors
-localDescrDir1 = grantDir + "iowaExpTest/localDescriptors/rugAnnotForm_cSOriMastRemesh_localDescr/"
-
-#phase and patient combinations
-iowaExpTestRAPhasePatCombos = (
-    [("pre", "Pre", pat) for pat in iowaExpTestRAPatsPre]
-    + [("post", "Post", pat) for pat in iowaExpTestRAPatsPre]
-    )
-#raw csv output files
-localDescr1OutputsCsv = [
-    localDescrDir1 + f"{phase}/{pat}{CPhase}_localDescr.csv"
-    for phase, CPhase, pat in iowaExpTestRAPhasePatCombos
-]
-#raw ply output files
-localDescr1OutputsPly = [
-    localDescrDir1 + f"{phase}/{pat}{CPhase}_localDescr.ply"
-    for phase, CPhase, pat in iowaExpTestRAPhasePatCombos
-]
-
-#labeled csvs 
-labeledDescr1Csv = [
-    localDescrDir1 + f"{phase}LabeledCsv/{pat}{CPhase}_localDescrLabel.csv"
-    for phase, CPhase, pat in iowaExpTestRAPhasePatCombos
-]
-
 ###############################################################################
 ##################################BEGIN RULES##################################
 ###############################################################################
@@ -651,15 +625,7 @@ rule spatialTrans:
     input:
         expand(iowaExpTestSpatialTransDir + "{seg1Pat}SpatialTransMats.pkl", seg1Pat = iowaExpTestRAPatsBoth)
 
-#everything above this point is in rule all
 
-
-rule localDescriptors:
-    input:
-        "tools/cpp/localDescriptors/build/localDescriptors",
-        localDescr1OutputsCsv,
-        localDescr1OutputsPly,
-        labeledDescr1Csv
 
 ###############################################################################
 #pipeline rules
