@@ -1423,72 +1423,6 @@ rule getSpatialTransMats_iowaExpTestRA:
         """
 
 
-
-
-
-
-#####################################
-#local descriptors
-#see rule localDescriptors
-#THIS IS A PERFECT EXAMPLE OF HOW TO HAVE A SINGLE RULE RUN FOR MULTIPLE WILDCARDS
-#AND NOT HAVE TO MAKE SEPARATE RULES FOR EACH WILDCARD COMBO
-#SEE FACILITOR OBJECTS ABOVE
-
-
-
-
-
-
-rule compileCmakeLocalDescriptors:
-    threads: 1
-    resources:
-        queue="all.q"
-    input:
-        cmake = "tools/cpp/localDescriptors/CMakeLists.txt",
-        cppFile = "tools/cpp/localDescriptors/localDescriptors.cpp"
-    output:
-        #this function is created in the process but not explicitly used in the bash code
-        outFunction = "tools/cpp/localDescriptors/build/localDescriptors"
-    shell:
-        """
-        cmake -S tools/cpp/localDescriptors -B tools/cpp/localDescriptors/build
-        cmake --build tools/cpp/localDescriptors/build
-        """
-
-###############extractLocalDescriptor will not work in its current state
-#the executable was updated with search radius information after these rules were written
-#the rule will need to be updated to accomidate new arguements
-
-rule extractLocalDescriptors:
-    threads: defaultThreads
-    input:
-        inFile = iowaExpTestRAFormCSOriMastRemeshDir + "{phase}/{pat}{CPhase}_formCSOriMastRemesh.ply",
-        function = "tools/cpp/localDescriptors/build/localDescriptors"
-    output:
-        outPly = localDescrDir1 + "{phase}/{pat}{CPhase}_localDescr.ply",
-        outCsv = localDescrDir1 + "{phase}/{pat}{CPhase}_localDescr.csv"
-    shell:
-        """
-        {input.function} {input.inFile} {output.outPly} {output.outCsv}
-        """
-
-#i have changed the local descriptor function to take 2 additional arguements
-#and removed the ply output so this will likely error out
-rule localDescrLabeledCsv:
-    threads: defaultThreads
-    input:
-        meshPath = iowaExpTestRAFormCSOriMastRemeshDir + "{phase}/{pat}{CPhase}_formCSOriMastRemesh.ply",
-        ldPath = localDescrDir1 + "{phase}/{pat}{CPhase}_localDescr.csv",
-        script = "tools/processes/produceLabeledDescriptorCsv.py",
-        deps = rafDeps
-    output:
-        outPath = localDescrDir1 + "{phase}LabeledCsv/{pat}{CPhase}_localDescrLabel.csv"
-    shell:
-        """
-        python {input.script} {input.meshPath} {input.ldPath} {output.outPath}
-        """
-
-
 #########################
 #remesh and feature extraction timing
 
@@ -1702,6 +1636,22 @@ rule rugaePipeOptim:
         labeledDescFiles_rpo,
         combinedDescFiles_rpo
 
+
+rule compileCmakeLocalDescriptors:
+    threads: 1
+    resources:
+        queue="all.q"
+    input:
+        cmake = "tools/cpp/localDescriptors/CMakeLists.txt",
+        cppFile = "tools/cpp/localDescriptors/localDescriptors.cpp"
+    output:
+        #this function is created in the process but not explicitly used in the bash code
+        outFunction = "tools/cpp/localDescriptors/build/localDescriptors"
+    shell:
+        """
+        cmake -S tools/cpp/localDescriptors -B tools/cpp/localDescriptors/build
+        cmake --build tools/cpp/localDescriptors/build
+        """
 
 rule remesh_rpo:
     threads: defaultThreads
