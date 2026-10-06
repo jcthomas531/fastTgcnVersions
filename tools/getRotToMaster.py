@@ -4,8 +4,9 @@ import open3d as o3d
 import  preprocess_point_cloud as ppc
 #function to obtain the rotation matrix that aligns a particular scan to the master arch
 #filePath is the file path to the scan you want the registration for
-#things must be centered and scaled prior to using this
-def getRotToMaster(filePath, masterArchPath):
+#things must be centered prior to using this
+#default arguements for voxel size and iters are set to values that work for matching to masterArch1 in unscaled version
+def getRotToMaster(filePath, masterArchPath, voxel_size = 6, iters = 400):
     
     #load in master arch
     mPath = masterArchPath
@@ -15,8 +16,8 @@ def getRotToMaster(filePath, masterArchPath):
     sPc = o3d.io.read_point_cloud(filePath)
     
     #set up
-    voxel_size = .05
-    iters = 100
+    #voxel_size = 6
+    #iters = 400
     
     #source is what will be moving
     #target is what we are wanting to match to

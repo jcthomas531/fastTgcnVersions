@@ -1,0 +1,619 @@
+Using profile sgeALL for setting default command line arguments.
+/old_Users/jthomas48/dissModels/intraoralSegmentation/Snakefile:194: SyntaxWarning: invalid escape sequence '\.'
+  origStlPreDFilepath = [dir_ + file_ for dir_, file_ in zip(origStlPreDDir, origStlPreDFile)]
+/old_Users/jthomas48/dissModels/intraoralSegmentation/Snakefile:212: SyntaxWarning: invalid escape sequence '\.'
+  origStlFinFilepath = [dir_ + file_ for dir_, file_ in zip(origStlFinDir, origStlFinFile)]
+
+SNAKEMAKE
+=========
+  Date: 2026-10-04 17:57:12
+  Workflow ID: ea29cb2e-fc96-4fa7-96e4-c42ff593b3e3
+  Platform: Linux-3.10.0-1160.119.1.el7.x86_64-x86_64-with-glibc2.17
+  Host: argon-login-6.hpc
+  User: jthomas48
+  Snakemake version: 9.24.0
+  Python version: 3.13.14 (main, Jul 23 2026, 14:44:45) [Clang 22.1.3 ]
+  Command: /Users/jthomas48/.venv/bin/snakemake --profile sgeALL all
+  Snakefile: /old_Users/jthomas48/dissModels/intraoralSegmentation/Snakefile
+  Base directory: /old_Users/jthomas48/dissModels/intraoralSegmentation
+  Run directory: /old_Users/jthomas48/dissModels/intraoralSegmentation
+  Working directory: /old_Users/jthomas48/dissModels/intraoralSegmentation
+  Config file(s): []
+  Config MD5: 99914b932bd37a50b983c5e7c90ae93b
+
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided remote nodes: 1000
+Job stats:
+job                                  count
+---------------------------------  -------
+makeNoSuperimpVisIowaExpTestRA           8
+segIowaExpTestRAPre                      1
+superimpIowaExpTestRA                    8
+getCentSizeIowaExpTestPre                1
+makeSuperimpVisIowaExpTestRA             8
+superimpIowaExpTestRARemesh              8
+segIowaExpTestRAPost                     1
+getCentSizeIowaExpTestPost               1
+getSpatialTransMats_iowaExpTestRA        8
+all                                      1
+total                                   45
+
+Select jobs to execute...
+Execute 17 jobs...
+
+[Sun Oct  4 17:57:21 2026]
+rule superimpIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat001Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat001Post_formCSOriMast.ply, superimposition/rugaeAnnotRegistration.py, tools/getRegistration.py, tools/preprocess_point_cloud.py, tools/trimeshToDf_labels.py, tools/trimeshExtractFaceLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat001SuperimpPostOnPreTrans_rugAnnot.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat001Post_formCSOriMast_rugAnnotSuperimp.ply
+    jobid: 5011
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat001Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat001Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat001
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/rugaeAnnotRegistration.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat001Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat001Post_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat001SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat001Post_formCSOriMast_rugAnnotSuperimp.ply
+        
+Submitted job 5011 with external jobid '6591341'.
+
+[Sun Oct  4 17:57:23 2026]
+rule makeNoSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat007Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat007Post_formCSOriMast.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat007NoSuperimpVis_formCSOriMast.html
+    jobid: 5062
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat007Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat007Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat007
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat007Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat007Post_formCSOriMast.ply red ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat007NoSuperimpVis_formCSOriMast.html
+        
+Submitted job 5062 with external jobid '6591342'.
+
+[Sun Oct  4 17:57:31 2026]
+rule superimpIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat015Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat015Post_formCSOriMast.ply, superimposition/rugaeAnnotRegistration.py, tools/getRegistration.py, tools/preprocess_point_cloud.py, tools/trimeshToDf_labels.py, tools/trimeshExtractFaceLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat015SuperimpPostOnPreTrans_rugAnnot.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat015Post_formCSOriMast_rugAnnotSuperimp.ply
+    jobid: 5025
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat015Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat015Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat015
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/rugaeAnnotRegistration.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat015Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat015Post_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat015SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat015Post_formCSOriMast_rugAnnotSuperimp.ply
+        
+Submitted job 5025 with external jobid '6591343'.
+
+[Sun Oct  4 17:57:40 2026]
+rule segIowaExpTestRAPre:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat013Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat012Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat014Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat015Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat008Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat007Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat004Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat001Pre_formCSOriMastRemesh.ply, prediction/ftePrediction.py, prediction/fastTgcnEasyPredictFun.py, fastTgcnEasy/dataloader.py, fastTgcnEasy/Baseline.py, fastTgcnEasy/loss.py, fastTgcnEasy/utils.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete
+    jobid: 4962
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat004Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat007Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat008Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat013Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat015Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat001Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat012Pre_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/pat014Pre_formCSOriMastRemesh.ply, prediction/ftePrediction.py
+    threads: 16
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=UI-GPU, gpus=3
+Shell command: 
+        python prediction/ftePrediction.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/ ../../../../Shared/gb_lss/Thomas/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/ ../../../../Shared/gb_lss/Thomas/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/predMat/
+        
+Submitted job 4962 with external jobid '6591344'.
+
+[Sun Oct  4 17:57:48 2026]
+rule makeNoSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat013Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat013Post_formCSOriMast.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat013NoSuperimpVis_formCSOriMast.html
+    jobid: 5064
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat013Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat013Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat013
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat013Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat013Post_formCSOriMast.ply red ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat013NoSuperimpVis_formCSOriMast.html
+        
+Submitted job 5064 with external jobid '6591345'.
+
+[Sun Oct  4 17:57:58 2026]
+rule superimpIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat014Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat014Post_formCSOriMast.ply, superimposition/rugaeAnnotRegistration.py, tools/getRegistration.py, tools/preprocess_point_cloud.py, tools/trimeshToDf_labels.py, tools/trimeshExtractFaceLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat014SuperimpPostOnPreTrans_rugAnnot.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat014Post_formCSOriMast_rugAnnotSuperimp.ply
+    jobid: 5039
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat014Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat014Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat014
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/rugaeAnnotRegistration.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat014Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat014Post_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat014SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat014Post_formCSOriMast_rugAnnotSuperimp.ply
+        
+Submitted job 5039 with external jobid '6591346'.
+
+[Sun Oct  4 17:58:00 2026]
+rule makeNoSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat004Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat004Post_formCSOriMast.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat004NoSuperimpVis_formCSOriMast.html
+    jobid: 5066
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat004Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat004Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat004
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat004Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat004Post_formCSOriMast.ply red ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat004NoSuperimpVis_formCSOriMast.html
+        
+Submitted job 5066 with external jobid '6591347'.
+
+[Sun Oct  4 17:58:06 2026]
+rule makeNoSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat008Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat008Post_formCSOriMast.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat008NoSuperimpVis_formCSOriMast.html
+    jobid: 5068
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat008Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat008Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat008
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat008Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat008Post_formCSOriMast.ply red ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat008NoSuperimpVis_formCSOriMast.html
+        
+Submitted job 5068 with external jobid '6591348'.
+
+[Sun Oct  4 17:58:14 2026]
+rule superimpIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat012Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat012Post_formCSOriMast.ply, superimposition/rugaeAnnotRegistration.py, tools/getRegistration.py, tools/preprocess_point_cloud.py, tools/trimeshToDf_labels.py, tools/trimeshExtractFaceLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat012SuperimpPostOnPreTrans_rugAnnot.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat012Post_formCSOriMast_rugAnnotSuperimp.ply
+    jobid: 5053
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat012Post_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat012Pre_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat012
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/rugaeAnnotRegistration.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat012Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat012Post_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat012SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat012Post_formCSOriMast_rugAnnotSuperimp.ply
+        
+Submitted job 5053 with external jobid '6591349'.
+
+[Sun Oct  4 17:58:22 2026]
+rule makeNoSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat001Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat001Post_formCSOriMast.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat001NoSuperimpVis_formCSOriMast.html
+    jobid: 5061
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat001Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat001Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat001
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat001Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat001Post_formCSOriMast.ply red ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat001NoSuperimpVis_formCSOriMast.html
+        
+Submitted job 5061 with external jobid '6591350'.
+
+[Sun Oct  4 17:58:30 2026]
+rule superimpIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat007Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat007Post_formCSOriMast.ply, superimposition/rugaeAnnotRegistration.py, tools/getRegistration.py, tools/preprocess_point_cloud.py, tools/trimeshToDf_labels.py, tools/trimeshExtractFaceLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat007SuperimpPostOnPreTrans_rugAnnot.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat007Post_formCSOriMast_rugAnnotSuperimp.ply
+    jobid: 5018
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat007Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat007Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat007
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/rugaeAnnotRegistration.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat007Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat007Post_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat007SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat007Post_formCSOriMast_rugAnnotSuperimp.ply
+        
+Submitted job 5018 with external jobid '6591351'.
+
+[Sun Oct  4 17:58:32 2026]
+rule makeNoSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat015Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat015Post_formCSOriMast.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat015NoSuperimpVis_formCSOriMast.html
+    jobid: 5063
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat015Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat015Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat015
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat015Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat015Post_formCSOriMast.ply red ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat015NoSuperimpVis_formCSOriMast.html
+        
+Submitted job 5063 with external jobid '6591352'.
+
+[Sun Oct  4 17:58:36 2026]
+rule superimpIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat013Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat013Post_formCSOriMast.ply, superimposition/rugaeAnnotRegistration.py, tools/getRegistration.py, tools/preprocess_point_cloud.py, tools/trimeshToDf_labels.py, tools/trimeshExtractFaceLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat013SuperimpPostOnPreTrans_rugAnnot.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat013Post_formCSOriMast_rugAnnotSuperimp.ply
+    jobid: 5032
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat013Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat013Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat013
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/rugaeAnnotRegistration.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat013Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat013Post_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat013SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat013Post_formCSOriMast_rugAnnotSuperimp.ply
+        
+Submitted job 5032 with external jobid '6591353'.
+
+[Sun Oct  4 17:58:43 2026]
+rule makeNoSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat014Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat014Post_formCSOriMast.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat014NoSuperimpVis_formCSOriMast.html
+    jobid: 5065
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat014Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat014Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat014
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat014Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat014Post_formCSOriMast.ply red ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat014NoSuperimpVis_formCSOriMast.html
+        
+Submitted job 5065 with external jobid '6591354'.
+
+[Sun Oct  4 17:58:49 2026]
+rule superimpIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat004Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat004Post_formCSOriMast.ply, superimposition/rugaeAnnotRegistration.py, tools/getRegistration.py, tools/preprocess_point_cloud.py, tools/trimeshToDf_labels.py, tools/trimeshExtractFaceLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat004SuperimpPostOnPreTrans_rugAnnot.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat004Post_formCSOriMast_rugAnnotSuperimp.ply
+    jobid: 5046
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat004Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat004Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat004
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/rugaeAnnotRegistration.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat004Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat004Post_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat004SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat004Post_formCSOriMast_rugAnnotSuperimp.ply
+        
+Submitted job 5046 with external jobid '6591355'.
+
+[Sun Oct  4 17:58:59 2026]
+rule makeNoSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat012Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat012Post_formCSOriMast.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat012NoSuperimpVis_formCSOriMast.html
+    jobid: 5067
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat012Post_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat012Pre_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat012
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat012Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat012Post_formCSOriMast.ply red ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/noSuperimp/rugAnnotFrom_cSOriMast/pat012NoSuperimpVis_formCSOriMast.html
+        
+Submitted job 5067 with external jobid '6591356'.
+
+[Sun Oct  4 17:59:02 2026]
+rule superimpIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat008Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat008Post_formCSOriMast.ply, superimposition/rugaeAnnotRegistration.py, tools/getRegistration.py, tools/preprocess_point_cloud.py, tools/trimeshToDf_labels.py, tools/trimeshExtractFaceLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat008SuperimpPostOnPreTrans_rugAnnot.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat008Post_formCSOriMast_rugAnnotSuperimp.ply
+    jobid: 5060
+    reason: Updated input files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat008Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat008Post_formCSOriMast.ply
+    wildcards: iowaExpTestRABothPats=pat008
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/rugaeAnnotRegistration.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat008Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/post/pat008Post_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat008SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat008Post_formCSOriMast_rugAnnotSuperimp.ply
+        
+Submitted job 5060 with external jobid '6591357'.
+[Sun Oct  4 17:59:36 2026]
+Finished jobid: 5062 (Rule: makeNoSuperimpVisIowaExpTestRA)
+1 of 45 steps (2%) done
+[Sun Oct  4 17:59:36 2026]
+Finished jobid: 5064 (Rule: makeNoSuperimpVisIowaExpTestRA)
+2 of 45 steps (4%) done
+[Sun Oct  4 17:59:36 2026]
+Finished jobid: 5066 (Rule: makeNoSuperimpVisIowaExpTestRA)
+3 of 45 steps (7%) done
+[Sun Oct  4 17:59:36 2026]
+Finished jobid: 5068 (Rule: makeNoSuperimpVisIowaExpTestRA)
+4 of 45 steps (9%) done
+[Sun Oct  4 17:59:36 2026]
+Finished jobid: 5061 (Rule: makeNoSuperimpVisIowaExpTestRA)
+5 of 45 steps (11%) done
+[Sun Oct  4 17:59:37 2026]
+Finished jobid: 5063 (Rule: makeNoSuperimpVisIowaExpTestRA)
+6 of 45 steps (13%) done
+[Sun Oct  4 17:59:37 2026]
+Finished jobid: 5065 (Rule: makeNoSuperimpVisIowaExpTestRA)
+7 of 45 steps (16%) done
+[Sun Oct  4 17:59:37 2026]
+Finished jobid: 5067 (Rule: makeNoSuperimpVisIowaExpTestRA)
+8 of 45 steps (18%) done
+[Sun Oct  4 18:00:17 2026]
+Finished jobid: 5011 (Rule: superimpIowaExpTestRA)
+9 of 45 steps (20%) done
+Select jobs to execute...
+Execute 2 jobs...
+
+[Sun Oct  4 18:00:17 2026]
+rule superimpIowaExpTestRARemesh:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat001Post_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat001SuperimpPostOnPreTrans_rugAnnot.pkl, tools/processes/rotate.py, tools/trimeshExtractFaceLabels.py, tools/trimeshToDf_labels.py, tools/trimeshToDfNoLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat001Post_formCSOriMastRemesh_rugAnnotSuperimp.ply
+    jobid: 5005
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat001SuperimpPostOnPreTrans_rugAnnot.pkl
+    wildcards: iowaExpTestRABothPats=pat001
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python tools/processes/rotate.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat001Post_formCSOriMastRemesh.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat001SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat001Post_formCSOriMastRemesh_rugAnnotSuperimp.ply True
+        
+Submitted job 5005 with external jobid '6591358'.
+
+[Sun Oct  4 18:00:21 2026]
+rule makeSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat001Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat001Post_formCSOriMast_rugAnnotSuperimp.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat001SuperimpVis_formCSOriMast.html
+    jobid: 5069
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat001Post_formCSOriMast_rugAnnotSuperimp.ply
+    wildcards: iowaExpTestRABothPats=pat001
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat001Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat001Post_formCSOriMast_rugAnnotSuperimp.ply green ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat001SuperimpVis_formCSOriMast.html
+        
+Submitted job 5069 with external jobid '6591359'.
+[Sun Oct  4 18:00:29 2026]
+Finished jobid: 5025 (Rule: superimpIowaExpTestRA)
+10 of 45 steps (22%) done
+[Sun Oct  4 18:00:29 2026]
+Finished jobid: 5039 (Rule: superimpIowaExpTestRA)
+11 of 45 steps (24%) done
+[Sun Oct  4 18:00:29 2026]
+Finished jobid: 5053 (Rule: superimpIowaExpTestRA)
+12 of 45 steps (27%) done
+[Sun Oct  4 18:00:29 2026]
+Finished jobid: 5018 (Rule: superimpIowaExpTestRA)
+13 of 45 steps (29%) done
+[Sun Oct  4 18:00:29 2026]
+Finished jobid: 5032 (Rule: superimpIowaExpTestRA)
+14 of 45 steps (31%) done
+[Sun Oct  4 18:00:29 2026]
+Finished jobid: 5046 (Rule: superimpIowaExpTestRA)
+15 of 45 steps (33%) done
+[Sun Oct  4 18:00:29 2026]
+Finished jobid: 5060 (Rule: superimpIowaExpTestRA)
+16 of 45 steps (36%) done
+Select jobs to execute...
+Execute 14 jobs...
+
+[Sun Oct  4 18:00:30 2026]
+rule makeSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat014Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat014Post_formCSOriMast_rugAnnotSuperimp.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat014SuperimpVis_formCSOriMast.html
+    jobid: 5073
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat014Post_formCSOriMast_rugAnnotSuperimp.ply
+    wildcards: iowaExpTestRABothPats=pat014
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat014Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat014Post_formCSOriMast_rugAnnotSuperimp.ply green ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat014SuperimpVis_formCSOriMast.html
+        
+Submitted job 5073 with external jobid '6591360'.
+
+[Sun Oct  4 18:00:38 2026]
+rule superimpIowaExpTestRARemesh:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat004Post_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat004SuperimpPostOnPreTrans_rugAnnot.pkl, tools/processes/rotate.py, tools/trimeshExtractFaceLabels.py, tools/trimeshToDf_labels.py, tools/trimeshToDfNoLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat004Post_formCSOriMastRemesh_rugAnnotSuperimp.ply
+    jobid: 5040
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat004SuperimpPostOnPreTrans_rugAnnot.pkl
+    wildcards: iowaExpTestRABothPats=pat004
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python tools/processes/rotate.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat004Post_formCSOriMastRemesh.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat004SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat004Post_formCSOriMastRemesh_rugAnnotSuperimp.ply True
+        
+Submitted job 5040 with external jobid '6591361'.
+
+[Sun Oct  4 18:00:41 2026]
+rule makeSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat012Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat012Post_formCSOriMast_rugAnnotSuperimp.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat012SuperimpVis_formCSOriMast.html
+    jobid: 5075
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat012Post_formCSOriMast_rugAnnotSuperimp.ply
+    wildcards: iowaExpTestRABothPats=pat012
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat012Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat012Post_formCSOriMast_rugAnnotSuperimp.ply green ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat012SuperimpVis_formCSOriMast.html
+        
+Submitted job 5075 with external jobid '6591362'.
+
+[Sun Oct  4 18:00:44 2026]
+rule superimpIowaExpTestRARemesh:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat008Post_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat008SuperimpPostOnPreTrans_rugAnnot.pkl, tools/processes/rotate.py, tools/trimeshExtractFaceLabels.py, tools/trimeshToDf_labels.py, tools/trimeshToDfNoLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat008Post_formCSOriMastRemesh_rugAnnotSuperimp.ply
+    jobid: 5054
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat008SuperimpPostOnPreTrans_rugAnnot.pkl
+    wildcards: iowaExpTestRABothPats=pat008
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python tools/processes/rotate.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat008Post_formCSOriMastRemesh.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat008SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat008Post_formCSOriMastRemesh_rugAnnotSuperimp.ply True
+        
+Submitted job 5054 with external jobid '6591363'.
+
+[Sun Oct  4 18:00:52 2026]
+rule makeSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat007Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat007Post_formCSOriMast_rugAnnotSuperimp.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat007SuperimpVis_formCSOriMast.html
+    jobid: 5070
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat007Post_formCSOriMast_rugAnnotSuperimp.ply
+    wildcards: iowaExpTestRABothPats=pat007
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat007Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat007Post_formCSOriMast_rugAnnotSuperimp.ply green ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat007SuperimpVis_formCSOriMast.html
+        
+Submitted job 5070 with external jobid '6591364'.
+
+[Sun Oct  4 18:01:02 2026]
+rule superimpIowaExpTestRARemesh:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat015Post_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat015SuperimpPostOnPreTrans_rugAnnot.pkl, tools/processes/rotate.py, tools/trimeshExtractFaceLabels.py, tools/trimeshToDf_labels.py, tools/trimeshToDfNoLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat015Post_formCSOriMastRemesh_rugAnnotSuperimp.ply
+    jobid: 5019
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat015SuperimpPostOnPreTrans_rugAnnot.pkl
+    wildcards: iowaExpTestRABothPats=pat015
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python tools/processes/rotate.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat015Post_formCSOriMastRemesh.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat015SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat015Post_formCSOriMastRemesh_rugAnnotSuperimp.ply True
+        
+Submitted job 5019 with external jobid '6591365'.
+
+[Sun Oct  4 18:01:04 2026]
+rule makeSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat013Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat013Post_formCSOriMast_rugAnnotSuperimp.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat013SuperimpVis_formCSOriMast.html
+    jobid: 5072
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat013Post_formCSOriMast_rugAnnotSuperimp.ply
+    wildcards: iowaExpTestRABothPats=pat013
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat013Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat013Post_formCSOriMast_rugAnnotSuperimp.ply green ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat013SuperimpVis_formCSOriMast.html
+        
+Submitted job 5072 with external jobid '6591366'.
+
+[Sun Oct  4 18:01:11 2026]
+rule superimpIowaExpTestRARemesh:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat014Post_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat014SuperimpPostOnPreTrans_rugAnnot.pkl, tools/processes/rotate.py, tools/trimeshExtractFaceLabels.py, tools/trimeshToDf_labels.py, tools/trimeshToDfNoLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat014Post_formCSOriMastRemesh_rugAnnotSuperimp.ply
+    jobid: 5033
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat014SuperimpPostOnPreTrans_rugAnnot.pkl
+    wildcards: iowaExpTestRABothPats=pat014
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python tools/processes/rotate.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat014Post_formCSOriMastRemesh.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat014SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat014Post_formCSOriMastRemesh_rugAnnotSuperimp.ply True
+        
+Submitted job 5033 with external jobid '6591367'.
+
+[Sun Oct  4 18:01:21 2026]
+rule makeSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat004Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat004Post_formCSOriMast_rugAnnotSuperimp.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat004SuperimpVis_formCSOriMast.html
+    jobid: 5074
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat004Post_formCSOriMast_rugAnnotSuperimp.ply
+    wildcards: iowaExpTestRABothPats=pat004
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat004Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat004Post_formCSOriMast_rugAnnotSuperimp.ply green ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat004SuperimpVis_formCSOriMast.html
+        
+Submitted job 5074 with external jobid '6591368'.
+
+[Sun Oct  4 18:01:23 2026]
+rule superimpIowaExpTestRARemesh:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat012Post_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat012SuperimpPostOnPreTrans_rugAnnot.pkl, tools/processes/rotate.py, tools/trimeshExtractFaceLabels.py, tools/trimeshToDf_labels.py, tools/trimeshToDfNoLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat012Post_formCSOriMastRemesh_rugAnnotSuperimp.ply
+    jobid: 5047
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat012SuperimpPostOnPreTrans_rugAnnot.pkl
+    wildcards: iowaExpTestRABothPats=pat012
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python tools/processes/rotate.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat012Post_formCSOriMastRemesh.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat012SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat012Post_formCSOriMastRemesh_rugAnnotSuperimp.ply True
+        
+Submitted job 5047 with external jobid '6591369'.
+
+[Sun Oct  4 18:01:31 2026]
+rule makeSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat008Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat008Post_formCSOriMast_rugAnnotSuperimp.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat008SuperimpVis_formCSOriMast.html
+    jobid: 5076
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat008Post_formCSOriMast_rugAnnotSuperimp.ply
+    wildcards: iowaExpTestRABothPats=pat008
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat008Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat008Post_formCSOriMast_rugAnnotSuperimp.ply green ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat008SuperimpVis_formCSOriMast.html
+        
+Submitted job 5076 with external jobid '6591370'.
+
+[Sun Oct  4 18:01:38 2026]
+rule superimpIowaExpTestRARemesh:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat007Post_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat007SuperimpPostOnPreTrans_rugAnnot.pkl, tools/processes/rotate.py, tools/trimeshExtractFaceLabels.py, tools/trimeshToDf_labels.py, tools/trimeshToDfNoLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat007Post_formCSOriMastRemesh_rugAnnotSuperimp.ply
+    jobid: 5012
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat007SuperimpPostOnPreTrans_rugAnnot.pkl
+    wildcards: iowaExpTestRABothPats=pat007
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python tools/processes/rotate.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat007Post_formCSOriMastRemesh.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat007SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat007Post_formCSOriMastRemesh_rugAnnotSuperimp.ply True
+        
+Submitted job 5012 with external jobid '6591371'.
+
+[Sun Oct  4 18:01:45 2026]
+rule makeSuperimpVisIowaExpTestRA:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat015Pre_formCSOriMast.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat015Post_formCSOriMast_rugAnnotSuperimp.ply, superimposition/createSuperimpHtmlVisuals.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat015SuperimpVis_formCSOriMast.html
+    jobid: 5071
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat015Post_formCSOriMast_rugAnnotSuperimp.ply
+    wildcards: iowaExpTestRABothPats=pat015
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python superimposition/createSuperimpHtmlVisuals.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMast/pre/pat015Pre_formCSOriMast.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMast/pat015Post_formCSOriMast_rugAnnotSuperimp.ply green ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/visuals/superimp/rugAnnotFrom_cSOriMast/pat015SuperimpVis_formCSOriMast.html
+        
+Submitted job 5071 with external jobid '6591372'.
+
+[Sun Oct  4 18:01:51 2026]
+rule superimpIowaExpTestRARemesh:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat013Post_formCSOriMastRemesh.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat013SuperimpPostOnPreTrans_rugAnnot.pkl, tools/processes/rotate.py, tools/trimeshExtractFaceLabels.py, tools/trimeshToDf_labels.py, tools/trimeshToDfNoLabels.py, tools/dfToPlyExport.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat013Post_formCSOriMastRemesh_rugAnnotSuperimp.ply
+    jobid: 5026
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat013SuperimpPostOnPreTrans_rugAnnot.pkl
+    wildcards: iowaExpTestRABothPats=pat013
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=all.q, gpus=0
+Shell command: 
+        python tools/processes/rotate.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/post/pat013Post_formCSOriMastRemesh.ply ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/transformations/rugAnnotForm_cSOriMast/pat013SuperimpPostOnPreTrans_rugAnnot.pkl ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat013Post_formCSOriMastRemesh_rugAnnotSuperimp.ply True
+        
+Submitted job 5026 with external jobid '6591373'.
+[Sun Oct  4 18:01:56 2026]
+Finished jobid: 5005 (Rule: superimpIowaExpTestRARemesh)
+17 of 45 steps (38%) done
+[Sun Oct  4 18:01:56 2026]
+Finished jobid: 5069 (Rule: makeSuperimpVisIowaExpTestRA)
+18 of 45 steps (40%) done
+[Sun Oct  4 18:01:56 2026]
+Finished jobid: 5073 (Rule: makeSuperimpVisIowaExpTestRA)
+19 of 45 steps (42%) done
+[Sun Oct  4 18:01:56 2026]
+Finished jobid: 5040 (Rule: superimpIowaExpTestRARemesh)
+20 of 45 steps (44%) done
+[Sun Oct  4 18:01:56 2026]
+Finished jobid: 5075 (Rule: makeSuperimpVisIowaExpTestRA)
+21 of 45 steps (47%) done
+[Sun Oct  4 18:01:56 2026]
+Finished jobid: 5054 (Rule: superimpIowaExpTestRARemesh)
+22 of 45 steps (49%) done
+[Sun Oct  4 18:01:56 2026]
+Finished jobid: 5070 (Rule: makeSuperimpVisIowaExpTestRA)
+23 of 45 steps (51%) done
+[Sun Oct  4 18:01:56 2026]
+Finished jobid: 5019 (Rule: superimpIowaExpTestRARemesh)
+24 of 45 steps (53%) done
+[Sun Oct  4 18:01:56 2026]
+Finished jobid: 5072 (Rule: makeSuperimpVisIowaExpTestRA)
+25 of 45 steps (56%) done
+[Sun Oct  4 18:01:56 2026]
+Finished jobid: 5033 (Rule: superimpIowaExpTestRARemesh)
+26 of 45 steps (58%) done
+[Sun Oct  4 18:01:56 2026]
+Finished jobid: 5074 (Rule: makeSuperimpVisIowaExpTestRA)
+27 of 45 steps (60%) done
+[Sun Oct  4 18:01:56 2026]
+Finished jobid: 5047 (Rule: superimpIowaExpTestRARemesh)
+28 of 45 steps (62%) done
+[Sun Oct  4 18:02:07 2026]
+Finished jobid: 5076 (Rule: makeSuperimpVisIowaExpTestRA)
+29 of 45 steps (64%) done
+[Sun Oct  4 18:02:07 2026]
+Finished jobid: 5012 (Rule: superimpIowaExpTestRARemesh)
+30 of 45 steps (67%) done
+[Sun Oct  4 18:02:17 2026]
+Finished jobid: 5071 (Rule: makeSuperimpVisIowaExpTestRA)
+31 of 45 steps (69%) done
+[Sun Oct  4 18:02:17 2026]
+Finished jobid: 5026 (Rule: superimpIowaExpTestRARemesh)
+32 of 45 steps (71%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Sun Oct  4 18:02:17 2026]
+rule segIowaExpTestRAPost:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat001Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat007Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat015Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat013Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat014Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat004Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat012Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat008Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, prediction/ftePrediction.py, prediction/fastTgcnEasyPredictFun.py, fastTgcnEasy/dataloader.py, fastTgcnEasy/Baseline.py, fastTgcnEasy/loss.py, fastTgcnEasy/utils.py
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete
+    jobid: 5004
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat014Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat013Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat001Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat004Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat012Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat015Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat007Post_formCSOriMastRemesh_rugAnnotSuperimp.ply, ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/pat008Post_formCSOriMastRemesh_rugAnnotSuperimp.ply
+    threads: 16
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=UI-GPU, gpus=3
+Shell command: 
+        python prediction/ftePrediction.py ../../../../Shared/gb_lss/Thomas/iowaExpTest/superimposition/superimpPostScan/rugAnnotForm_cSOriMastRemesh/ ../../../../Shared/gb_lss/Thomas/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/ ../../../../Shared/gb_lss/Thomas/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/predMat/
+        
+Submitted job 5004 with external jobid '6591375'.
