@@ -117,3 +117,12 @@ def leaveOneOut(dat):
 
 leaveOneOut(dat = dFirst)
 leaveOneOut(dat = dSecond)
+
+
+
+
+
+
+
+
+
