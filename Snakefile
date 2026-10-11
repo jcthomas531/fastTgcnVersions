@@ -1378,6 +1378,8 @@ reduct = ["decim", "remesh"]
 pointDens = [8500, 12000, 15000, 20000]
 normRadProp = [0.008, 0.012, 0.016, 0.02]
 descRadMult = [1.05, 1.1, 1.3, 1.5]
+models = ["xgb"]
+localDescriptors = ["pfh"]
 
 
 rugaePipeOptimDir = grantDir + "iowaExpTest/rugaePipeOptim/"
@@ -1433,6 +1435,25 @@ phaseDensReductNormDescCombos_rpo = (
         for desc in descRadMult]
     )
 
+densReductNormDescModelLocalCombos_rpo = (
+    [(dens, red, norm, desc, mod, ld) 
+        for dens in pointDens
+        for red in reduct
+        for norm in normRadProp
+        for desc in descRadMult
+        for mod in models
+        for ld in localDescriptors
+        ]
+    + [(dens, red, norm, desc, mod, ld) 
+        for dens in pointDens
+        for red in reduct
+        for norm in normRadProp
+        for desc in descRadMult
+        for mod in models
+        for ld in localDescriptors
+        ]
+    )
+
 
 
 #file paths
@@ -1464,6 +1485,15 @@ combinedDescFiles_rpo = [
     rugaePipeOptimDir + f"combinedDescriptors/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/combinedDesc.csv"
     for phase, density, reduction, normal, descrip in phaseDensReductNormDescCombos_rpo
 ]
+modelResultFiles_fold5_rpo = [
+    rugaePipeOptimDir + f"performance/fold5/{model}/{locDesc}/{reduction}{density}/norm{normal}_desc{descrip}/results.csv"
+    for density, reduction, normal, descrip, model, locDesc in densReductNormDescModelLocalCombos_rpo
+]
+modelSummaryFiles_fold5_rpo = [
+    rugaePipeOptimDir + f"performance/fold5/{model}/{locDesc}/{reduction}{density}/norm{normal}_desc{descrip}/summary.pkl"
+    for density, reduction, normal, descrip, model, locDesc in densReductNormDescModelLocalCombos_rpo
+]
+
 
 #overall rule for the experiment
 rule rugaePipeOptim:
@@ -1475,7 +1505,9 @@ rule rugaePipeOptim:
         featDescFiles_rpo,
         featDescTimeFiles_rpo,
         labeledDescFiles_rpo,
-        combinedDescFiles_rpo
+        combinedDescFiles_rpo,
+        modelResultFiles_fold5_rpo,
+        modelSummaryFiles_fold5_rpo
 
 
 rule compileCmakeLocalDescriptors:
@@ -1589,4 +1621,30 @@ rule combineDesc_rpo:
     shell:
         """
         python {input.script} {output.outPath} {input.inFiles}
+        """
+
+model_rpoDeps = ["tools/rugaeDetect/patSplitter.py", "tools/rugaeDetect/iouPoint.py"]
+rule xgbPfh_rpo:
+    container: "../../containers/lorwyn.sif" #i added the machine learning packages to the wrong contianer, need to update
+    threads: 40
+    input:
+        inFiles = lambda wc: expand(
+        rugaePipeOptimDir + "combinedDescriptors/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/combinedDesc.csv",
+        phase=["pre","post"],
+        reduction=wc.reduction,
+        density=wc.density,
+        normal=wc.normal,
+        descrip=wc.descrip
+        ),
+        script = "rugaeDetect/processes/descriptor_xgbModel.py",
+        deps = model_rpoDeps
+    params:
+        descPrefix = lambda wc: f"^{wc.locDesc}_",
+        model = "{model}"
+    output:
+        resultsOut = rugaePipeOptimDir + "performance/fold5/{model}/{locDesc}/{reduction}{density}/norm{normal}_desc{descrip}/results.csv",
+        summaryOut = rugaePipeOptimDir + "performance/fold5/{model}/{locDesc}/{reduction}{density}/norm{normal}_desc{descrip}/summary.pkl"
+    shell:
+        """
+        python {input.script} {params.descPrefix} {output.resultsOut} {output.summaryOut} {input.inFiles}
         """
