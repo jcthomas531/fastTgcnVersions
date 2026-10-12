@@ -1379,7 +1379,7 @@ pointDens = [8500, 12000, 15000, 20000]
 normRadProp = [0.008, 0.012, 0.016, 0.02]
 descRadMult = [1.05, 1.1, 1.3, 1.5]
 models = ["xgb"]
-localDescriptors = ["pfh"]
+localDescriptors = ["pfh", "fpfh", "rops", "usc_desc", "shot_desc"]
 
 
 rugaePipeOptimDir = grantDir + "iowaExpTest/rugaePipeOptim/"
@@ -1495,6 +1495,10 @@ modelSummaryFiles_fold5_rpo = [
 ]
 
 
+#low density versions for testing
+modelResultFiles_fold5_rpo_short = [i for i in modelResultFiles_fold5_rpo if "8500" in i or "12000" in i]
+modelSummaryFiles_fold5_rpo_short = [i for i in modelSummaryFiles_fold5_rpo if "8500" in i or "12000" in i]
+
 #overall rule for the experiment
 rule rugaePipeOptim:
     input:
@@ -1508,6 +1512,12 @@ rule rugaePipeOptim:
         combinedDescFiles_rpo,
         modelResultFiles_fold5_rpo,
         modelSummaryFiles_fold5_rpo
+
+#rule for modeling just the first two levels of density reduction
+rule rugaePipeOptim_modShort:
+    input:
+        modelResultFiles_fold5_rpo_short,
+        modelSummaryFiles_fold5_rpo_short
 
 
 rule compileCmakeLocalDescriptors:

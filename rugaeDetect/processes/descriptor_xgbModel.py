@@ -7,9 +7,10 @@ import re
 import xgboost as xgb
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, accuracy_score
 import numpy as np
 import pickle
+import time
 rSeed = 826
 
 #testing
@@ -54,7 +55,7 @@ splitDat = patSplitter(dat)
 #loop thru hold out groups
 print("Begin model fitting")
 resDict = {}
-for i in range(len(uniqPats)):#range(2):
+for i in range(len(uniqPats)):
     pati = uniqPats[i]
 
     #test/training and validation data
@@ -77,10 +78,10 @@ for i in range(len(uniqPats)):#range(2):
     #parameter grid
     #https://www.xgboost.org/code/xgboost-hyperparameter-tuning-guide/?utm_source=chatgpt.com
     paramGrid = {
-        "n_estimators": [200, 400],#[50, 100, 200],
-        "learning_rate": [0.05, 0.2],#[0.05, 0.1, 0.2],
-        "gamma": [0,  1],#[0, 0.1, 1],
-        "max_depth": [5, 7]#[3, 5, 7]
+        "n_estimators": [300, 600, 900],
+        "learning_rate": [0.15, 0.3, 0.45],
+        "gamma": [0.7,  1, 3],
+        "max_depth": [6, 9, 12]
     }
 
     #metrics to look at
@@ -108,14 +109,23 @@ for i in range(len(uniqPats)):#range(2):
         verbose=2
     )
 
-    #perform grid search
+    #perform grid search and time
+    startTime = time.time()
     gridRes_xgb = gridSearch.fit(
         X=ttDatX,
         y=ttDatY
     )
+    endTime = time.time()
+    cvTime = endTime - startTime
 
     #extract best model
     fitXgb = gridRes_xgb.best_estimator_
+
+    #extract the average IoU for the cross validation of best model (essentially test IoU)
+    testIou = gridRes_xgb.best_score_
+    #get in-sample iou for best model
+    insamplePred = fitXgb.predict(ttDatX)
+    insampleIou = iouP.iouPoint(observed = ttDatY, predicted = insamplePred)
 
     #extract best model params
     paramsXgb = gridRes_xgb.best_params_
@@ -127,7 +137,11 @@ for i in range(len(uniqPats)):#range(2):
     #validation metrics
     valRocAuc = roc_auc_score(y_true = vDatY, y_score = valPredProb)
     valIou = iouP.iouPoint(observed = vDatY, predicted = valPred)
-    valDict = {"iou": valIou, "rocAuc": valRocAuc} 
+    valAcc = accuracy_score(y_true = vDatY, y_pred = valPred)
+    valDict = {
+        "iou": valIou, "rocAuc": valRocAuc, "acc": valAcc, "cvTime": cvTime,
+        "testIou": testIou, "insampleIou": insampleIou
+    } 
 
     #add metrics to output
     resDict[pati] = paramsXgb | valDict
@@ -147,7 +161,13 @@ summaryDict = {
     "sdIou": np.std(resultsDat["iou"]),
     "maxRocAuc": np.max(resultsDat["rocAuc"]),
     "meanRocAuc": np.mean(resultsDat["rocAuc"]),
-    "sdRocAuc": np.std(resultsDat["rocAuc"])
+    "sdRocAuc": np.std(resultsDat["rocAuc"]),
+    "maxAcc": np.max(resultsDat["acc"]),
+    "meanAcc": np.mean(resultsDat["acc"]),
+    "sdAcc": np.std(resultsDat["acc"]),
+    "maxTime": np.max(resultsDat["cvTime"]),
+    "meanTime": np.mean(resultsDat["cvTime"]),
+    "sdTime": np.std(resultsDat["cvTime"])
 }
 
 #exports
