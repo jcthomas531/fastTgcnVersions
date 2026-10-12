@@ -35,7 +35,7 @@
 
 Notes in italics are notes to myself for the future.
 
-\section{Introduction}
+\section{Experimental set up}
 
 \subsection{Goal}
 
@@ -56,10 +56,25 @@ The geometric properties of a 3D scan can be quantified by extracting local feat
 For the rugae classification pipeline, we will consider the following local descriptors:
 \begin{itemize}
     \item Point feature histograms (PFH)
+    \begin{itemize}
+        \item Produces 125 features (prefix pfh\_)
+    \end{itemize}
     \item Fast point feature historgrams (FPFH)
+    \begin{itemize}
+        \item Produces 33 features (prefix fpfh\_)
+    \end{itemize}
     \item Rotational porjection statistics (RoPS)
+    \begin{itemize}
+        \item Produces 135 features (prefix rops\_)
+    \end{itemize}
     \item Unique shape context (USC)
+    \begin{itemize}
+        \item Produces 1960 features (prefix usc\_desc\_) and a 9 value reference frame (prefix usc\_rf\_)
+    \end{itemize}
     \item Signature of histograms of orientations (SHOT)
+    \begin{itemize}
+        \item Produces 352 features (prefix shot\_desc\_) and a 9 value reference frame (prefix shot\_rf\_)
+    \end{itemize}
 \end{itemize}
 
 It is possible that multiple sets of local desriptors will improve model performance, with each set of local descriptor contributing its unique strengths to the classification task. This will also be assessed.
@@ -94,30 +109,39 @@ A few models will be considered, each one serving as a representative for its ge
 
 \begin{itemize}
     \item XGBoost
+    \begin{itemize}
+        \item Tuning parameters: gamma, learning\_rate, max\_depth, n\_estimators
+    \end{itemize}
     \item SVM, polynomial kernel
     \item SVM, radial basis kernel
     \item KNN
 \end{itemize}
 
-\textit{We also need to consider which hyperparameters will be tuned in each model and describe their search space below. For a first pass, we can use mostly defaults so that we can get some preliminary results.}
 
-\subsection{Training, test, and validation}
 
-For the time being, I am going to start with basic CV, just stratified on point label so we have even information in training and test groups. If we see that the test performance is much higher than the validation performance, then we will know that we have a data leakage issue that needs to be reconsidered.
 
-In our preliminary data set we have 8 patients. Each patient has a pre and a post scan. Thus, we have a total of 16 scans. This gets tricky when we consider validation. The problem is that our sample size is relatively limited. If we had more patients, it would be easy enough to just leave a few patients out as validation. However, if we leave just one patient out here as a validation set, we are removing about 12\% of our data from the training/testing process which is not ideal. However, since we may have data leakage in our training/test set up, the validation set being completely independent of the training/test set is crucial so we can detect any data leakage. 
+\newpage
 
-One option for a validation set is to continue ignoring the experimental unit grouping (patient) and just randomly subset into training/test/validation. However, if there is data leakage, we will not be able to tell as our validation set would also be affected by the leakage. A better option is to leave out an entire patient for validation and let the other 7 patients serve as training/test. This puts more of a limit on generalizability (especially to an applied audience) but protects us more from overstating success. With this approach, we would have 14 scans (7 patients) in the training/test sets and two scans (1 patient) in the validation set.
+\section{Model training}
 
-So, in summary, we have concerns about data leakage that from 3 sources:
-\begin{itemize}
-    \item \textbf{Patient level:} we are not grouping or accounting for patient in any way in our CV. Thus, it is possible that the information in the training set is shared by the test set leading to over-optimistic results.
-    \item \textbf{Time level:} our CV is not accounting for the fact that the same patient will contain similar information across both scans. Even if we were accounting for dependence at the patient level in our CV, we would still not be protected from over-optimism due to information shared across time which may be in both our training and our test set.
-    \item \textbf{Spatial level:} we are not accounting for spatial relationships in the CV. However, I believe this is less of a concern than the other two. Information learned purely based on spatial dependencies will still be applicable in validation sets since they will have the same general spatial make up. We are not applying this model to anything that doesnt have a similar shape and location of the rugae.
-\end{itemize}
+\subsection{Challenges}
 
-By keeping the pre and the post scan from a single patient out of the training/test, we should be able to detect data leakage in the validation. If we see good performance in the test sets and poor performance in the validation set, we will know that a more complex treatment of the CV is necessary.
+\begin{enumerate}
+    \item The target rugae region is small in comparison to the full scan, comprising less than 10\% of the points in the scan. Thus, whatever cross validation technique is implemented must be stratified so that both the test and the training sets have comparable amounts of rugae points.
+    \item The most simple way to approach training/test/validation is to pool all of the points from all of the scans together and randomly allocate them to groups. However, there are several sources of dependency within and between the scans that make this approach not viable:
+    \begin{enumerate}
+        \item \textbf{Scan-level:} Points within a scan are related to one another. There is a potential for information leakage if points from the same scan are spread across the training/test/validation sets.
+        \item \textbf{Patient-level:} Pre and post scans from the same patient will be related. There is potential for information leakage if points from the same patient as spread across the training/test/validation sets.
+        \item \textbf{Spatial-level:} Points in the scans are spatially related with points close to each other sharing larger amount of information. There is potential for information leakage if points are randomly assigned to training/test/validation sets without respect to location. This level of dependency is the least amount of concern as information learned purely based on spatial relation will still be useful when the model is applied as it will only ever be applied to scans with similar form (intraoral scans).
+    \end{enumerate}
+    \item The preliminary data contains 8 patients. Each patient has a pre and a post scan. Thus, there is a total of 16 scans. This is small in terms of experimental units. 
+\end{enumerate}
 
+\subsection{CV approach 1: rotating patient validation set}
+
+This approach is a two stage variation of LOOCV. For each iteration, a single patient (both their pre and post scan) is held out as a validation set. The points from the scans of the remaining patients are pooled (both pre and post scans). Stratified cross validation is performed on the pooled observations. The best resulting model is used to predict on the held out validation patient and performance is measured. This process is repeated with each patient serving as the hold out one time. 
+
+This process accounts for the small rugae region through stratification (challenge i). Spatial-level point dependencies are completely (challenge ii.c). Scan-level and patient-level dependencies (challenges ii.a and ii.b) are ignored in the internal cross validation but the validation set is completely independent of the cross validation set at each of these levels. Thus, the validation performance will not be artificially inflated due to these dependencies. The small amount of experimental units (challenge iii) is accounted for by using LOOCV with each patient held out once. The amount of data to train on is maximized while still retaining an independent validation source.
 
 \textit{The purpose of cross validation is to choose a model, not fit a model. Once cross validation is finished, we fit the chosen model on the full data.}
 
@@ -125,6 +149,7 @@ By keeping the pre and the post scan from a single patient out of the training/t
 
 \href{https://towardsdatascience.com/spatial-cross-validation-using-scikit-learn-74cb8ffe0ab9/}{Basic article on spatial CV}
 
+\newpage
 
 \section{Procedure}
 
@@ -151,9 +176,59 @@ Determining the best pipeline for rugae classification will be performed as a cr
     \end{tabular}
 \end{table}
 
-\subsection{Performance}
+\subsection{Evaluating performance}
 
 Best pipeline performance will be based on both measures of accuracy and time.
+
+\newpage
+
+
+\section{Results}
+
+\subsection{Run 1}
+
+\begin{itemize}
+    \item CV approach 1
+    \item Pfh descriptor only
+    \item 5 fold CV
+    \item Conservative variance filter (exclude variance $<$ 0.0001)
+    \item XGBoost model only
+    \begin{itemize}
+        \item gamma: $\{0,1\}$
+        \item learning\_rate: $\{0.05, 0.2\}$
+        \item max\_depth: $\{5, 7\}$
+        \item n\_estimators: $\{200,400\}$
+    \end{itemize}
+    \item Primary performance measure: IoU
+\end{itemize}
+
+\subsubsection{General take aways}
+\begin{itemize}
+    \item Patient 15 has abnormally poor performance compared to other patients. Patient 15 has mean IoU of 0.203 and 0.323 for decimation and remeshed respectively compared to 0.493 and 0.636 when patient 15 is excluded.
+    \item Decimation has much poorer performance than remeshing, see mean IoUs described above. Dropping decimation all together may be advisable. The parameter grid for the next run will be tweaked towards maximizing remeshed performance rather than decimation performance (ie moving it more in line with what helps remeshed best). Remeshed data seems to benefit from low gamma, higher n\_estimators, higher learning\_rate, and higher max\_depth.
+    \item There seems to be only slight gains in performance with increasing scan resolution. If this trend continues, dropping higher resolutions may be warranted. For remeshed scans, the following pairs of resolution and mean IoU: (8500, 0.600), (12000, 0.597), (15000, 0.594), (20000, 0.598). For decimated scans: (8500, 0.434), (12000, 0.451), (15000, 0.464), (20000, 0.478).
+\end{itemize}
+
+\newpage
+
+\subsection{Run 2}
+
+\begin{itemize}
+    \item CV approach 1
+    \item Descriptors: PFH, FPFH, RoPs, USC\_desc, SHOT\_desc
+    \item 5 fold CV
+    \item Conservative variance filter (exclude variance $<$ 0.0001)
+    \item XGBoost model only
+    \begin{itemize}
+        \item gamma: $\{0.7, 1, 3\}$
+        \item learning\_rate: $\{0.15, 0.30, 0.45\}$
+        \item max\_depth: $\{6, 9, 12\}$
+        \item n\_estimators: $\{300, 600, 900\}$
+    \end{itemize}
+    \item Primary performance measure: IoU
+\end{itemize}
+
+
 
 \newpage
 
@@ -179,11 +254,6 @@ Best pipeline performance will be based on both measures of accuracy and time.
     \end{itemize}
 \end{itemize}
 
-\subsection{Progress}
-
-\begin{itemize}
-    \item Local descriptors PFH, FPFG, RoPs, USC, and SHOT all implemented in C++ with timing.
-\end{itemize}
 
 \subsection{General notes}
 
@@ -246,14 +316,6 @@ All folders are organized into the following levels
 
 \newpage
 
-\section{Results}
-
-\subsection{Cross validation}
-
-For initial testing, a basic train/test/validate scheme was implemented. A single patient is excluded from the data and the remainder is split without regard to patient with a 75/25 train/test split. An xgboost model was fit on the train/test data using all default hyperparameter values. Test AUC values were around 0.95. When predicting on the validation data, AUC performance was around 0.9. This performance decrease makes sense due to information leakage between the training and sets sets.
-
-Grouped leave-one-out cross validation was the first CV scheme considered for model training. The motivation behind this being that since we have a relatively small sample size (in the initial data), setting aside an entire patient for a validation set is not an efficient use of data. In an effort recreate something similar but use the data more efficiently, grouped leave-one-out cross validation was implemented where groups are patients. Each patient serves as a "validation" set to the rest of the patients in the training process. Then, the test performance should give a good idea validation performance. Preformance around 0.3.
-
 \section{References}
 
 Shailaja, 2018: Assessment of palatal rugae pattern and its significance in orthodontics and forensic odontology
@@ -269,5 +331,6 @@ Li 2016: Improved algorithm for point cloud registration based on fast point fea
 pyvista decimate uses vtkQuadraticDecimation, \href{https://docs.pyvista.org/api/core/_autosummary/pyvista.polydatafilters.decimate}{decimate documentation}, \href{https://vtk.org/doc/nightly/html/classvtkQuadricDecimation.html}{algorithm}
 
 pyvista decimate\_pro uses algorithm described in paper: \href{https://docs.pyvista.org/api/core/_autosummary/pyvista.polydatafilters.decimate_pro}{decimate\_pro documentation}, \href{https://dl.acm.org/doi/10.1145/133994.134010}{paper}
+
 
 \end{document}
