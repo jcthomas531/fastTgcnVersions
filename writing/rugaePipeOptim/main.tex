@@ -20,6 +20,7 @@
     pdfpagemode=FullScreen,
     }
 \usepackage{booktabs}
+\usepackage{subcaption}
 \oddsidemargin0in
 \textwidth6.5in
 \addtolength{\topmargin}{-.75in}
@@ -233,6 +234,43 @@ Best pipeline performance will be based on both measures of accuracy and time.
     \end{itemize}
     \item With these radius values, it would be valuable to see what the actual radius is that they produce in reference to the size of scans.
 \end{itemize}
+
+\subsubsection{Predicted regions}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .5\textwidth]{"run001/pat001PredRegion.png"}
+    \caption{}
+\end{figure}
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{"run001/predRegionIssue.png"}
+        \caption{First caption}
+        \label{fig:img1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{"run001/predRegionIssue2.png"}
+        \caption{Second caption}
+        \label{fig:img2}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{"run001/predRegionIssue2Zoom.png"}
+        \caption{Third caption}
+        \label{fig:img3}
+    \end{subfigure}
+    \caption{Main figure caption describing all three sub-figures.}
+    \label{fig:three_images}
+\end{figure}
+
+I think this may be due to all of the processing of point labels, will have to check the annotated scans that get pumped into the model.
 
 
 
