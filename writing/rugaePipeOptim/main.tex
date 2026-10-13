@@ -202,12 +202,39 @@ Best pipeline performance will be based on both measures of accuracy and time.
     \item Primary performance measure: IoU
 \end{itemize}
 
-\subsubsection{General take aways}
+\subsubsection{Plots}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .8\textwidth]{"run001/resolPlot.png"}
+    \caption{}
+\end{figure}
+
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .8\textwidth]{"run001/radiiPlots.png"}
+    \caption{}
+\end{figure}
+
+
+
+\subsubsection{Take aways}
 \begin{itemize}
     \item Patient 15 has abnormally poor performance compared to other patients. Patient 15 has mean IoU of 0.203 and 0.323 for decimation and remeshed respectively compared to 0.493 and 0.636 when patient 15 is excluded.
-    \item Decimation has much poorer performance than remeshing, see mean IoUs described above. Dropping decimation all together may be advisable. The parameter grid for the next run will be tweaked towards maximizing remeshed performance rather than decimation performance (ie moving it more in line with what helps remeshed best). Remeshed data seems to benefit from low gamma, higher n\_estimators, higher learning\_rate, and higher max\_depth.
-    \item There seems to be only slight gains in performance with increasing scan resolution. If this trend continues, dropping higher resolutions may be warranted. For remeshed scans, the following pairs of resolution and mean IoU: (8500, 0.600), (12000, 0.597), (15000, 0.594), (20000, 0.598). For decimated scans: (8500, 0.434), (12000, 0.451), (15000, 0.464), (20000, 0.478).
+    \item Decimation has much poorer performance than remeshing. Dropping decimation all together may be advisable. The parameter grid for the next run will be tweaked towards maximizing remeshed performance rather than decimation performance (ie moving it more in line with what helps remeshed best). Remeshed data seems to benefit from low gamma, higher n\_estimators, higher learning\_rate, and higher max\_depth.
+    \item Decimation has slightly increasing performance with increasing resolution, but remeshed scans do not show the same trend. If this trend continues to be apparanet, dropping higher resolutions may be warranted. 
+    \item Both radius parameters seem to have next to no influence on performance and no interactions between the two have standout performance. There are three alternate (or potentially simultaneous) implications from this:
+    \begin{itemize}
+        \item we were too conservative with the grid for these parameters and more extreme values would be beneficial
+        \item the radius values dont make an impact because the local descriptors are not very important in the model, potentially overshadowed by the xyz values
+        \item the radius values actually dont really matter.
+    \end{itemize}
+    \item With these radius values, it would be valuable to see what the actual radius is that they produce in reference to the size of scans.
 \end{itemize}
+
+
 
 \newpage
 
