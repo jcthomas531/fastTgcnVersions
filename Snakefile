@@ -1636,7 +1636,7 @@ rule combineDesc_rpo:
 model_rpoDeps = ["tools/rugaeDetect/patSplitter.py", "tools/rugaeDetect/iouPoint.py"]
 rule xgbPfh_rpo:
     container: "../../containers/lorwyn.sif" #i added the machine learning packages to the wrong contianer, need to update
-    threads: 40
+    threads: 20
     input:
         inFiles = lambda wc: expand(
         rugaePipeOptimDir + "combinedDescriptors/{phase}/{reduction}{density}/norm{normal}_desc{descrip}/combinedDesc.csv",
