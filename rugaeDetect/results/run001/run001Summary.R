@@ -1,13 +1,14 @@
 library(dplyr)
 library(stringr)
 library(ggplot2)
+library(patchwork)
 set.seed(826)
 
 #this will need to be modified when this file finds a new home
 #testing
 perfDir <- "K:/iowaExpTest/rugaePipeOptim/performance/run001"
 #this should work on hpc but i cannot navigate like this when running locally
-perfDir <- "../../../../../Shared/gb_lss/Thomas/iowaExpTest/rugaePipeOptim/performance/run001"
+#perfDir <- "../../../../../Shared/gb_lss/Thomas/iowaExpTest/rugaePipeOptim/performance/run001"
 
 setwd(perfDir)
 
@@ -184,3 +185,77 @@ runSum |>
 #finding best overall setting (ignoring pat015)
 bestSetting <- which.max(runSum_no15$meanIou)
 runSum_no15[bestSetting,]
+
+
+runSum_no15_ready <- runSum_no15 |>
+  mutate(
+    normRadMult = factor(normRadMult, levels = c(0.008, 0.012, 0.016, 0.02)),
+    descRadMult = factor(descRadMult, levels = c(1.05, 1.1, 1.3, 1.5)),
+    resol = factor(resol, levels = c(8500,12000,15000,20000))
+  )
+
+normRadPlot <- runSum_no15_ready |>
+  ggplot(aes(x = normRadMult, y = meanIou, color = resol)) +
+  geom_boxplot() +
+  theme_bw() +
+  ylim(0,1) +
+  theme(legend.position = "none") +
+  labs(y = "Mean IoU", x = "Normal radius parameter")
+
+
+descRadPlot <- runSum_no15_ready |>
+  ggplot(aes(x = descRadMult, y = meanIou, color = resol)) +
+  geom_boxplot() +
+  theme_bw() +
+  ylim(0,1) +
+  theme(legend.position = "none") +
+  labs(y = "Mean IoU", x = "Local descriptor radius parameter")
+
+interRadPlot <- runSum_no15_ready |>
+  ggplot(aes(x = interaction(normRadMult, descRadMult), y = meanIou, color = resol)) +
+  geom_boxplot() +
+  theme_bw() +
+  ylim(0,1) +
+  labs(
+    y = "Mean IoU",
+    x = "Combinations of normal radius and local descriptor radius parameters",
+    color = "Resol."
+    )
+
+radiiPlots_no15 <- (normRadPlot + descRadPlot) / interRadPlot
+radiiPlots_no15 <- radiiPlots_no15 + 
+  plot_annotation(
+    title = "Radii parameters and mean IoU",
+    subtitle = "Patient 15 excluded"
+  )
+
+scanResoPlot_no15 <- runSum_no15_ready |>
+  ggplot(aes(x = resol,  y = meanIou, color = reductTech)) +
+  geom_boxplot() +
+  theme_bw() +
+  ylim(0,1) +
+  labs(
+    title = "Scan resolution and mean IoU",
+    subtitle = "Patient 15 excluded",
+    y = "Mean IoU",
+    x = "Resolution",
+    color = "Reduct. Tech."
+  )
+
+
+#export into writing folder
+# setwd("Y:/dissModels/intraoralSegmentation/writing/rugaePipeOptim/run001")
+# ggsave(
+#   filename = "radiiPlots.png",
+#   plot = radiiPlots_no15,
+#   width = 9,
+#   height = 7,
+#   dpi = 600
+# )
+# ggsave(
+#   filename = "resolPlot.png",
+#   plot = scanResoPlot_no15,
+#   width = 8,
+#   height = 5,
+#   dpi = 600
+# )
