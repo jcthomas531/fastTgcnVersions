@@ -200,7 +200,7 @@ normRadPlot <- runSum_no15_ready |>
   theme_bw() +
   ylim(0,1) +
   theme(legend.position = "none") +
-  labs(y = "Mean IoU", x = "Normal radius parameter")
+  labs(y = "Mean IoU", x = expression("Normal radius parameter" ~ alpha[r]))
 
 
 descRadPlot <- runSum_no15_ready |>
@@ -209,7 +209,7 @@ descRadPlot <- runSum_no15_ready |>
   theme_bw() +
   ylim(0,1) +
   theme(legend.position = "none") +
-  labs(y = "Mean IoU", x = "Local descriptor radius parameter")
+  labs(y = "Mean IoU", x = expression("Local descriptor radius parameter" ~ gamma[r]))
 
 interRadPlot <- runSum_no15_ready |>
   ggplot(aes(x = interaction(normRadMult, descRadMult), y = meanIou, color = resol)) +
@@ -218,7 +218,7 @@ interRadPlot <- runSum_no15_ready |>
   ylim(0,1) +
   labs(
     y = "Mean IoU",
-    x = "Combinations of normal radius and local descriptor radius parameters",
+    x = "Combinations",
     color = "Resol."
     )
 
@@ -244,7 +244,7 @@ scanResoPlot_no15 <- runSum_no15_ready |>
 
 
 #export into writing folder
-# setwd("Y:/dissModels/intraoralSegmentation/writing/rugaePipeOptim/run001")
+setwd("Y:/dissModels/intraoralSegmentation/writing/rugaePipeOptim/run001")
 # ggsave(
 #   filename = "radiiPlots.png",
 #   plot = radiiPlots_no15,

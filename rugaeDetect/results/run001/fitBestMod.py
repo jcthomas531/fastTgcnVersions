@@ -85,8 +85,7 @@ for i in range(len(uniqPats)):
     valPredProb = fitXgb.predict_proba(vDatX)[:,1]
 
     #output data set
-    outDat = vDatX
-    outDat["label"] = vDatY
+    outDat = vDat
     outDat["predLabel"] = valPred
     outDat["predProb"] = valPredProb
     outDat["labelComp"] = np.select(
@@ -117,16 +116,90 @@ for i in range(len(uniqPats)):
 
 
 #visualizing predicted regions
-dati = predDict["pat015"]["pred"]
-pointsi = dati[["x", "y", "z"]].to_numpy()
-labelsi = dati["labelComp"].to_numpy()
-ploti = pv.Plotter()
-ploti.add_points(
-    points = pointsi,
-    scalars = labelsi,
+dati = predDict["pat007"]["pred"]
+
+datPre = dati[dati["patId"].str.contains("Pre", na = False)]
+pointsPre = datPre[["x", "y", "z"]].to_numpy()
+labelsPre = datPre["labelComp"].to_numpy()
+plotPre = pv.Plotter()
+plotPre.add_points(
+    points = pointsPre,
+    scalars = labelsPre,
     render_points_as_spheres = True,
     point_size = 20,
     categories = True,
     cmap = ["green", "blue", "red", "grey"]
 )
-ploti.show()
+plotPre.show()
+
+
+datPost = dati[dati["patId"].str.contains("Post", na = False)]
+pointsPost = datPost[["x", "y", "z"]].to_numpy()
+labelsPost = datPost["labelComp"].to_numpy()
+plotPost = pv.Plotter()
+plotPost.add_points(
+    points = pointsPost,
+    scalars = labelsPost,
+    render_points_as_spheres = True,
+    point_size = 20,
+    categories = True,
+    cmap = ["green", "blue", "red", "grey"]
+)
+plotPost.show()
+
+
+#variable importance
+#https://stackoverflow.com/questions/37627923/how-to-get-feature-importance-in-xgboost
+#https://xgboost.readthedocs.io/en/latest/python/python_api.html#xgboost.Booster.get_score
+modi = predDict["pat001"]["model"]
+#number of times the feature is used to split data across all trees
+weightImport = modi.get_booster().get_score(importance_type="weight")
+#average gain when used in a split
+gainImport = modi.get_booster().get_score(importance_type="gain")
+#average cover when used in a split
+coverImport = modi.get_booster().get_score(importance_type="cover")
+#these are just sums instead of averages
+#totGainImport = modi.get_booster().get_score(importance_type="total_gain")
+#totCoverImport = modi.get_booster().get_score(importance_type="total_cover")
+
+#ordering based on value
+def orderIt(x):
+    return dict(sorted(x.items(), key=lambda item: item[1], reverse=True))
+def getTop(x, min):
+    return {k: v for k, v in x.items() if v >= min}
+
+weightImport = orderIt(weightImport)
+weightImportTop = getTop(weightImport, min = 100)
+
+gainImport = orderIt(gainImport)
+gainImportTop = getTop(gainImport, min = 5)
+
+coverImport = orderIt(coverImport)
+coverImportTop = getTop(coverImport, min = 75)
+
+import matplotlib.pyplot as plt
+
+
+plt.figure(figsize=(12, 6))
+plt.bar(weightImportTop.keys(), weightImportTop.values(), color = "dodgerblue")
+plt.xticks(rotation=45)
+plt.title("Variable importance: weight")
+plt.ylabel("Weight")
+plt.show()
+
+plt.figure(figsize=(12, 6))
+plt.bar(gainImportTop.keys(), gainImportTop.values(), color = "firebrick")
+plt.xticks(rotation=45)
+plt.title("Variable importance: gain")
+plt.ylabel("Gain")
+plt.show()
+
+plt.figure(figsize=(12, 6))
+plt.bar(coverImportTop.keys(), coverImportTop.values(), color = "purple")
+plt.xticks(rotation=45)
+plt.title("Variable importance: cover")
+plt.ylabel("Cover")
+plt.show()
+
+
+#this would be good to show averaged across all validation sets
