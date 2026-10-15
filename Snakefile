@@ -1,5 +1,6 @@
 import os
 import re
+from pathlib import Path
 
 #for running on the hpc
 
@@ -76,8 +77,8 @@ iowaExpTestOrigFormCSOriMastPostDir = grantDir + "iowaExpTest/scanData/origForm_
 iowaExpTestOrigFormCSOriMastRemeshPreDir = grantDir + "iowaExpTest/scanData/origForm_cSOriMastRemesh/pre/"
 iowaExpTestOrigFormCSOriMastRemeshPostDir = grantDir + "iowaExpTest/scanData/origForm_cSOriMastRemesh/post/"
 #segmeted directories
-iowaExpTestSegPreDir = grantDir + "iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/origForm_cSOriMastRemesh/pre/"
-iowaExpTestSegPostDir = grantDir + "iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/origForm_cSOriMastRemesh/post/"
+iowaExpTestSegPreDir = grantDir + "iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMast_noScale_epoch260/origForm_cSOriMastRemesh/pre/"
+iowaExpTestSegPostDir = grantDir + "iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMast_noScale_epoch260/origForm_cSOriMastRemesh/post_superimp/"
 #centroid size directiories
 iowaExpTestCentSizeDir = grantDir + "iowaExpTest/centroidSize/"
 
@@ -131,8 +132,8 @@ trainTestDir_t3dsIosseg_cSOriMast = grantDir + "trainTestSets/t3dsIosseg_cSOriMa
 
 #segmentation directories
 iowaExpTestSegDir = grantDir + "iowaExpTest/segResults/"
-iowaExpTestSeg1Dir_pre = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/"
-iowaExpTestSeg1Dir_post = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/"
+iowaExpTestSeg1Dir_pre = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/pre/"
+iowaExpTestSeg1Dir_post = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/post_superimp/"
 
 #spatialTrans
 iowaExpTestSpatialTransDir = grantDir + "iowaExpTest/spatialTrans/"
@@ -244,7 +245,24 @@ def getIowaExpTestRAPost(wildcards):
 #patient names for just the patients with both a pre and a post
 iowaExpTestRAPatsBoth = list(set(iowaExpTestRAPatsPre) & set(iowaExpTestRAPatsPost))
 
-#helper function for iowaExpTestRA files after then are segmented
+#helper function for iowaExpTestRA files after they are segmented
+#this is getting upset with my because it is looking for something that does not yet exist if the files have never been segmented
+#this isnt actaully in issue in terms of running rules because it will only effect rules downstream of segmentation but this python
+#code runs prior to the rules that make the objects. 
+#the code below checks to see if the sentinal files for the segmentation exist and if not, creates a dummy file 
+#in the segmented directory that has the same naming convention as the real ones. this will be overwritten when the real ones
+#are made but it gives these functions to grab on to and avoids an error. as i said, since rules using these functions will
+#not run until after the segmentation is done, this will not cause any problems
+if not os.path.isfile(iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete"):
+    newFileA = Path(grantDir + "iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/pre/pat001Pre_formCSOriMastRemesh_seg.ply")
+    newFileA.parent.mkdir(parents=True, exist_ok=True)
+    newFileA.touch()
+
+if not os.path.isfile(iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post_superimp.complete"):
+    newFileB = Path(grantDir + "iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/post_superimp/pat001Post_formCSOriMastRemesh_rugAnnotSuperimp_seg.ply")
+    newFileB.parent.mkdir(parents=True, exist_ok=True)
+    newFileB.touch()
+
 iowaExpTestRAPatsPre_seg1, iowaExpTestRAPathDictPre_seg1 = patNamesAndPathDict(iowaExpTestSeg1Dir_pre, fileExt = ".ply")
 iowaExpTestRAPatsPost_seg1, iowaExpTestRAPathDictPost_seg1 = patNamesAndPathDict(iowaExpTestSeg1Dir_post, fileExt = ".ply")
 #create helper functions
@@ -252,6 +270,8 @@ def getIowaExpTestSeg1Pre(wildcards):
     return iowaExpTestRAPathDictPre_seg1[wildcards.seg1Pat]
 def getIowaExpTestSeg1Post(wildcards):
     return iowaExpTestRAPathDictPost_seg1[wildcards.seg1Pat]
+
+
 
 ###############################################################################
 #teeth3ds
@@ -416,11 +436,11 @@ rule all:
         #iowaExpTest centroid size
         #
         #pre centroid size
-        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/centSizePre.csv",
-        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/archLengthPre.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/centSizePre.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/archLengthPre.csv",
         #post centroid size
-        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/centSizePost.csv",
-        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/archLengthPost.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/centSizePost.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/archLengthPost.csv",
         #
         #process iowaExpTestRA
         #
@@ -442,15 +462,18 @@ rule all:
         #iowaExpTestRA, post scans with annotated rugae superimposition transformation applied
         expand(iowaExpTestRASuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMast_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         expand(iowaExpTestRARemeshSuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        #--------------------
+        #CURRENTLY HAVING AN ISSUE WITH HTML EXPORT
         #iowaExpansion pre and post scan visualization htmls with no superimposition
-        expand(iowaExpTestRANoSuperimpVisDir + "{iowaExpTestRABothPats}NoSuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        # expand(iowaExpTestRANoSuperimpVisDir + "{iowaExpTestRABothPats}NoSuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
-        expand(iowaExpTestRASuperimpVisDir + "{iowaExpTestRABothPats}SuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        # expand(iowaExpTestRASuperimpVisDir + "{iowaExpTestRABothPats}SuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        #--------------------
         #
         #segmentation
         #
-        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
-        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete",
+        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
+        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post_superimp.complete",
         #
         #spatial transformation matrices
         #
@@ -563,11 +586,11 @@ rule processIowaExpTest:
 rule iowaExpTestCentroidSize:
     input:
         #pre centroid size
-        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/centSizePre.csv",
-        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/archLengthPre.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/centSizePre.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/archLengthPre.csv",
         #post centroid size
-        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/centSizePost.csv",
-        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/archLengthPost.csv"
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/centSizePost.csv",
+        iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/archLengthPost.csv"
 
 rule processIowaExpTestRA:
     input:
@@ -590,16 +613,20 @@ rule superimp:
         expand(iowaExpTestRATransDir + "{iowaExpTestRABothPats}SuperimpPostOnPreTrans_rugAnnot.pkl", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         #iowaExpTestRA, post scans with annotated rugae superimposition transformation applied
         expand(iowaExpTestRASuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMast_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
-        expand(iowaExpTestRARemeshSuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        expand(iowaExpTestRARemeshSuperimpPostScanDir + "{iowaExpTestRABothPats}Post_formCSOriMastRemesh_rugAnnotSuperimp.ply", iowaExpTestRABothPats = iowaExpTestRAPatsBoth)
+        #--------------------
+        #CURRENTLY HAVING AN ISSUE WITH HTML EXPORT
         #iowaExpansion pre and post scan visualization htmls with no superimposition
-        expand(iowaExpTestRANoSuperimpVisDir + "{iowaExpTestRABothPats}NoSuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
+        # expand(iowaExpTestRANoSuperimpVisDir + "{iowaExpTestRABothPats}NoSuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth),
         #iowaExpansion pre and post scan visualization htmls with annotated rugae superimposition
-        expand(iowaExpTestRASuperimpVisDir + "{iowaExpTestRABothPats}SuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth)
+        # expand(iowaExpTestRASuperimpVisDir + "{iowaExpTestRABothPats}SuperimpVis_formCSOriMast.html", iowaExpTestRABothPats = iowaExpTestRAPatsBoth)
+        #--------------------
+
 
 rule segmentation:
     input:
-        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
-        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete"
+        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
+        iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post_superimp.complete"
 
 rule spatialTrans:
     input:
@@ -1272,17 +1299,19 @@ rule segIowaExpTestRAPre:
         deps = segDeps
     params:
         inDir_ = iowaExpTestRAFormCSOriMastRemeshPreDir,
-        outDir_ = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/",
-        predMatDir = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/predMat/"
+        outDir_ = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/pre/",
+        predMatDir = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/pre/predMat/"
     output:
         #monitoring done by sentinel file
-        touch(iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete")
+        touch(iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete")
     shell:
         """
         python {input.script} {params.inDir_} {params.outDir_} {params.predMatDir}
         """
 
 #iowaExpTest
+#this uses remeshed scans that have already been superimposed on the rugae region
+#thus the output plys here are superimposed plys
 rule segIowaExpTestRAPost:
     threads: 16
     resources:
@@ -1294,11 +1323,11 @@ rule segIowaExpTestRAPost:
         deps = segDeps
     params:
         inDir_ = iowaExpTestRARemeshSuperimpPostScanDir,
-        outDir_ = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/",
-        predMatDir = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/predMat/"
+        outDir_ = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/post_superimp/",
+        predMatDir = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/post_superimp/predMat/"
     output:
         #monitoring done by sentinel file
-        touch(iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete")
+        touch(iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post_superimp.complete")
     shell:
         """
         python {input.script} {params.inDir_} {params.outDir_} {params.predMatDir}
@@ -1313,14 +1342,14 @@ rule segIowaExpTestRAPost:
 rule getCentSizeIowaExpTestPre:
     threads: defaultThreads
     input:
-        sentinelFile = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
+        sentinelFile = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
         script = "tools/processes/calculateCentroidSize.py",
         deps = calcCentSizeDeps
     params:
-        dir_ = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/"
+        dir_ = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/pre/"
     output:
-        outCent = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/centSizePre.csv",
-        outLength = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/archLengthPre.csv"
+        outCent = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/centSizePre.csv",
+        outLength = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/archLengthPre.csv"
     shell:
         """
         python {input.script} {params.dir_} {output.outCent} {output.outLength}
@@ -1331,14 +1360,14 @@ rule getCentSizeIowaExpTestPre:
 rule getCentSizeIowaExpTestPost:
     threads: defaultThreads
     input:
-        sentinelFile = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete",
+        sentinelFile = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post_superimp.complete",
         script = "tools/processes/calculateCentroidSize.py",
         deps = calcCentSizeDeps
     params:
-        dir_ = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/"
+        dir_ = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/post_superimp/"
     output:
-        outCent = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/centSizePost.csv",
-        outLength = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/archLengthPost.csv"
+        outCent = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/centSizePost.csv",
+        outLength = iowaExpTestCentSizeDir + "centSize_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/archLengthPost.csv"
     shell:
         """
         python {input.script} {params.dir_} {output.outCent} {output.outLength}
@@ -1349,14 +1378,17 @@ rule getCentSizeIowaExpTestPost:
 
 
 
+
+
 ##################################
 #get rigid registration spatial transformation matrix
+
 
 rule getSpatialTransMats_iowaExpTestRA:
     threads: defaultThreads
     input:
-        preSentinel = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
-        postSentinel = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post.complete",
+        preSentinel = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/monitoringFiles/pre.complete",
+        postSentinel = iowaExpTestSegDir + "segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/monitoringFiles/post_superimp.complete",
         prePath = getIowaExpTestSeg1Pre,
         postPath = getIowaExpTestSeg1Post,
         script = "movement/getSpatialTransMats.py",

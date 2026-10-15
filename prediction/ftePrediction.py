@@ -18,7 +18,7 @@ preMatDir = sys.argv[3]
 ftep.fastTgcnEasyPredict(inDir = inDir_,
                          outDir = outDir_,
                          predMatOutDir = preMatDir,
-                         modelPath = str(projectRoot / "fastTgcnEasy/trainedModels/2026_10_04 t3dsIosseg_noScaleEpoch30_intermediate.pth")
+                         modelPath = str(projectRoot / "fastTgcnEasy/trainedModels/2026_10_14 t3dsIosseg_cSOriMast_noScale_epoch260.pth")
                          )
 
 

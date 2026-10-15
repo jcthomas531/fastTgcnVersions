@@ -147,6 +147,11 @@ def fastTgcnEasyPredict(inDir, outDir, predMatOutDir, modelPath):
         pred = pred.cpu()
         #
         matPath = (predPathStr) % namePred
+        #this will not work if the directory does not exist yet
+        #thus, making the directory
+        matPath_Path = Path(matPath)
+        matPath_Path.parent.mkdir(parents=True, exist_ok=True)
+        #writing out
         fp2 = open(matPath, "wb")
         pickle.dump(obj = pred,
                     file = fp2)
