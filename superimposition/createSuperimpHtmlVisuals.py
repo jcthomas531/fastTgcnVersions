@@ -29,6 +29,9 @@ superimpPlot.add_mesh(postMesh, color=color_, opacity = .6)
 #superimpPlot.show() #do not run show() this prior to using export_html()
 #export
 superimpPlot.export_html(visHtml)
+#import trame_pyvista
+#superimpPlot.trame.export_html(visHtml)
+#apparently the above function is deptricated but the suggest superimpPlot.trame.export_html(visHtml) also does not work
 print("superimposition html exported")
 
 
