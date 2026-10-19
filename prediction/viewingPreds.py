@@ -1,5 +1,5 @@
 import sys
-sys.path.append("Y:/dissModels/intraoralSegmentation/tools")
+sys.path.append("tools")
 #import plyFunctions as pf
 import readAndPlot as rap
 import os
@@ -8,7 +8,7 @@ import os
 
 
 
-dir1 = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/origForm_cSOriMastRemesh/post/"
+dir1 = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/post_superimp/"
 
 os.chdir(dir1)
 segFiles = os.listdir()
@@ -18,7 +18,7 @@ for i in range(len(segFiles)):
         rap.readAndPlot(file = filei, 
                        arch = "U")
 
-dir2 = "K:/iowaExpTest/scanData/rugAnnotForm_cSOriMastRemesh/pre/"
+dir2 = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/pre/"
 os.chdir(dir2)
 plyFiles = os.listdir()
 for i in range(len(plyFiles)):
