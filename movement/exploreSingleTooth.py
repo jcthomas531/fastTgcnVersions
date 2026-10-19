@@ -1,4 +1,3 @@
-from pyglet.libs.win32.constants import PROCESSOR_INTEL_386
 import pickle
 import sys
 import pandas as pd
@@ -10,8 +9,8 @@ import readAndFormat as raf
 import toothCentroids as toCe
 import giveSurf
 
-prePath = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/pre/pat001Pre_formCSOriMastRemesh_seg.ply"
-postPath = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMastEpoch300/rugAnnotForm_cSOriMastRemesh/post/pat001Post_formCSOriMastRemesh_rugAnnotSuperimp_seg.ply"
+prePath = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/pre/pat001Pre_formCSOriMastRemesh_seg.ply"
+postPath = "K:/iowaExpTest/segResults/segResults_t3dsIosseg_cSOriMast_noScale_epoch260/rugAnnotForm_cSOriMastRemesh/post_superimp/pat001Post_formCSOriMastRemesh_rugAnnotSuperimp_seg.ply"
 transPath = "K:/iowaExpTest/spatialTrans/pat001SpatialTransMats.pkl"
 
 #load in trans
@@ -46,10 +45,10 @@ post3 = rmtt.restrictMeshToTooth(postDf, toothNum = "3")
 pre3Surf = giveSurf.giveSurf(face = pre3["face"], vertex = pre3["vert"])
 post3Surf = giveSurf.giveSurf(face = post3["face"], vertex = post3["vert"])
 
-# p3 = pv.Plotter()
-# p3.add_mesh(pre3Surf, color = "white")
-# p3.add_mesh(post3Surf, scalars = "rgba", rgb = True,  opacity = .6)
-# p3.show()
+p3 = pv.Plotter()
+p3.add_mesh(pre3Surf, color = "white")
+p3.add_mesh(post3Surf, scalars = "rgba", rgb = True,  opacity = .6)
+p3.show()
 
 
 
@@ -115,14 +114,10 @@ rigid3 = applySpatialTrans(dat = pre3, trans=t3Trans)
 r3Surf = giveSurf.giveSurf(face = rigid3["face"], vertex = rigid3["vert"])
 
 pR3 = pv.Plotter()
-# pR3.add_mesh(pre3Surf, color = "white")
-pR3.add_mesh(post3Surf, color = "white",  opacity = 1)
+pR3.add_mesh(pre3Surf, color = "white")
+#pR3.add_mesh(post3Surf, color = "white",  opacity = 1)
 pR3.add_mesh(r3Surf, color = "blue",  opacity = .6)
 pR3.show()
-
-
-#it looks like what we have here is the transfromation FROM time 2 TO time 1 applied to time 1
-#potentnailly we are working the wrong direction in our ICP
 
 len(allTrans)
 range(len(allTrans))
@@ -197,12 +192,19 @@ diffDf3 = pd.DataFrame({
     "z": prePos3["z"] - movedPos3["z"]
 })
 diffDf3["l2Norm"] = np.linalg.norm(x = diffDf3[["x", "y", "z"]], axis = 1, ord = 2)
-meanX3 = diffDf3["x"].mean()
+#using median as it is resistant to outliers
+medX3 = diffDf3["x"].median() 
 sdX3 = diffDf3["x"].std()
-meanY3 = diffDf3["y"].mean()
+medY3 = diffDf3["y"].median()
 sdY3 = diffDf3["y"].std()
-meanZ3 = diffDf3["z"].mean()
+medZ3 = diffDf3["z"].median()
 sdZ3 = diffDf3["z"].std()
-meanDiff3 = diffDf3["l2Norm"].mean()
+medDiff3 = diffDf3["l2Norm"].median()
 sdDiff3 = diffDf3["l2Norm"].std()
+
+import matplotlib as Plt
+Plt.pyplot.hist(diffDf3["x"])
+
+
+
 
