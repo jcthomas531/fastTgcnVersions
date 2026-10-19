@@ -1,3 +1,4 @@
+from numpy import shape
 import pandas as pd
 import re
 import sys
@@ -121,31 +122,31 @@ dati = predDict["pat007"]["pred"]
 datPre = dati[dati["patId"].str.contains("Pre", na = False)]
 pointsPre = datPre[["x", "y", "z"]].to_numpy()
 labelsPre = datPre["labelComp"].to_numpy()
-plotPre = pv.Plotter()
-plotPre.add_points(
-    points = pointsPre,
-    scalars = labelsPre,
-    render_points_as_spheres = True,
-    point_size = 20,
-    categories = True,
-    cmap = ["green", "blue", "red", "grey"]
-)
-plotPre.show()
+# plotPre = pv.Plotter()
+# plotPre.add_points(
+#     points = pointsPre,
+#     scalars = labelsPre,
+#     render_points_as_spheres = True,
+#     point_size = 20,
+#     categories = True,
+#     cmap = ["green", "blue", "red", "grey"]
+# )
+# plotPre.show()
 
 
 datPost = dati[dati["patId"].str.contains("Post", na = False)]
 pointsPost = datPost[["x", "y", "z"]].to_numpy()
 labelsPost = datPost["labelComp"].to_numpy()
-plotPost = pv.Plotter()
-plotPost.add_points(
-    points = pointsPost,
-    scalars = labelsPost,
-    render_points_as_spheres = True,
-    point_size = 20,
-    categories = True,
-    cmap = ["green", "blue", "red", "grey"]
-)
-plotPost.show()
+# plotPost = pv.Plotter()
+# plotPost.add_points(
+#     points = pointsPost,
+#     scalars = labelsPost,
+#     render_points_as_spheres = True,
+#     point_size = 20,
+#     categories = True,
+#     cmap = ["green", "blue", "red", "grey"]
+# )
+# plotPost.show()
 
 
 #variable importance
@@ -203,3 +204,101 @@ plt.show()
 
 
 #this would be good to show averaged across all validation sets
+
+
+
+#functionizing variable importance
+#arguement x is a fit model object like predDict["pat001"]["model"]
+def varImport(x):
+    #number of times the feature is used to split data across all trees
+    weightImpDf = pd.DataFrame(
+        x.get_booster().get_score(importance_type="weight").items(),
+        columns=["var", "weigthImport"]
+    )
+    #average gain when used in a split
+    gainImpDf = pd.DataFrame(
+        x.get_booster().get_score(importance_type="gain").items(),
+        columns = ["var", "gainImport"]
+    )
+    #average cover when used in a split
+    coverImpDf = pd.DataFrame(
+        x.get_booster().get_score(importance_type="cover").items(), 
+        columns = ["var", "coverImport"]
+    )
+    #join data frames on var
+    impDf = weightImpDf.merge(gainImpDf, on = "var", how = "outer")
+    impDf = impDf.merge(coverImpDf, on = "var", how = "outer")
+    return impDf
+
+
+pats = list(predDict.keys())
+patImpDfs = {}
+for i in range(len(pats)):
+    pati = pats[i]
+    modi = predDict[pati]["model"]
+    impDfi = varImport(modi)
+    impDfi["patId"] = pati
+    patImpDfs[pati] = impDfi
+
+fullImpDf = pd.concat(patImpDfs.values(), ignore_index = True)
+#some of these models seem not the have all of the variables... why is that? just a couple missing
+varImpSum = (
+    fullImpDf.groupby("var")
+    .agg(
+        n = ("patId", "size"),
+        meanWeightImp = ("weigthImport", "mean"),
+        meanGainImp = ("gainImport", "mean"),
+        meanCoverImp = ("coverImport", "mean")
+    )
+    .reset_index()
+)
+
+weightImpSum = varImpSum.sort_values("meanWeightImp", ascending = False)
+weightImpSumTop = weightImpSum.iloc[0:31]
+gainImpSum = varImpSum.sort_values("meanGainImp", ascending = False)
+gainImpSumTop = gainImpSum.iloc[0:31]
+coverImpSum = varImpSum.sort_values("meanCoverImp", ascending = False)
+coverImpSumTop = coverImpSum.iloc[0:31]
+
+
+from plotnine import ggplot, aes, geom_col, theme_bw, theme, element_text, labs
+def varImpPlotter(x, varString, color, title):
+    plotx = (
+        ggplot(
+            x,
+            aes(
+                x = "reorder(var, -" + varString + ")",
+                y = varString
+            )
+        ) +
+        geom_col(
+            fill = color
+        ) +
+        theme_bw() +
+        theme(axis_text_x = element_text(angle = 45, hjust = 1)) +
+        labs(title = title, x = "Variable")
+    )
+    return plotx
+weightImpPlot = varImpPlotter(
+    x = weightImpSumTop, 
+    varString="meanWeightImp", 
+    color = "dodgerblue", 
+    title = "Average weight for each variable across all validation models, top 30")
+gainImpPlot = varImpPlotter(
+    x = gainImpSumTop,
+    varString= "meanGainImp",
+    color = "firebrick",
+    title = "Average gain for each variable across all validation models, top 30"
+    )
+coverImpPlot = varImpPlotter(
+    x = coverImpSumTop,
+    varString= "meanCoverImp",
+    color = "purple",
+    title = "Average cover for each variable across all validation models, top 30"
+    )
+
+#save outputs
+# run001WritingDir = "Y:/dissModels/intraoralSegmentation/writing/rugaePipeOptim/run001/"
+# weightImpPlot.save(run001WritingDir + "weightImpPlot.png", dpi = 600, width=8, height = 5)
+# gainImpPlot.save(run001WritingDir + "gainImpPlot.png", dpi = 600, width=8, height = 5)
+# coverImpPlot.save(run001WritingDir + "coverImpPlot.png", dpi = 600, width=8, height = 5)

@@ -217,7 +217,7 @@ The model yielding the highest mean IoU on validation sets is remeshed to 8500 p
     \item Both radius parameters $\alpha_r$ and $\gamma_r$ seem to have next to no influence on performance and no interactions between the two have standout performance, see \textbf{Fig. \ref{run001Radii}}. There are three alternate (or potentially simultaneous) implications from this:
     \begin{itemize}
         \item we were too conservative with the grid for these parameters and more extreme values would be beneficial
-        \item the radius values dont make an impact because the local descriptors are not very important in the model, potentially overshadowed by the xyz values
+        \item the radius values dont make an impact because the local descriptors are not very important in the model, potentially overshadowed by the xyz values/ Looking at variable importance plots \textbf{Figs. \ref{run001Weight}-\ref{run001Cover}}, this does not seem to be the case.
         \item the radius values actually dont really matter.
     \end{itemize}
     \item With these radius values, it would be valuable to see what the actual radius is that they produce in reference to the size of scans.
@@ -228,7 +228,7 @@ The model yielding the highest mean IoU on validation sets is remeshed to 8500 p
 
 
 
-\subsubsection{Plots}
+\subsubsection{Performance plots}
 
 \begin{figure}[H]
     \centering
@@ -244,6 +244,31 @@ The model yielding the highest mean IoU on validation sets is remeshed to 8500 p
     \label{run001Radii}
 \end{figure}
 
+
+\subsubsection{Variable Importance Plots}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .9\textwidth]{"run001/weightImpPlot.png"}
+    \caption{Run001, Variable Importance, weight}
+    \label{run001Weight}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .9\textwidth]{"run001/gainImpPlot.png"}
+    \caption{Run001, Variable Importance, gain}
+    \label{run001Gain}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .9\textwidth]{"run001/coverImpPlot.png"}
+    \caption{Run001, Variable Importance, cover}
+    \label{run001Cover}
+\end{figure}
+
+\newpage
 
 \subsubsection{Predicted regions}
 
