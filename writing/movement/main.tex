@@ -1,0 +1,130 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[table]{xcolor}
+\usepackage[font=small,labelfont=bf,tableposition=top]{caption}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+\usepackage{booktabs}
+\usepackage{subcaption}
+\usepackage[dvipsnames]{xcolor}
+\oddsidemargin0in
+\textwidth6.5in
+\addtolength{\topmargin}{-.75in}
+\textheight 8.5in
+ 
+\renewcommand{\labelenumi}{\roman{enumi}.}
+\theoremstyle{definition}
+\newtheorem{problem}{Problem}
+\title{Tooth Movement}
+\author{J. C. Thomas}
+\begin{document}
+\maketitle
+
+
+\section{Review of methods and literature}
+
+\noindent An affine transformation matrix in 3D space $\mathbf{T}$ has the form:
+
+$$\mathbf{T} = \begin{bmatrix}
+\mathbf{R} & \mathbf{t} \\
+\mathbf{0}^T & 1
+\end{bmatrix}$$
+
+\noindent $\mathbf{T}$ is a 4x4 matrix with submatrix $\mathbf{R}$ a 3x3 rotation matrix and vector $\mathbf{t}$ a 3x1 translation vector. The rotation matrix $\mathbf{R}$ is a member of a group called $SO(n)$ or $SE(n)$ (\textit{or possibly both at the same time, still figuring it out}) and is constrained to be orthogonal ($\mathbf{R}^T\mathbf{R} = \mathbf{I}$) and have determinate 1 ($det(\mathbf{R}) = 1$) (\textit{and potentially have unit vectors for the columns and rows, still figuring it out}). \textbf{The overall goal is to model the affine matrices that define the change in location for each tooth.} \\
+
+\noindent Some good resources on affine transformations and rotation matrices:
+\begin{itemize}
+    \item \href{https://www.brainvoyager.com/bv/doc/UsersGuide/CoordsAndTransforms/SpatialTransformationMatrices.html}{Straightforward ideas of affine transformations}
+    \item \href{https://github.com/madibabaiasl/modern-robotics-course/wiki/Lesson-3:-Orientation-in-Robotics-%E2%80%90-Rotation-Matrices}{Notes on orientation}
+    \item \href{https://motion.cs.illinois.edu/RoboticSystems/3DRotations.html}{Illinois notes on rotation}
+    \item \href{https://modernrobotics.northwestern.edu/nu-gm-book-resource/3-2-1-rotation-matrices-part-1-of-2/}{Northwestern robotics video on rotation matrices}
+\end{itemize}
+
+\subsection{Possible approaches}
+
+\paragraph{Lie group regression}
+
+Rigid transformations live in the mathematical space called the special Euclidean group $SE(3)$. Some papers:
+\begin{itemize}
+    \item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC11507511/}{Aubray 2024, Polynomial regression on Lie groups and application to SE(3)}
+    \item \href{https://link.springer.com/chapter/10.1007/978-3-319-45026-1_7}{Porikli 2016, Regression on Lie groups and its application to affine motion tracking}
+\end{itemize}
+
+There are two general approaches taken with this framework: (1) covariate regression to predict a transformation matrix and (2) geodesic regression which is fitting a trend through multiple transformations. (1) is the process I am more generally familiar with but (2) could have interesting applications for when there is more than one transformation matrix.
+
+\paragraph{Regression on rotation matrix and translation vector separately}
+
+This idea simplifies things a little but why not model things together if possible? Also, if there is any relationship between the translation vector and the rotation matrix, this would not capture that. Here are some resources:
+\begin{itemize}
+    \item \href{https://onlinelibrary.wiley.com/doi/10.1002/cjs.5550340201}{Rivest 2009, Regression and correlation for 3x3 rotation matrices}
+\end{itemize}
+
+\paragraph{Statistical shape analysis and Procrustes methods}
+
+Chatgpt made this suggestion though I struggle to see how this could be applied to the current non-landmarked setting, but it could be worth investigating.
+
+
+
+
+\subsection{Regression in Lie groups and manifolds}
+
+Before diving into the deep, deep water of trying to understand everything to do with Lie groups and manifolds, I want to try to find a couple of papers that really match what I am trying to do with the covariate regression approach and spend time trying to learn these topics in context of the approach. I am going to start with these papers:
+\begin{itemize}
+    \item Application of regression on Lie groups specifically to movement: 
+    \begin{itemize}
+        \item Avoids direct linear assumption and assumption of implicit Euclidean space (chatgpt reading suggestion), \href{https://link.springer.com/chapter/10.1007/978-3-319-45026-1_7}{Porikli 2016, Regression on Lie groups and its application to affine motion tracking} 
+        \item Also avoids linearization of the movement which implies implicit Eugclidean space (chatgpt reading suggestion) \href{https://www.researchgate.net/publication/221362444_Learning_on_lie_groups_for_invariant_detection_and_tracking}{Tuzel 2008, Learning on lie groups for invariant detection and tracking} 
+        \item This one seems more related to geodesic regression and using previous transformations to predict trajectory rather than covariate based regression (chatgpt reading suggestion) \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC11507511/}{Aubray 2024, Polynomial regression on Lie groups and application to SE(3)} 
+    \end{itemize}
+    \item More general treatments of Lie and manifold regression:
+    \begin{itemize}
+        \item Specifically using Euclidean predictors and a manifold response, \href{https://www.tandfonline.com/doi/full/10.1080/01621459.2016.1208615#abstract}{Lin 2016, Extrinsic Local Regression on Manifold-Valued Data}
+        \item Non-parametric method with Lie group predictors, \href{https://projecteuclid.org/journals/annals-of-statistics/volume-50/issue-5/Nonparametric-regression-on-Lie-groups-with-measurement-errors/10.1214/22-AOS2218.full}{Jeon 2022, Nonparametric regression on Lie groups with measurement errors}
+        \item Scalar predictors with matrix valued response, \href{https://academic.oup.com/biomet/article/110/2/361/6730723}{Lin 2022, Additive models for symmetric positive-definite matrices and Lie groups} also (perhaps the same paper?): \href{https://arxiv.org/abs/2009.08789}{Lin 2020, Additive Models for Symmetric Positive-Definite Matrices, Riemannian Manifolds and Lie groups}
+        \item Lie group predictors and complex response, \href{https://projecteuclid.org/journals/bernoulli/volume-32/issue-3/Optimal-designs-for-regression-on-Lie-groups/10.3150/25-BEJ1932.full}{Chakraborty 2026, Optimal designs for regression on Lie groups}
+        \item Euclidean predictors with manifold response, \href{https://academic.oup.com/jrsssb/article/79/2/463/7041936}{Cornea 2017, Regression Models on Riemannian Symmetric Spaces}
+    \end{itemize}
+\end{itemize}
+
+
+\subsection{Movement applications in dentistry}
+\begin{itemize}
+    \item There is lots of literature for measuring tooth movement over time, here are some examples:
+    \begin{itemize}
+        \item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC6041451/}{Yun 2018, Clinical application of an intraoral scanner for serial evaluation of orthodontic tooth movement: A preliminary study}
+    \end{itemize}
+    \item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC9933556/}{Lee 2022, Assessment of malalignment factors related to Invisalign treatment time aided by automated imaging processes}
+    \begin{itemize}
+        \item This paper looks at movement at the segmented tooth level. It models a composite score of the 6 degrees of freedom (which I believe is standard for affine transformation matrix) instead of the actual transformation matrix. This paper is also co-authored by Ko at OSU and uses his TS-MDL segmentation model. Side note, if I have time ever (doubtful), I would like to take a look using this model and seeing how the results differ from the model I am currently using.
+    \end{itemize} 
+    \item \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC13150245/}{Ushanandhini 2026, Development of an AI model to predict tooth movement during orthodontic treatment}
+    \begin{itemize}
+        \item Comparing an "AI" model (just a fancy deep learning model) to what they are calling conventional methods of modeling tooth movement. There is not much detail about these conventional methods, but could be dug into.
+    \end{itemize}
+    \item \href{https://link.springer.com/article/10.1186/s12903-025-07494-x}{Adel 2025, The influence of different digital registration methods on measurement accuracy of clear aligner treatment outcomes}
+    \begin{itemize}
+        \item It is not immediately clear if the tooth movement investigated here is a the tooth level or at the arch level, but there is mention of the 3x3 transformation matrix and the 6 degree of freedom problem. 
+    \end{itemize}
+    \item \href{https://www.sciencedirect.com/science/article/pii/S2212443823000656?via%3Dihub}{Adel 2023, Quantifying maxillary anterior tooth movement in digital orthodontics: Does the choice of the superimposition software matter?}
+    \begin{itemize}
+        \item Also discusses the rotation matrix. It appears that evaluation was done on each of the 6 degrees of freedom separately, not modeling the transformation matrix.
+    \end{itemize}
+\end{itemize}
+
+
+\end{document}
