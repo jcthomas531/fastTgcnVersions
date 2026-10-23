@@ -1405,6 +1405,7 @@ rule getSpatialTransMats_iowaExpTestRA:
 
 #########################
 #rugae classification pipeline optimization experiment
+#not included in rule all
 
 reduct = ["decim", "remesh"]
 pointDens = [8500, 12000, 15000, 20000]
@@ -1667,7 +1668,7 @@ rule combineDesc_rpo:
 
 model_rpoDeps = ["tools/rugaeDetect/patSplitter.py", "tools/rugaeDetect/iouPoint.py"]
 rule xgbPfh_rpo:
-    container: "../../containers/lorwyn.sif" #i added the machine learning packages to the wrong contianer, need to update
+    container: "../../containers/lorwyn.sif" #i added the machine learning packages to the wrong contianer, need to update #SHOULD BE FIXED NOW
     threads: 20
     input:
         inFiles = lambda wc: expand(
@@ -1690,3 +1691,208 @@ rule xgbPfh_rpo:
         """
         python {input.script} {params.descPrefix} {output.resultsOut} {output.summaryOut} {input.inFiles}
         """
+
+
+
+
+##########################
+#rigid movement for each tooth
+rigidMoveDir = grantDir + "iowaExpTest/rigidMovement/"
+
+rigidMoveSumDeps = [
+    "tools/readAndFormat.py",
+    "tools/toothVars.py",
+    "tools/colorNumFrame.py",
+    "tools/plyRead.py",
+    "movement/tools/allToothMove.py",
+    "movement/tools/singleToothMove.py",
+    "movement/tools/applySpatialTrans.py",
+    "tools/giveSurf.py",
+    "tools/restrictMeshToTooth.py"
+]
+
+rule rigidMovement:
+    input:
+        expand(rigidMoveDir + "moveSummaryData/{seg1Pat}/mainResults.pkl", seg1Pat = iowaExpTestRAPatsBoth),
+        expand(rigidMoveDir + "moveSummaryData/{seg1Pat}/rigidImage.png", seg1Pat = iowaExpTestRAPatsBoth),
+        expand(rigidMoveDir + "moveSummaryData/{seg1Pat}/rigidInteract.html", seg1Pat = iowaExpTestRAPatsBoth)
+
+rule getRigidMovementSummary:
+    input:
+        prePath = getIowaExpTestSeg1Pre,
+        postPath = getIowaExpTestSeg1Post,
+        transPath = iowaExpTestSpatialTransDir + "{seg1Pat}SpatialTransMats.pkl",
+        script = "movement/tools/processes/rigidMoveSummary.py",
+        deps = rigidMoveSumDeps
+    output:
+        pklPath = rigidMoveDir + "moveSummaryData/{seg1Pat}/mainResults.pkl",
+        rigidImage = rigidMoveDir + "moveSummaryData/{seg1Pat}/rigidImage.png",
+        rigidHtml = rigidMoveDir + "moveSummaryData/{seg1Pat}/rigidInteract.html"
+    shell:
+        """
+        python {input.script} {input.prePath} {input.postPath} {input.transPath} {output.pklPath} {output.rigidImage} {output.rigidHtml}
+        """
+
+rule test111:
+    resources:
+        render_slots=1
+    input:
+        expand("../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/{seg1Pat}/{seg1Pat}rigidMoveReport.pdf", seg1Pat = iowaExpTestRAPatsBoth)
+
+rule rigidMovementReport:
+    threads: 4
+    container: "../../containers/lorwyn.sif"
+    input:
+        pklPath = rigidMoveDir + "moveSummaryData/{seg1Pat}/mainResults.pkl",
+        rigidImage = rigidMoveDir + "moveSummaryData/{seg1Pat}/rigidImage.png",
+        rigidHtml = rigidMoveDir + "moveSummaryData/{seg1Pat}/rigidInteract.html",
+        quarto = "movement/reports/smTest.qmd"
+    output:
+        outPath = "../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/{seg1Pat}/{seg1Pat}rigidMoveReport.pdf"
+    params:
+        patNum = "{seg1Pat}",
+        outDir = "../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/{seg1Pat}/",
+        outFile = "{seg1Pat}rigidMoveReport.pdf"
+    shell:
+        """
+    export PATH="$(python3 -m site --user-base)/bin:$PATH"
+    export JUPYTER_DATA_DIR="$HOME/.local/share/jupyter"
+    export PAT_NUM="{params.patNum}"
+
+    runtime_dir=$(mktemp -d "${{TMPDIR:-/tmp}}/quarto.XXXXXX")
+    trap 'rm -rf "$runtime_dir"' EXIT
+
+    export XDG_RUNTIME_DIR="$runtime_dir"
+    export JUPYTER_RUNTIME_DIR="$runtime_dir"
+    export LANG=C.utf8
+    export LC_ALL=C.utf8
+    export TEXMFVAR="$runtime_dir/texmf-var"
+    export TEXMFCACHE="$runtime_dir/texmf-cache"
+    mkdir -p "$TEXMFVAR" "$TEXMFCACHE"
+
+    out_dir="$(realpath -m "{params.outDir}")"
+    out_file="{params.outFile}"
+    qmd_file="$(realpath "{input.quarto}")"
+    qmd_dir="$(dirname "$qmd_file")"
+
+    mkdir -p "$out_dir" || exit 1
+
+    echo "Quarto file: $qmd_file"
+    echo "Local render directory: $qmd_dir"
+    echo "Expected output: $out_dir/$out_file"
+
+    # Render locally to avoid cross-filesystem rename errors.
+    cd "$qmd_dir" || exit 1
+
+    quarto render "$qmd_file" \
+        --to pdf \
+        --output "$out_file" \
+        --output-dir "$qmd_dir"
+
+    status=$?
+    if [ "$status" -ne 0 ]; then
+        exit "$status"
+    fi
+
+    rendered_file="$qmd_dir/$out_file"
+
+    if [ ! -f "$rendered_file" ]; then
+        echo "ERROR: Quarto did not create $rendered_file"
+        exit 1
+    fi
+
+    # Copy, rather than rename, across filesystems.
+    cp "$rendered_file" "$out_dir/$out_file" || exit 1
+
+    if [ ! -f "$out_dir/$out_file" ]; then
+        echo "ERROR: PDF missing from destination."
+        exit 1
+    fi
+
+    echo "PDF verified: $out_dir/$out_file"
+    """
+
+
+#also sort of working
+#        """
+#        export PATH="$(python3 -m site --user-base)/bin:$PATH"
+#        export JUPYTER_DATA_DIR="$HOME/.local/share/jupyter"
+#        export PAT_NUM="{params.patNum}"
+#        runtime_dir=$(mktemp -d "${{TMPDIR:-/tmp}}/quarto.XXXXXX")
+#        trap 'rm -rf "$runtime_dir"' EXIT
+#        export XDG_RUNTIME_DIR="$runtime_dir"
+#        export JUPYTER_RUNTIME_DIR="$runtime_dir"
+#        export LANG=C.utf8
+#        export LC_ALL=C.utf8
+#        export TEXMFVAR="$runtime_dir/texmf-var"
+#        export TEXMFCACHE="$runtime_dir/texmf-cache"
+#        mkdir -p "$TEXMFVAR" "$TEXMFCACHE"
+#        out_dir="$(realpath "{params.outDir}")"
+#        out_file="{params.outFile}"
+#        qmd_file="$(realpath "{input.quarto}")"
+#        mkdir -p "$out_dir"
+#        echo "Quarto file: $qmd_file"
+#        echo "Output directory: $out_dir"
+#        echo "Expected PDF: $out_dir/$out_file"
+#        quarto render "$qmd_file" \
+#            --to pdf \
+#            --output "$out_file" \
+#            --output-dir "$out_dir"
+#        status=$?
+#        if [ "$status" -ne 0 ]; then
+#            exit "$status"
+#        fi
+#        if [ ! -f "$out_dir/$out_file" ]; then
+#            echo "PDF not found in expected directory."
+#            echo "Searching for generated PDF:"
+#            find /Shared/gb_lss/Thomas/iowaExpTest/rigidMovement \
+#                -maxdepth 3 -name "$out_file" -print
+#            exit 1
+#        fi
+#        echo "PDF verified: $out_dir/$out_file"
+#        """
+
+
+
+#WORKING ISH
+#shell:
+#        """
+#        export PATH="$(python3 -m site --user-base)/bin:$PATH"
+#        export JUPYTER_DATA_DIR="$HOME/.local/share/jupyter"
+#        export PAT_NUM="{params.patNum}"
+#        runtime_dir=$(mktemp -d "${{TMPDIR:-/tmp}}/quarto.XXXXXX")
+#        trap 'rm -rf "$runtime_dir"' EXIT
+#        export XDG_RUNTIME_DIR="$runtime_dir"
+#        export JUPYTER_RUNTIME_DIR="$runtime_dir"
+#        export LANG=C.utf8
+#        export LC_ALL=C.utf8
+#        export TEXMFVAR="$runtime_dir/texmf-var"
+#        export TEXMFCACHE="$runtime_dir/texmf-cache"
+#        mkdir -p "$TEXMFVAR" "$TEXMFCACHE"
+#        echo "===== Environment ====="
+#        echo "HOME=$HOME"
+#        echo "PAT_NUM=$PAT_NUM"
+#        locale
+#        echo "===== Output directory ====="
+#        out_dir="$(realpath "{params.outDir}")"
+#        mkdir -p "$out_dir"
+#        echo "Output directory: $out_dir"
+#        echo "Output filename: {params.outFile}"
+#        echo "===== Available PDF engines ====="
+#        command -v xelatex || true
+#        echo "===== Quarto render ====="
+#        quarto render {input.quarto} \
+#            --to pdf \
+#            --output "{params.outFile}" \
+#            --output-dir "$out_dir"
+#        status=$?
+#        out_file="$out_dir/{params.outFile}"
+#        if [ "$status" -eq 0 ] && [ -f "$out_file" ]; then
+#            echo "PDF verified: $out_file"
+#        else
+#            echo "ERROR: PDF missing or render failed"
+#            find "$out_dir" -maxdepth 1 -type f -print
+#            exit 1
+#        fi
+#        exit "$status"
+#        """
