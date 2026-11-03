@@ -58,3 +58,15 @@ writing/*/*
 # Track .tex files
 !writing/*/*.tex
 !writing/*/**/*.tex
+
+#claude code: ignore everything in .claude except CLAUDE.md
+.claude/*
+!.claude/CLAUDE.md
+
+#word documents
+*.docx
+
+#environment folders and everything inside them
+.ipython/
+.local/
+.jupyter/

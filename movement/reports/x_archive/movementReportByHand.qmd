@@ -1,0 +1,108 @@
+---
+title: "Title"
+author: "J. C. Thomas"
+date: "`r Sys.Date()`"
+format: 
+  pdf:
+    number-sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, comment = NULL)
+#this is going to require knitr and must be run on lorwyn.sif not lorwyn_eclipsed.sif
+```
+
+
+```{python}
+#testing
+# patNum = "pat001" #this can be passed in as a parameter in the snakemake with the same wildcards used to build pklPath
+```
+
+
+
+```{r, out.width = "100%", fig.align = "center", warning=FALSE}
+patNum <- "pat001"
+datPath <- "K:/iowaExpTest/rigidMovement/moveSummaryData/"
+picPath <- paste0(datPath, patNum, "/rigidImage.png")
+print(patNum)
+print(picPath)
+knitr::include_graphics(
+  picPath
+)
+```
+
+\newpage
+
+```{python, results = "asis"}
+import pickle
+patNum = "pat001"
+pklPath = "K:/iowaExpTest/rigidMovement/moveSummaryData/" + patNum + "/mainResults.pkl"
+with open(pklPath, "rb") as f:
+    res = pickle.load(f)
+medTab = (
+  res["medianTable"].
+  rename(
+    columns = {
+      "toothNum": "Tooth Number",
+      "medX": "X Median",
+      "medY": "Y Median",
+      "medZ": "Z Median",
+      "medL2": "Length Median"
+    }
+  ).
+  style.
+  format(
+    precision=3
+  ).
+  hide(axis="index").
+  to_latex(
+    hrules=True,
+    caption="Median Directional Movements"
+  )
+)
+print(patNum)
+print(medTab)
+print("earlyTest")
+
+```
+
+
+```{python}
+from plotnine import ggplot, aes, geom_histogram
+import pandas as pd
+dat = pd.DataFrame({
+    "x": [1, 2, 2, 3, 3, 3, 4, 4, 5, 6, 6, 7]
+})
+
+p = (
+    ggplot(dat, aes(x="x"))
+    + geom_histogram(binwidth=1, fill="dodgerblue", color="black")
+)
+
+p
+```
+
+```{python}
+# import pickle
+# patNum = "pat001"
+# pklPath = "K:/iowaExpTest/rigidMovement/moveSummaryData/" + patNum + "/mainResults.pkl"
+# with open(pklPath, "rb") as f:
+#     res = pickle.load(f)
+
+# bbb = res["mainResults"]["3"]["diffDat"]
+# from plotnine import ggplot, aes, geom_histogram
+# from IPython.display import display
+# p = (ggplot(bbb, aes(x = "x")) + 
+#         geom_histogram(fill = "dodgerblue", color = "black"))
+# display(p.draw())
+```
+
+
+```{python}
+# from IPython.display import display
+# # display(res["mainResults"]["11"]["movePlotX"])
+# import plotnine
+# aaa = res["mainResults"]["11"]["movePlotX"]
+# aaa
+print("test1234")
+```

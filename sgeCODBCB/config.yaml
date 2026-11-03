@@ -1,5 +1,5 @@
 executor: cluster-generic
-jobs: 25
+jobs: 1
 cores: 256
 latency-wait: 60
 printshellcmds: true

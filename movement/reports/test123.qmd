@@ -1,0 +1,183 @@
+---
+title: "Title"
+author: "J. C. Thomas"
+format: 
+  pdf:
+    number-sections: true
+execute:
+  echo: false
+---
+
+```{python}
+import pickle
+from plotnine import ggplot, aes, geom_histogram, labs, theme_bw, geom_vline, geom_jitter, geom_boxplot, geom_violin, scale_x_continuous, theme, geom_hline, geom_point
+import numpy as np
+from IPython.display import display, Latex, Image
+import sys
+import pandas as pd
+sys.path.append("../tools")
+from allDirectionPlots import allDirectionPlots
+#
+patNum = "pat001"
+pklPath = "K:/iowaExpTest/rigidMovement/moveSummaryData/" + patNum + "/mainResults.pkl"
+imagePath = "K:/iowaExpTest/rigidMovement/moveSummaryData/" + patNum + "/rigidImage.png"
+#load in data
+with open(pklPath, "rb") as f:
+    res = pickle.load(f)
+#
+print(patNum)
+```
+
+
+```{python}
+display(Image(filename=imagePath))
+```
+
+\newpage
+
+```{python}
+
+medTab = (
+  res["medianTable"][["toothNum", "medX", "medY", "medZ", "medL2"]].
+  rename(
+    columns = {
+      "toothNum": "Tooth Number",
+      "medX": "X Median",
+      "medY": "Y Median",
+      "medZ": "Z Median",
+      "medL2": "Length Median"
+    }
+  ).
+  style.
+  format(
+    precision=3
+  ).
+  hide(axis="index").
+  to_latex(
+    hrules=True,
+    caption="Median Directional Movements",
+    position="H"
+  )
+)
+
+display(Latex(medTab))
+```
+
+\newpage
+
+
+
+```{python}
+
+#row bind all of the diff data for the different teeth
+flatter = {}
+for i in res["mainResults"].keys():
+  aaa = res["mainResults"][i]["diffDat"]
+  aaa["toothNum"] = i
+  flatter[i] = aaa
+fullDiffDat = pd.concat(flatter, axis = 0, ignore_index=True)
+#manipulating the data
+fullDiffDat["toothNum"] = pd.to_numeric(fullDiffDat["toothNum"])
+
+#median table with absolute values
+medDf = res["medianTable"]
+medDf["toothNum"] = pd.to_numeric(medDf["toothNum"])
+
+#plots for each direcional movement
+absPlotX = (
+  ggplot(fullDiffDat, aes(x = "toothNum", y = "absX", color = "toothNum")) +
+  geom_jitter(alpha = .5, height = 0, width = .3) +
+  scale_x_continuous(
+    breaks = range(
+      np.min(fullDiffDat["toothNum"]),
+      np.max(fullDiffDat["toothNum"]) + 1,
+      1
+    )
+  ) +
+  theme_bw() +
+  theme(legend_position="none") +
+  labs(
+    title = "Absolute value of movement in X, " + patNum,
+    y = "Abs. X",
+    x = "Tooth Number",
+    subtitle = "Medians plotted"
+  ) +
+  geom_point(data = medDf, mapping = aes(x = "toothNum", y = "medAbsX"), color = "red")
+)
+absPlotY = (
+  ggplot(fullDiffDat, aes(x = "toothNum", y = "absY", color = "toothNum")) +
+  geom_jitter(alpha = .5, height = 0, width = .3) +
+  scale_x_continuous(
+    breaks = range(
+      np.min(fullDiffDat["toothNum"]),
+      np.max(fullDiffDat["toothNum"]) + 1,
+      1
+    )
+  ) +
+  theme_bw() +
+  theme(legend_position="none") +
+  labs(
+    title = "Absolute value of movement in Y, " + patNum,
+    y = "Abs. Y",
+    x = "Tooth Number",
+    subtitle = "Medians plotted"
+  ) +
+  geom_point(data = medDf, mapping = aes(x = "toothNum", y = "medAbsY"), color = "red")
+)
+absPlotZ = (
+  ggplot(fullDiffDat, aes(x = "toothNum", y = "absZ", color = "toothNum")) +
+  geom_jitter(alpha = .5, height = 0, width = .3) +
+  scale_x_continuous(
+    breaks = range(
+      np.min(fullDiffDat["toothNum"]),
+      np.max(fullDiffDat["toothNum"]) + 1,
+      1
+    )
+  ) +
+  theme_bw() +
+  theme(legend_position="none") +
+  labs(
+    title = "Absolute value of movement in Z, " + patNum,
+    y = "Abs. Z",
+    x = "Tooth Number",
+    subtitle = "Median plotted"
+  ) +
+  geom_point(data = medDf, mapping = aes(x = "toothNum", y = "medAbsZ"), color = "red")
+)
+plotL2 = (
+  ggplot(fullDiffDat, aes(x = "toothNum", y = "l2Norm", color = "toothNum")) +
+  geom_jitter(alpha = .5, height = 0, width = .3) +
+  scale_x_continuous(
+    breaks = range(
+      np.min(fullDiffDat["toothNum"]),
+      np.max(fullDiffDat["toothNum"]) + 1,
+      1
+    )
+  ) +
+  theme_bw() +
+  theme(legend_position="none") +
+  labs(
+    title = "L2 norm of movement vector, " + patNum,
+    y = "L2 Norm",
+    x = "Tooth Number",
+    subtitle = "Median plotted"
+  ) +
+  geom_point(data = medDf, mapping = aes(x = "toothNum", y = "medL2"), color = "red")
+)
+display(absPlotX)
+display(absPlotY)
+display(absPlotZ)
+display(plotL2)
+```
+
+\newpage
+
+```{python}
+#| warning: False
+xyzPlots = allDirectionPlots(res)
+for i in xyzPlots.keys():
+  for j in xyzPlots[i].keys():
+    display(xyzPlots[i][j])
+```
+
+

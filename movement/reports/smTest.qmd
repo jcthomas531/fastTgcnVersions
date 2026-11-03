@@ -1,0 +1,21 @@
+---
+title: "Title"
+author: "J. C. Thomas"
+params:
+    patnum: "pat001"
+format: 
+  pdf:
+    pdf-engine: xelatex
+    number-sections: true
+execute:
+  echo: false
+---
+
+
+```{python}
+import os
+
+patNum = os.environ.get("PAT_NUM", "pat001")
+print(os.getcwd())
+print(patNum)
+```

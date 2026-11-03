@@ -1,3 +1,4 @@
+from pyvista import OFF_SCREEN
 import pickle
 import sys
 import pandas as pd
@@ -208,3 +209,128 @@ Plt.pyplot.hist(diffDf3["x"])
 
 
 
+#####################################################################################################################
+
+sys.path.append("movement/tools")
+from singleToothMove import singleToothMove
+import restrictMeshToTooth as rmtt
+
+
+#testing
+
+with open(transPath, "rb") as f:
+    transDict = pickle.load(f)
+#load formatted meshes
+preDat = raf.readAndFormat(file = prePath, arch = "U")
+postDat = raf.readAndFormat(file = postPath, arch = "U")
+
+
+def allToothMove(preDat, postDat, transDict, patNum):
+    uniqTeeth = [i for i in transDict.keys() if i != "gum"]
+
+    allTeethMove = {}
+    for i in range(len(uniqTeeth)):
+        #tooth level data
+        toothi = uniqTeeth[i]
+        preDati = rmtt.restrictMeshToTooth(preDat, toothNum = toothi)
+        postDati = rmtt.restrictMeshToTooth(postDat, toothNum = toothi)
+        transi = transDict[toothi]
+        #get movement summary
+        allTeethMove[toothi] = singleToothMove(
+            preDati = preDati, postDati = postDati, transi = transi, patNum = patNum
+        )
+    return allTeethMove
+
+
+
+aaa = allToothMove(preDat = preDat, postDat = postDat, transDict = transDict, patNum = "3")
+aaa["3"]["diffSummary"]
+aaa["3"]["movePlotX"]
+#diff summary is pre - rigid
+
+uTeeth = [i for i in transDict.keys() if i != "gum"]
+p = pv.Plotter()
+p.add_mesh(aaa["2"]["surf_pre"], color = "white")
+p.add_mesh(aaa["2"]["surf_rigid"], scalars = "rgba", rgb = True,  opacity = .6)
+p.add_mesh(aaa["3"]["surf_pre"], color = "white")
+p.add_mesh(aaa["3"]["surf_rigid"], scalars = "rgba", rgb = True,  opacity = .6)
+p.add_mesh(aaa["15"]["surf_pre"], color = "white")
+p.add_mesh(aaa["15"]["surf_rigid"], scalars = "rgba", rgb = True,  opacity = .6)
+p.add_mesh(aaa["14"]["surf_pre"], color = "white")
+p.add_mesh(aaa["14"]["surf_rigid"], scalars = "rgba", rgb = True,  opacity = .6)
+p.show_bounds(
+    grid="front",
+    location="outer",
+    all_edges=True,
+    xtitle="X",
+    ytitle="Y",
+    ztitle="Z"
+)
+p.show()
+
+
+
+uTeeth = [i for i in transDict.keys() if i != "gum"]
+#pre and rigid 
+p = pv.Plotter()
+for i in range(len(uTeeth)):
+    toothi = uTeeth[i]
+    p.add_mesh(aaa[toothi]["surf_pre"], color = "white")
+    p.add_mesh(aaa[toothi]["surf_rigid"], scalars = "rgba", rgb = True,  opacity = .6)
+p.show_bounds(
+    grid="front",
+    location="outer",
+    all_edges=True,
+    xtitle="X",
+    ytitle="Y",
+    ztitle="Z"
+)
+p.show()
+
+
+#post and rigid
+p = pv.Plotter()
+for i in range(len(uTeeth)):
+    toothi = uTeeth[i]
+    p.add_mesh(aaa[toothi]["surf_post"], color = "white")
+    p.add_mesh(aaa[toothi]["surf_rigid"], scalars = "rgba", rgb = True,  opacity = .6)
+p.show_bounds(
+    grid="front",
+    location="outer",
+    all_edges=True,
+    xtitle="X",
+    ytitle="Y",
+    ztitle="Z"
+)
+p.show()
+
+
+
+summaryDict = {}
+for i in aaa.keys():
+    summaryDict[i] = aaa[i]["diffSummary"]
+summaryDf = pd.DataFrame.from_dict(summaryDict, orient="index")
+summaryDf = summaryDf.rename_axis("toothNum").reset_index()
+summaryDfMedXYZ = summaryDf[["toothNum", "medX", "medY", "medZ"]]
+
+
+
+
+
+
+#testing screenshot
+p = pv.Plotter(off_screen = True)
+for i in range(len(uTeeth)):
+    toothi = uTeeth[i]
+    p.add_mesh(aaa[toothi]["surf_pre"], color = "white")
+    p.add_mesh(aaa[toothi]["surf_rigid"], scalars = "rgba", rgb = True,  opacity = .6)
+p.show_bounds(
+    grid="front",
+    location="outer",
+    all_edges=True,
+    xtitle="X",
+    ytitle="Y",
+    ztitle="Z"
+)
+p.view_xy()
+p.screenshot(rigidImage)

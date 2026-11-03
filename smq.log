@@ -1,0 +1,607 @@
+Using profile sgeCODBCB for setting default command line arguments.
+/old_Users/jthomas48/dissModels/intraoralSegmentation/Snakefile:195: SyntaxWarning: invalid escape sequence '\.'
+  origStlPreDFilepath = [dir_ + file_ for dir_, file_ in zip(origStlPreDDir, origStlPreDFile)]
+/old_Users/jthomas48/dissModels/intraoralSegmentation/Snakefile:213: SyntaxWarning: invalid escape sequence '\.'
+  origStlFinFilepath = [dir_ + file_ for dir_, file_ in zip(origStlFinDir, origStlFinFile)]
+
+SNAKEMAKE
+=========
+  Date: 2026-10-23 14:54:54
+  Workflow ID: 35b56989-852c-4799-ab97-9cf981a09938
+  Platform: Linux-3.10.0-1160.119.1.el7.x86_64-x86_64-with-glibc2.17
+  Host: argon-itf-login-4.hpc
+  User: jthomas48
+  Snakemake version: 9.24.0
+  Python version: 3.13.14 (main, Jul 23 2026, 14:44:45) [Clang 22.1.3 ]
+  Command: /Users/jthomas48/.venv/bin/snakemake --profile sgeCODBCB test111
+  Snakefile: /old_Users/jthomas48/dissModels/intraoralSegmentation/Snakefile
+  Base directory: /old_Users/jthomas48/dissModels/intraoralSegmentation
+  Run directory: /old_Users/jthomas48/dissModels/intraoralSegmentation
+  Working directory: /old_Users/jthomas48/dissModels/intraoralSegmentation
+  Config file(s): []
+  Config MD5: 99914b932bd37a50b983c5e7c90ae93b
+
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided remote nodes: 1
+Job stats:
+job                    count
+-------------------  -------
+rigidMovementReport        8
+test111                    1
+total                      9
+
+Select jobs to execute...
+Execute 1 jobs...
+
+[Fri Oct 23 14:54:55 2026]
+rule rigidMovementReport:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat014/mainResults.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat014/rigidImage.png, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat014/rigidInteract.html, movement/reports/smTest.qmd
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat014/pat014rigidMoveReport.pdf
+    jobid: 121
+    reason: Missing output files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat014/pat014rigidMoveReport.pdf; Code has changed since last execution
+    wildcards: seg1Pat=pat014
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=CODBCB, gpus=0
+Shell command: 
+    export PATH="$(python3 -m site --user-base)/bin:$PATH"
+    export JUPYTER_DATA_DIR="$HOME/.local/share/jupyter"
+    export PAT_NUM="pat014"
+
+    runtime_dir=$(mktemp -d "${TMPDIR:-/tmp}/quarto.XXXXXX")
+    trap 'rm -rf "$runtime_dir"' EXIT
+
+    export XDG_RUNTIME_DIR="$runtime_dir"
+    export JUPYTER_RUNTIME_DIR="$runtime_dir"
+    export LANG=C.utf8
+    export LC_ALL=C.utf8
+    export TEXMFVAR="$runtime_dir/texmf-var"
+    export TEXMFCACHE="$runtime_dir/texmf-cache"
+    mkdir -p "$TEXMFVAR" "$TEXMFCACHE"
+
+    out_dir="$(realpath -m "../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat014/")"
+    out_file="pat014rigidMoveReport.pdf"
+    qmd_file="$(realpath "movement/reports/smTest.qmd")"
+    qmd_dir="$(dirname "$qmd_file")"
+
+    mkdir -p "$out_dir" || exit 1
+
+    echo "Quarto file: $qmd_file"
+    echo "Local render directory: $qmd_dir"
+    echo "Expected output: $out_dir/$out_file"
+
+    # Render locally to avoid cross-filesystem rename errors.
+    cd "$qmd_dir" || exit 1
+
+    quarto render "$qmd_file"         --to pdf         --output "$out_file"         --output-dir "$qmd_dir"
+
+    status=$?
+    if [ "$status" -ne 0 ]; then
+        exit "$status"
+    fi
+
+    rendered_file="$qmd_dir/$out_file"
+
+    if [ ! -f "$rendered_file" ]; then
+        echo "ERROR: Quarto did not create $rendered_file"
+        exit 1
+    fi
+
+    # Copy, rather than rename, across filesystems.
+    cp "$rendered_file" "$out_dir/$out_file" || exit 1
+
+    if [ ! -f "$out_dir/$out_file" ]; then
+        echo "ERROR: PDF missing from destination."
+        exit 1
+    fi
+
+    echo "PDF verified: $out_dir/$out_file"
+    
+Submitted job 121 with external jobid '6676967'.
+Select jobs to execute...
+[Fri Oct 23 14:56:35 2026]
+Finished jobid: 121 (Rule: rigidMovementReport)
+1 of 9 steps (11%) done
+Execute 1 jobs...
+
+[Fri Oct 23 14:56:35 2026]
+rule rigidMovementReport:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat004/mainResults.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat004/rigidImage.png, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat004/rigidInteract.html, movement/reports/smTest.qmd
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat004/pat004rigidMoveReport.pdf
+    jobid: 112
+    reason: Missing output files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat004/pat004rigidMoveReport.pdf; Code has changed since last execution
+    wildcards: seg1Pat=pat004
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=CODBCB, gpus=0
+Shell command: 
+    export PATH="$(python3 -m site --user-base)/bin:$PATH"
+    export JUPYTER_DATA_DIR="$HOME/.local/share/jupyter"
+    export PAT_NUM="pat004"
+
+    runtime_dir=$(mktemp -d "${TMPDIR:-/tmp}/quarto.XXXXXX")
+    trap 'rm -rf "$runtime_dir"' EXIT
+
+    export XDG_RUNTIME_DIR="$runtime_dir"
+    export JUPYTER_RUNTIME_DIR="$runtime_dir"
+    export LANG=C.utf8
+    export LC_ALL=C.utf8
+    export TEXMFVAR="$runtime_dir/texmf-var"
+    export TEXMFCACHE="$runtime_dir/texmf-cache"
+    mkdir -p "$TEXMFVAR" "$TEXMFCACHE"
+
+    out_dir="$(realpath -m "../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat004/")"
+    out_file="pat004rigidMoveReport.pdf"
+    qmd_file="$(realpath "movement/reports/smTest.qmd")"
+    qmd_dir="$(dirname "$qmd_file")"
+
+    mkdir -p "$out_dir" || exit 1
+
+    echo "Quarto file: $qmd_file"
+    echo "Local render directory: $qmd_dir"
+    echo "Expected output: $out_dir/$out_file"
+
+    # Render locally to avoid cross-filesystem rename errors.
+    cd "$qmd_dir" || exit 1
+
+    quarto render "$qmd_file"         --to pdf         --output "$out_file"         --output-dir "$qmd_dir"
+
+    status=$?
+    if [ "$status" -ne 0 ]; then
+        exit "$status"
+    fi
+
+    rendered_file="$qmd_dir/$out_file"
+
+    if [ ! -f "$rendered_file" ]; then
+        echo "ERROR: Quarto did not create $rendered_file"
+        exit 1
+    fi
+
+    # Copy, rather than rename, across filesystems.
+    cp "$rendered_file" "$out_dir/$out_file" || exit 1
+
+    if [ ! -f "$out_dir/$out_file" ]; then
+        echo "ERROR: PDF missing from destination."
+        exit 1
+    fi
+
+    echo "PDF verified: $out_dir/$out_file"
+    
+Submitted job 112 with external jobid '6676976'.
+Select jobs to execute...
+[Fri Oct 23 14:57:35 2026]
+Finished jobid: 112 (Rule: rigidMovementReport)
+2 of 9 steps (22%) done
+Execute 1 jobs...
+
+[Fri Oct 23 14:57:35 2026]
+rule rigidMovementReport:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat008/mainResults.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat008/rigidImage.png, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat008/rigidInteract.html, movement/reports/smTest.qmd
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat008/pat008rigidMoveReport.pdf
+    jobid: 109
+    reason: Missing output files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat008/pat008rigidMoveReport.pdf; Code has changed since last execution
+    wildcards: seg1Pat=pat008
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=CODBCB, gpus=0
+Shell command: 
+    export PATH="$(python3 -m site --user-base)/bin:$PATH"
+    export JUPYTER_DATA_DIR="$HOME/.local/share/jupyter"
+    export PAT_NUM="pat008"
+
+    runtime_dir=$(mktemp -d "${TMPDIR:-/tmp}/quarto.XXXXXX")
+    trap 'rm -rf "$runtime_dir"' EXIT
+
+    export XDG_RUNTIME_DIR="$runtime_dir"
+    export JUPYTER_RUNTIME_DIR="$runtime_dir"
+    export LANG=C.utf8
+    export LC_ALL=C.utf8
+    export TEXMFVAR="$runtime_dir/texmf-var"
+    export TEXMFCACHE="$runtime_dir/texmf-cache"
+    mkdir -p "$TEXMFVAR" "$TEXMFCACHE"
+
+    out_dir="$(realpath -m "../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat008/")"
+    out_file="pat008rigidMoveReport.pdf"
+    qmd_file="$(realpath "movement/reports/smTest.qmd")"
+    qmd_dir="$(dirname "$qmd_file")"
+
+    mkdir -p "$out_dir" || exit 1
+
+    echo "Quarto file: $qmd_file"
+    echo "Local render directory: $qmd_dir"
+    echo "Expected output: $out_dir/$out_file"
+
+    # Render locally to avoid cross-filesystem rename errors.
+    cd "$qmd_dir" || exit 1
+
+    quarto render "$qmd_file"         --to pdf         --output "$out_file"         --output-dir "$qmd_dir"
+
+    status=$?
+    if [ "$status" -ne 0 ]; then
+        exit "$status"
+    fi
+
+    rendered_file="$qmd_dir/$out_file"
+
+    if [ ! -f "$rendered_file" ]; then
+        echo "ERROR: Quarto did not create $rendered_file"
+        exit 1
+    fi
+
+    # Copy, rather than rename, across filesystems.
+    cp "$rendered_file" "$out_dir/$out_file" || exit 1
+
+    if [ ! -f "$out_dir/$out_file" ]; then
+        echo "ERROR: PDF missing from destination."
+        exit 1
+    fi
+
+    echo "PDF verified: $out_dir/$out_file"
+    
+Submitted job 109 with external jobid '6676979'.
+Select jobs to execute...
+[Fri Oct 23 14:58:35 2026]
+Finished jobid: 109 (Rule: rigidMovementReport)
+3 of 9 steps (33%) done
+Execute 1 jobs...
+
+[Fri Oct 23 14:58:35 2026]
+rule rigidMovementReport:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat013/mainResults.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat013/rigidImage.png, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat013/rigidInteract.html, movement/reports/smTest.qmd
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat013/pat013rigidMoveReport.pdf
+    jobid: 1
+    reason: Missing output files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat013/pat013rigidMoveReport.pdf; Code has changed since last execution
+    wildcards: seg1Pat=pat013
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=CODBCB, gpus=0
+Shell command: 
+    export PATH="$(python3 -m site --user-base)/bin:$PATH"
+    export JUPYTER_DATA_DIR="$HOME/.local/share/jupyter"
+    export PAT_NUM="pat013"
+
+    runtime_dir=$(mktemp -d "${TMPDIR:-/tmp}/quarto.XXXXXX")
+    trap 'rm -rf "$runtime_dir"' EXIT
+
+    export XDG_RUNTIME_DIR="$runtime_dir"
+    export JUPYTER_RUNTIME_DIR="$runtime_dir"
+    export LANG=C.utf8
+    export LC_ALL=C.utf8
+    export TEXMFVAR="$runtime_dir/texmf-var"
+    export TEXMFCACHE="$runtime_dir/texmf-cache"
+    mkdir -p "$TEXMFVAR" "$TEXMFCACHE"
+
+    out_dir="$(realpath -m "../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat013/")"
+    out_file="pat013rigidMoveReport.pdf"
+    qmd_file="$(realpath "movement/reports/smTest.qmd")"
+    qmd_dir="$(dirname "$qmd_file")"
+
+    mkdir -p "$out_dir" || exit 1
+
+    echo "Quarto file: $qmd_file"
+    echo "Local render directory: $qmd_dir"
+    echo "Expected output: $out_dir/$out_file"
+
+    # Render locally to avoid cross-filesystem rename errors.
+    cd "$qmd_dir" || exit 1
+
+    quarto render "$qmd_file"         --to pdf         --output "$out_file"         --output-dir "$qmd_dir"
+
+    status=$?
+    if [ "$status" -ne 0 ]; then
+        exit "$status"
+    fi
+
+    rendered_file="$qmd_dir/$out_file"
+
+    if [ ! -f "$rendered_file" ]; then
+        echo "ERROR: Quarto did not create $rendered_file"
+        exit 1
+    fi
+
+    # Copy, rather than rename, across filesystems.
+    cp "$rendered_file" "$out_dir/$out_file" || exit 1
+
+    if [ ! -f "$out_dir/$out_file" ]; then
+        echo "ERROR: PDF missing from destination."
+        exit 1
+    fi
+
+    echo "PDF verified: $out_dir/$out_file"
+    
+Submitted job 1 with external jobid '6676986'.
+Select jobs to execute...
+[Fri Oct 23 14:59:05 2026]
+Finished jobid: 1 (Rule: rigidMovementReport)
+4 of 9 steps (44%) done
+Execute 1 jobs...
+
+[Fri Oct 23 14:59:05 2026]
+rule rigidMovementReport:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat007/mainResults.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat007/rigidImage.png, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat007/rigidInteract.html, movement/reports/smTest.qmd
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat007/pat007rigidMoveReport.pdf
+    jobid: 115
+    reason: Missing output files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat007/pat007rigidMoveReport.pdf; Code has changed since last execution
+    wildcards: seg1Pat=pat007
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=CODBCB, gpus=0
+Shell command: 
+    export PATH="$(python3 -m site --user-base)/bin:$PATH"
+    export JUPYTER_DATA_DIR="$HOME/.local/share/jupyter"
+    export PAT_NUM="pat007"
+
+    runtime_dir=$(mktemp -d "${TMPDIR:-/tmp}/quarto.XXXXXX")
+    trap 'rm -rf "$runtime_dir"' EXIT
+
+    export XDG_RUNTIME_DIR="$runtime_dir"
+    export JUPYTER_RUNTIME_DIR="$runtime_dir"
+    export LANG=C.utf8
+    export LC_ALL=C.utf8
+    export TEXMFVAR="$runtime_dir/texmf-var"
+    export TEXMFCACHE="$runtime_dir/texmf-cache"
+    mkdir -p "$TEXMFVAR" "$TEXMFCACHE"
+
+    out_dir="$(realpath -m "../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat007/")"
+    out_file="pat007rigidMoveReport.pdf"
+    qmd_file="$(realpath "movement/reports/smTest.qmd")"
+    qmd_dir="$(dirname "$qmd_file")"
+
+    mkdir -p "$out_dir" || exit 1
+
+    echo "Quarto file: $qmd_file"
+    echo "Local render directory: $qmd_dir"
+    echo "Expected output: $out_dir/$out_file"
+
+    # Render locally to avoid cross-filesystem rename errors.
+    cd "$qmd_dir" || exit 1
+
+    quarto render "$qmd_file"         --to pdf         --output "$out_file"         --output-dir "$qmd_dir"
+
+    status=$?
+    if [ "$status" -ne 0 ]; then
+        exit "$status"
+    fi
+
+    rendered_file="$qmd_dir/$out_file"
+
+    if [ ! -f "$rendered_file" ]; then
+        echo "ERROR: Quarto did not create $rendered_file"
+        exit 1
+    fi
+
+    # Copy, rather than rename, across filesystems.
+    cp "$rendered_file" "$out_dir/$out_file" || exit 1
+
+    if [ ! -f "$out_dir/$out_file" ]; then
+        echo "ERROR: PDF missing from destination."
+        exit 1
+    fi
+
+    echo "PDF verified: $out_dir/$out_file"
+    
+Submitted job 115 with external jobid '6676988'.
+Select jobs to execute...
+[Fri Oct 23 14:59:35 2026]
+Finished jobid: 115 (Rule: rigidMovementReport)
+5 of 9 steps (56%) done
+Execute 1 jobs...
+
+[Fri Oct 23 14:59:36 2026]
+rule rigidMovementReport:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat012/mainResults.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat012/rigidImage.png, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat012/rigidInteract.html, movement/reports/smTest.qmd
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat012/pat012rigidMoveReport.pdf
+    jobid: 118
+    reason: Missing output files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat012/pat012rigidMoveReport.pdf; Code has changed since last execution
+    wildcards: seg1Pat=pat012
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=CODBCB, gpus=0
+Shell command: 
+    export PATH="$(python3 -m site --user-base)/bin:$PATH"
+    export JUPYTER_DATA_DIR="$HOME/.local/share/jupyter"
+    export PAT_NUM="pat012"
+
+    runtime_dir=$(mktemp -d "${TMPDIR:-/tmp}/quarto.XXXXXX")
+    trap 'rm -rf "$runtime_dir"' EXIT
+
+    export XDG_RUNTIME_DIR="$runtime_dir"
+    export JUPYTER_RUNTIME_DIR="$runtime_dir"
+    export LANG=C.utf8
+    export LC_ALL=C.utf8
+    export TEXMFVAR="$runtime_dir/texmf-var"
+    export TEXMFCACHE="$runtime_dir/texmf-cache"
+    mkdir -p "$TEXMFVAR" "$TEXMFCACHE"
+
+    out_dir="$(realpath -m "../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat012/")"
+    out_file="pat012rigidMoveReport.pdf"
+    qmd_file="$(realpath "movement/reports/smTest.qmd")"
+    qmd_dir="$(dirname "$qmd_file")"
+
+    mkdir -p "$out_dir" || exit 1
+
+    echo "Quarto file: $qmd_file"
+    echo "Local render directory: $qmd_dir"
+    echo "Expected output: $out_dir/$out_file"
+
+    # Render locally to avoid cross-filesystem rename errors.
+    cd "$qmd_dir" || exit 1
+
+    quarto render "$qmd_file"         --to pdf         --output "$out_file"         --output-dir "$qmd_dir"
+
+    status=$?
+    if [ "$status" -ne 0 ]; then
+        exit "$status"
+    fi
+
+    rendered_file="$qmd_dir/$out_file"
+
+    if [ ! -f "$rendered_file" ]; then
+        echo "ERROR: Quarto did not create $rendered_file"
+        exit 1
+    fi
+
+    # Copy, rather than rename, across filesystems.
+    cp "$rendered_file" "$out_dir/$out_file" || exit 1
+
+    if [ ! -f "$out_dir/$out_file" ]; then
+        echo "ERROR: PDF missing from destination."
+        exit 1
+    fi
+
+    echo "PDF verified: $out_dir/$out_file"
+    
+Submitted job 118 with external jobid '6676991'.
+Select jobs to execute...
+[Fri Oct 23 15:00:05 2026]
+Finished jobid: 118 (Rule: rigidMovementReport)
+6 of 9 steps (67%) done
+Execute 1 jobs...
+
+[Fri Oct 23 15:00:05 2026]
+rule rigidMovementReport:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat015/mainResults.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat015/rigidImage.png, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat015/rigidInteract.html, movement/reports/smTest.qmd
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat015/pat015rigidMoveReport.pdf
+    jobid: 103
+    reason: Missing output files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat015/pat015rigidMoveReport.pdf; Code has changed since last execution
+    wildcards: seg1Pat=pat015
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=CODBCB, gpus=0
+Shell command: 
+    export PATH="$(python3 -m site --user-base)/bin:$PATH"
+    export JUPYTER_DATA_DIR="$HOME/.local/share/jupyter"
+    export PAT_NUM="pat015"
+
+    runtime_dir=$(mktemp -d "${TMPDIR:-/tmp}/quarto.XXXXXX")
+    trap 'rm -rf "$runtime_dir"' EXIT
+
+    export XDG_RUNTIME_DIR="$runtime_dir"
+    export JUPYTER_RUNTIME_DIR="$runtime_dir"
+    export LANG=C.utf8
+    export LC_ALL=C.utf8
+    export TEXMFVAR="$runtime_dir/texmf-var"
+    export TEXMFCACHE="$runtime_dir/texmf-cache"
+    mkdir -p "$TEXMFVAR" "$TEXMFCACHE"
+
+    out_dir="$(realpath -m "../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat015/")"
+    out_file="pat015rigidMoveReport.pdf"
+    qmd_file="$(realpath "movement/reports/smTest.qmd")"
+    qmd_dir="$(dirname "$qmd_file")"
+
+    mkdir -p "$out_dir" || exit 1
+
+    echo "Quarto file: $qmd_file"
+    echo "Local render directory: $qmd_dir"
+    echo "Expected output: $out_dir/$out_file"
+
+    # Render locally to avoid cross-filesystem rename errors.
+    cd "$qmd_dir" || exit 1
+
+    quarto render "$qmd_file"         --to pdf         --output "$out_file"         --output-dir "$qmd_dir"
+
+    status=$?
+    if [ "$status" -ne 0 ]; then
+        exit "$status"
+    fi
+
+    rendered_file="$qmd_dir/$out_file"
+
+    if [ ! -f "$rendered_file" ]; then
+        echo "ERROR: Quarto did not create $rendered_file"
+        exit 1
+    fi
+
+    # Copy, rather than rename, across filesystems.
+    cp "$rendered_file" "$out_dir/$out_file" || exit 1
+
+    if [ ! -f "$out_dir/$out_file" ]; then
+        echo "ERROR: PDF missing from destination."
+        exit 1
+    fi
+
+    echo "PDF verified: $out_dir/$out_file"
+    
+Submitted job 103 with external jobid '6676994'.
+Select jobs to execute...
+[Fri Oct 23 15:00:35 2026]
+Finished jobid: 103 (Rule: rigidMovementReport)
+7 of 9 steps (78%) done
+Execute 1 jobs...
+
+[Fri Oct 23 15:00:35 2026]
+rule rigidMovementReport:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat001/mainResults.pkl, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat001/rigidImage.png, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/moveSummaryData/pat001/rigidInteract.html, movement/reports/smTest.qmd
+    output: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat001/pat001rigidMoveReport.pdf
+    jobid: 106
+    reason: Missing output files: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat001/pat001rigidMoveReport.pdf; Code has changed since last execution
+    wildcards: seg1Pat=pat001
+    threads: 4
+    resources: tmpdir=<TBD>, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=CODBCB, gpus=0
+Shell command: 
+    export PATH="$(python3 -m site --user-base)/bin:$PATH"
+    export JUPYTER_DATA_DIR="$HOME/.local/share/jupyter"
+    export PAT_NUM="pat001"
+
+    runtime_dir=$(mktemp -d "${TMPDIR:-/tmp}/quarto.XXXXXX")
+    trap 'rm -rf "$runtime_dir"' EXIT
+
+    export XDG_RUNTIME_DIR="$runtime_dir"
+    export JUPYTER_RUNTIME_DIR="$runtime_dir"
+    export LANG=C.utf8
+    export LC_ALL=C.utf8
+    export TEXMFVAR="$runtime_dir/texmf-var"
+    export TEXMFCACHE="$runtime_dir/texmf-cache"
+    mkdir -p "$TEXMFVAR" "$TEXMFCACHE"
+
+    out_dir="$(realpath -m "../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat001/")"
+    out_file="pat001rigidMoveReport.pdf"
+    qmd_file="$(realpath "movement/reports/smTest.qmd")"
+    qmd_dir="$(dirname "$qmd_file")"
+
+    mkdir -p "$out_dir" || exit 1
+
+    echo "Quarto file: $qmd_file"
+    echo "Local render directory: $qmd_dir"
+    echo "Expected output: $out_dir/$out_file"
+
+    # Render locally to avoid cross-filesystem rename errors.
+    cd "$qmd_dir" || exit 1
+
+    quarto render "$qmd_file"         --to pdf         --output "$out_file"         --output-dir "$qmd_dir"
+
+    status=$?
+    if [ "$status" -ne 0 ]; then
+        exit "$status"
+    fi
+
+    rendered_file="$qmd_dir/$out_file"
+
+    if [ ! -f "$rendered_file" ]; then
+        echo "ERROR: Quarto did not create $rendered_file"
+        exit 1
+    fi
+
+    # Copy, rather than rename, across filesystems.
+    cp "$rendered_file" "$out_dir/$out_file" || exit 1
+
+    if [ ! -f "$out_dir/$out_file" ]; then
+        echo "ERROR: PDF missing from destination."
+        exit 1
+    fi
+
+    echo "PDF verified: $out_dir/$out_file"
+    
+Submitted job 106 with external jobid '6676995'.
+[Fri Oct 23 15:01:05 2026]
+Finished jobid: 106 (Rule: rigidMovementReport)
+8 of 9 steps (89%) done
+Select jobs to execute...
+Execute 1 jobs...
+
+[Fri Oct 23 15:01:05 2026]
+localrule test111:
+    input: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat013/pat013rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat015/pat015rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat001/pat001rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat008/pat008rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat004/pat004rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat007/pat007rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat012/pat012rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat014/pat014rigidMoveReport.pdf
+    jobid: 0
+    reason: Input files updated by another job: ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat013/pat013rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat008/pat008rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat014/pat014rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat004/pat004rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat007/pat007rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat015/pat015rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat001/pat001rigidMoveReport.pdf, ../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/pat012/pat012rigidMoveReport.pdf
+    resources: tmpdir=/localscratch, mem_mb=1000, mem=1 GB, mem_mib=954, disk_mb=1000, disk=1 GB, disk_mib=954, queue=CODBCB, gpus=0, render_slots=1
+Shell command: None
+[Fri Oct 23 15:01:05 2026]
+Finished jobid: 0 (Rule: test111)
+9 of 9 steps (100%) done
+Complete log(s): /old_Users/jthomas48/dissModels/intraoralSegmentation/.snakemake/log/2026-10-23T145453.181668.snakemake.log
