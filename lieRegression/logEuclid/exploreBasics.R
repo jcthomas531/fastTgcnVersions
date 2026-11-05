@@ -63,6 +63,72 @@ plotTri <- function(x, data, color) {
     )
 }
 
+#checking assumptions of SE(2) group
+#wikipedia says that proper rigid trans have det = 1 but it is not clear if this property is necessary
+#for what we are doing or even to be expected, it is not listed in sola 2018
+#https://en.wikipedia.org/wiki/Rigid_transformation
+checkAssum_se2_group <- function(x) {
+
+  rot <- x[1:2,1:2]
+
+  #check orthogonality
+  rotrot <- t(rot) %*% rot
+  #this vectorizes the matrix, checks equality within tolerence
+  rotOrthog <- Matrix::all.equal(rotrot, diag(2))
+  rotOrthogLogic <- ifelse(rotOrthog == TRUE, TRUE, FALSE)
+
+  #check determinate
+  rotDet <- det(rot)
+  rotDetLogic <- ifelse(
+    base::all.equal(rotDet, 1),
+    TRUE,
+    FALSE
+  )
+
+  return(
+    list(
+      #test results
+      rotOrthogCheck = rotOrthogLogic,
+      rotDetCheck = rotDetLogic,
+      #specifics
+      rotOrthogOutput = rotOrthog,
+      rotOrthogDiff = rotrot - diag(2),
+      rotDet = rotDet
+    )
+  )
+
+}
+#testing
+# trans2 <- transMaker(theta = 30, xMove = 0, yMove = 2)
+# checkAssum_se2_group(trans2)
+# test1 <- matrix(rnorm(9), nrow = 3)
+# checkAssum_se2_group(test1)
+
+
+#function for checking form of matrix once it is lie algebra
+#see sola 2018
+checkAssum_se2_algebra <- function(x) {
+  
+  rot <- x[1:2,1:2]
+  
+  
+  #check rotation portion is skew symmetric
+  #checking all everything at once
+  rotSkewSymm <- Matrix::all.equal(t(rot), -rot)
+  rotSkewSymmLogic <- ifelse(rotSkewSymm == TRUE, TRUE, FALSE)
+  #check diagonal is 0
+  rotDiagLogic <- base::all.equal(diag(rot), rep(0, 2))
+
+  return(
+    list(
+      rotSkewSymmCheck = rotSkewSymmLogic,
+      rotSkewSymmOutput = rotSkewSymm,
+      diag0Check = rotDiagLogic
+    )
+  )
+  
+}
+
 #----------------------------------------------------------------------------------------------------------------------------
 
 #specifying the triangle vertices as a matrix
@@ -101,8 +167,12 @@ p2 <- p1 |>
 p2
 
 
-
+#------------------------------------------------------------------------------------------------------------------------
 #adding error to the transformation
+#THIS MAY NOT BE THE PROPER WAY TO HANDLE ERROR
+#this may give rise to valid transformation matrices but it is not the error for the assumed model
+#that error is given in the lie algebra
+
 simulateTrans <- function(
   n, thetaMean = 30, thetaSd = 1, 
   xMean = 3, xSd = 1,
@@ -149,3 +219,56 @@ pError <- ggplot(mapping = aes(x = x, y = y)) |>
   xlim(-5,5) +
   ylim(-5,5)
 pError
+#------------------------------------------------------------------------------------------------------------------------
+
+
+#moving the transformation from the lie group to the lie algebra
+#as the log mapping is onto but not one-to-one, we will need to investigate how this
+#method handles multiple mappings
+library(expm)
+trans2_up <- logm(trans2)
+#check properties in the lie algebra
+checkAssum_se2_algebra(trans2_up)
+#bringing it back down to the lie group
+trans2_down <- expm(trans2_up)
+trans2
+#it seems that the projection up and back down reasonably preserves the transformation matrix
+#we will want to investigate if that remains true with matrices farther from the identity
+Matrix::all.equal(trans2, trans2_down)
+#we will want to investigate these assumptions as we get farther from the identity as well
+checkAssum_se2_group(trans2)
+checkAssum_se2_group(trans2_down)
+
+#a quick check with larger transformations
+#seems to still be working
+trans3 <- transMaker(theta = 95, xMove = 100, yMove = 100)
+trans3_up <- logm(trans3)
+trans3_down <- expm(trans3_up)
+Matrix::all.equal(trans3, trans3_down)
+checkAssum_se2_group(trans3)
+checkAssum_se2_group(trans3_down)
+
+
+
+
+
+#vee function to take matrix in lie algebra and make it into a vector
+#matrices in lie algebra have specific form, see sola 2018, so the basis can be hard coded
+#using form from sola 2018
+vee_se2 <- function(x) {
+  #basing this off SO(3) formulation in example 3 in sola 2018 and table 1
+  theta <- x[2,1]
+  rho <- x[1:2,3]
+  return(c(rho, theta))
+}
+#testing
+# trans3_up
+# vee_se2(trans3_up)
+
+#hat function to take vector representation in lie algebra back to matrix representation
+hat_se2 <- function(x) {
+  
+}
+
+
+
