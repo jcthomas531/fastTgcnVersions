@@ -1,8 +1,6 @@
 ---
-title: "Title"
+title: "Patient Movement Report"
 author: "J. C. Thomas"
-params:
-    patnum: "pat001"
 format: 
   pdf:
     pdf-engine: xelatex
@@ -14,8 +12,196 @@ execute:
 
 ```{python}
 import os
+import sys
 
-patNum = os.environ.get("PAT_NUM", "pat001")
-print(os.getcwd())
+#testing
+patNum = "pat001"
+pklPath = "K:/iowaExpTest/rigidMovement/moveSummaryData/" + patNum + "/mainResults.pkl"
+imagePath = "K:/iowaExpTest/rigidMovement/moveSummaryData/" + patNum + "/rigidImage.png"
+sys.path.append("movement/tools")
+
+
+#getting variables from snakemake shell
+patNum = os.environ.get("PAT_NUM")
+pklPathIn = os.environ.get("PKL_PATH")
+pklPath = "../../" + pklPathIn
+imagePathIn = os.environ.get("IMAGE_PATH")
+imagePath = "../../" + imagePathIn
+
+print("PATIENT NUMBER")
 print(patNum)
+
+import pickle
+from plotnine import ggplot, aes, geom_histogram, labs, theme_bw, geom_vline, geom_jitter, geom_boxplot, geom_violin, scale_x_continuous, theme, geom_hline, geom_point
+import numpy as np
+from IPython.display import display, Latex, Image
+import pandas as pd
+sys.path.append("../tools")
+from allDirectionPlots import allDirectionPlots
+
+#load in data
+with open(pklPath, "rb") as f:
+    res = pickle.load(f)
+
+```
+
+```{python}
+display(Image(filename=imagePath))
+```
+
+\newpage
+
+Directional movement is calculated as the pre-treatment position minus the post-treatment position. This is based on the coordinate system with the y axis running approximately along the midline and the x axis sitting somewhere around the tooth 2/tooth 14 position (shown in the image above). Using this reference system and directional movement calculated as pre minus post, interpretation of the sign of directional movement is challenging: expansion in the x direction for tooth 2 is denoted by a positive number but expansion for tooth 14 is denoted by a positive number. 
+
+This interpretation issue is purely driven by the location of the arch in the coordinate system. The next time we do this, I want to move the arches entirely into the (+,+) quadrant as I believe that will alleviate the issue entirely as well as not cause any other issues
+
+Note: these scans are automatically aligned to an ideally aligned "master arch". The "master arch" is manually (to an extent) moved to a specific alignment. The automatic alignment of the scans means they are not perfectly aligned like the "master arch" and this is what has created these interpretation issues for us. I believe that these issues would be completely eliminated by moving the master arch fully into the (+,+) quadrant. 
+
+```{python}
+
+medTab = (
+  res["medianTable"][["toothNum", "absMedX", "absMedY", "absMedZ", "medL2"]].
+  rename(
+    columns = {
+      "toothNum": "Tooth Number",
+      "absMedX": "X Median (Abs. val.)",
+      "absMedY": "Y Median (Abs. val.)",
+      "absMedZ": "Z Median (Abs. val.)",
+      "medL2": "Length Median (L2 norm)"
+    }
+  ).
+  style.
+  format(
+    precision=3
+  ).
+  hide(axis="index").
+  to_latex(
+    hrules=True,
+    caption="Absolute Value of Median Directional Movements",
+    position="H"
+  )
+)
+
+display(Latex(medTab))
+```
+
+\newpage
+
+
+
+```{python}
+
+#row bind all of the diff data for the different teeth
+flatter = {}
+for i in res["mainResults"].keys():
+  aaa = res["mainResults"][i]["diffDat"]
+  aaa["toothNum"] = i
+  flatter[i] = aaa
+fullDiffDat = pd.concat(flatter, axis = 0, ignore_index=True)
+#manipulating the data
+fullDiffDat["toothNum"] = pd.to_numeric(fullDiffDat["toothNum"])
+
+#median table with absolute values
+medDf = res["medianTable"]
+medDf["toothNum"] = pd.to_numeric(medDf["toothNum"])
+
+#plots for each direcional movement
+absPlotX = (
+  ggplot(fullDiffDat, aes(x = "toothNum", y = "x", color = "toothNum")) +
+  geom_hline(yintercept = 0, color = "gray") +
+  geom_jitter(alpha = .5, height = 0, width = .3) +
+  scale_x_continuous(
+    breaks = range(
+      np.min(fullDiffDat["toothNum"]),
+      np.max(fullDiffDat["toothNum"]) + 1,
+      1
+    )
+  ) +
+  theme_bw() +
+  theme(legend_position="none") +
+  labs(
+    title = "Movement in X, " + patNum,
+    y = "X",
+    x = "Tooth Number",
+    subtitle = "Medians plotted"
+  ) +
+  geom_point(data = medDf, mapping = aes(x = "toothNum", y = "medX"), color = "red") 
+)
+absPlotY = (
+  ggplot(fullDiffDat, aes(x = "toothNum", y = "y", color = "toothNum")) +
+  geom_hline(yintercept = 0, color = "gray") +
+  geom_jitter(alpha = .5, height = 0, width = .3) +
+  scale_x_continuous(
+    breaks = range(
+      np.min(fullDiffDat["toothNum"]),
+      np.max(fullDiffDat["toothNum"]) + 1,
+      1
+    )
+  ) +
+  theme_bw() +
+  theme(legend_position="none") +
+  labs(
+    title = "Movement in Y, " + patNum,
+    y = "Y",
+    x = "Tooth Number",
+    subtitle = "Medians plotted"
+  ) +
+  geom_point(data = medDf, mapping = aes(x = "toothNum", y = "medY"), color = "red")
+)
+absPlotZ = (
+  ggplot(fullDiffDat, aes(x = "toothNum", y = "z", color = "toothNum")) +
+  geom_hline(yintercept = 0, color = "gray") +
+  geom_jitter(alpha = .5, height = 0, width = .3) +
+  scale_x_continuous(
+    breaks = range(
+      np.min(fullDiffDat["toothNum"]),
+      np.max(fullDiffDat["toothNum"]) + 1,
+      1
+    )
+  ) +
+  theme_bw() +
+  theme(legend_position="none") +
+  labs(
+    title = "Movement in Z, " + patNum,
+    y = "Z",
+    x = "Tooth Number",
+    subtitle = "Median plotted"
+  ) +
+  geom_point(data = medDf, mapping = aes(x = "toothNum", y = "medZ"), color = "red")
+)
+plotL2 = (
+  ggplot(fullDiffDat, aes(x = "toothNum", y = "l2Norm", color = "toothNum")) +
+  geom_hline(yintercept = 0, color = "gray") +
+  geom_jitter(alpha = .5, height = 0, width = .3) +
+  scale_x_continuous(
+    breaks = range(
+      np.min(fullDiffDat["toothNum"]),
+      np.max(fullDiffDat["toothNum"]) + 1,
+      1
+    )
+  ) +
+  theme_bw() +
+  theme(legend_position="none") +
+  labs(
+    title = "L2 norm of movement vector, " + patNum,
+    y = "L2 Norm",
+    x = "Tooth Number",
+    subtitle = "Median plotted"
+  ) +
+  geom_point(data = medDf, mapping = aes(x = "toothNum", y = "medL2"), color = "red")
+)
+display(absPlotX)
+display(absPlotY)
+display(absPlotZ)
+display(plotL2)
+```
+
+\newpage
+
+```{python}
+#| warning: False
+xyzPlots = allDirectionPlots(res)
+for i in xyzPlots.keys():
+  for j in xyzPlots[i].keys():
+    display(xyzPlots[i][j])
 ```

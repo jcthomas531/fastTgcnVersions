@@ -48,7 +48,8 @@ for i in movement.keys():
     summaryDict[i] = movement[i]["diffSummary"]
 summaryDf = pd.DataFrame.from_dict(summaryDict, orient="index")
 summaryDf = summaryDf.rename_axis("toothNum").reset_index()
-medDf = summaryDf[["toothNum", "medX", "medY", "medZ", "medAbsX", "medAbsY", "medAbsZ", "medL2"]]
+#remember that the median of the absolute value does not equal the absolute value of the mean
+medDf = summaryDf[["toothNum", "medX", "medY", "medZ", "absMedX", "absMedY", "absMedZ", "medAbsX", "medAbsY", "medAbsZ", "medL2"]]
 
 #output main results
 rigidResults = {
