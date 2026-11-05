@@ -56,10 +56,7 @@ def singleToothMove(preDati, postDati, transi, patNum):
     diffi = pd.DataFrame({
         "x": rigidi_moved["vert"]["x"] - preDati_moved["vert"]["x"],
         "y": rigidi_moved["vert"]["y"] - preDati_moved["vert"]["y"],
-        "z": rigidi_moved["vert"]["z"] - preDati_moved["vert"]["z"],
-        "absX": np.abs(rigidi_moved["vert"]["x"] - preDati_moved["vert"]["x"]),
-        "absY": np.abs(rigidi_moved["vert"]["y"] - preDati_moved["vert"]["y"]),
-        "absZ": np.abs(rigidi_moved["vert"]["z"] - preDati_moved["vert"]["z"])
+        "z": rigidi_moved["vert"]["z"] - preDati_moved["vert"]["z"]
     })
     #calculate l2 norm
     diffi["l2Norm"] = np.linalg.norm(x = diffi[["x", "y", "z"]], axis = 1, ord = 2)
@@ -85,19 +82,6 @@ def singleToothMove(preDati, postDati, transi, patNum):
         "medZ": diffi["z"].median(),
         "absMedZ": np.abs(diffi["z"].median()),
         "sdZ": diffi["z"].std(),
-        #absoluate values of movement
-        #X
-        "meanAbsX": diffi["absX"].mean(),
-        "medAbsX": diffi["absX"].median(),
-        "sdAbsX": diffi["absX"].std(),
-        #Y
-        "meanAbsY": diffi["absY"].mean(),
-        "medAbsY": diffi["absY"].median(),
-        "sdAbsY": diffi["absY"].std(),
-        #Z
-        "meanAbsZ": diffi["absZ"].mean(),
-        "medAbsZ": diffi["absZ"].median(),
-        "sdAbsZ": diffi["absZ"].std(),
         #norm
         "meanL2": diffi["l2Norm"].mean(),
         "medL2": diffi["l2Norm"].median(),

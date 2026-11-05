@@ -1,0 +1,267 @@
+---
+title: "Patient Movement Report"
+author: "J. C. Thomas"
+format: 
+  pdf:
+    pdf-engine: xelatex
+    number-sections: true
+execute:
+  echo: false
+---
+
+
+```{python}
+import os
+import sys
+
+#testing
+# patNum = "pat001"
+# pklPath = "K:/iowaExpTest/rigidMovement/moveSummaryData/" + patNum + "/mainResults.pkl"
+# imagePath = "K:/iowaExpTest/rigidMovement/moveSummaryData/" + patNum + "/rigidImage.png"
+# sys.path.append("movement/tools")
+
+
+#getting variables from snakemake shell
+patNum = os.environ.get("PAT_NUM")
+pklPathIn = os.environ.get("PKL_PATH")
+pklPath = "../../" + pklPathIn
+imagePathIn = os.environ.get("IMAGE_PATH")
+imagePath = "../../" + imagePathIn
+
+print("PATIENT NUMBER")
+print(patNum)
+
+import pickle
+from plotnine import ggplot, aes, geom_histogram, labs, theme_bw, geom_vline, geom_jitter, geom_boxplot, geom_violin, scale_x_continuous, theme, geom_hline, geom_point
+import numpy as np
+from IPython.display import display, Latex, Image
+import pandas as pd
+sys.path.append("../tools")
+from allDirectionPlots import allDirectionPlots
+
+#load in data
+with open(pklPath, "rb") as f:
+    res = pickle.load(f)
+
+```
+
+```{python}
+display(Image(filename=imagePath))
+```
+
+\newpage
+
+# Intro and notes
+
+## Process
+
+Movement is calculated using the following procedure:
+
+* Sara manually annotates the rugae region for both the pre and post scan for each patient
+* The transformation that aligns the rugae region in the post scan to the rugae region in the pre scan is calculated
+* The calculated transformation is applied to the post scan so that it is properly superimposed on the pre scan
+* The next steps are done for each tooth within each patient:
+  * Subset the pre and post treatment to only include the tooth of interest
+  * Calculate the transformation that moves the selected tooth from its position pre treatment to its position post treatment
+  * Move the selected tooth from its pre treatment location to its matched post treatment location using the calculated transformation. I will call the location of the pre treatment tooth moved to the post treatment location the "transformed location".
+  * For each point on the tooth, calculate the distance between the pre treatment location and the transformed location. This is the movement vector. It consists of a movement in X, Y, and Z.
+* This presents as a data set for each patient with thousands of rows and a column for tooth number, X, Y, and Z with each row representing a point on the scan
+
+As the movement for each point on a tooth is represented by a vector of X, Y, and Z movements, we want to have some measure of the length of that vector. Vector lengths are measured via something called "norms". As norms are a measure of length, they will always be positive. In this report and moving forward, I will be using what is called the L2 norm. In case you are interested, it is calculated as:
+
+$$ \sqrt{\sum_{i=1}^{n} a_i^2}$$
+
+where $a_i$ are the elements of the vector, but these details are not important. If there is a different norm that you have seen used in literature, we can use that, but the L2 and L1 norms are the most popular choices.
+
+I am using the median as a measure of center because this data has a tendency towards outliers. This report is comprised of two sections: comparing expansion between teeth (section 2) and a more detailed investigation of the distribution of each tooths movement (section 3).
+
+## Movement and expansion
+
+Directional movement is calculated as the post-treatment position minus the pre-treatment position. The scans are set on a coordinate system with the y axis running approximately along the midline and the x axis sitting somewhere around the tooth 2/tooth 14 position (shown in the image above). Using this reference system and directional movement calculated as post minus pre, interpretation of the sign of directional movement is challenging: expansion in the x direction for tooth 2 is denoted by a negative number but expansion for tooth 14 is denoted by a positive number. 
+
+The easy solution is to just multiply all movement on one side of the arch by -1, however, because the scans are aligned to this system in an automated way, we cannot be 100% sure that the midline perfectly separates the right and left half of the arch. To get around the issue of a tooth being able to straddle an axis and having to deal with complicated relations of positive and negative values within a single tooth, I have simply moved all of the scans into the positive quadrant (by 500 units so there is never a concern). This changes nothing about the movement measurements because all of the data involved is moving the same amount.
+
+This allows us to interpret movement measurements in terms of expansion. Because expansion moves in opposite directions for each half of the arch in the x direction, we multiply the left hand side by -1. Thus, all expansive movement (outward x movement) is positive and constrictive movement (inwards x movement) is negative. The y and z directions dont necessary have this complicated relationship, so manipulation of their movement measurements is not necessary. Positive y values mean movement towards the front of the mouth. Positive z values mean movement in the direction the tooth is facing (theres probably a more technical term for that). Additionally, as the L2 norm is always positive, nothing needs to be done with that metric either.
+
+\textbf{TL;DR:} I have made the signs of the movement values consistent so that positive values always mean expansion.
+
+To keep things straight, I am going to call the measures that have been manipulated in the above way "expansion" and the un-manipulated version I will call "movement".
+
+\newpage
+
+# Expansion
+
+## Summary statistics
+
+Note that these values are expansions measures. See notes on difference from movement measures in the intro.
+
+```{python}
+
+medTab = (
+  res["medianTable"][["toothNum", "medX", "medY", "medZ", "medL2"]].
+  #converting x from movement to expansion
+  #this is like a dplyr mutate with case_when, operates elementwise
+  assign(
+    #this is like ifelse in r
+    #converting tooth num to numeric
+    medXExpand = lambda d: np.where(
+      pd.to_numeric(d["toothNum"]) <= 8, -d["medX"], d["medX"]
+      )
+  )[["toothNum", "medXExpand", "medY", "medZ", "medL2"]].
+  rename(
+    columns = {
+      "toothNum": "Tooth Number",
+      "medXExpand": "X Median",
+      "medY": "Y Median",
+      "medZ": "Z Median",
+      "medL2": "Length Median (L2 )"
+    }
+  ).
+  style.
+  format(
+    precision=3
+  ).
+  hide(axis="index").
+  to_latex(
+    hrules=True,
+    caption="Median Expansion",
+    position="H"
+  )
+)
+
+display(Latex(medTab))
+```
+
+\newpage
+
+## Plots of expansion for each point
+
+Note that these values are expansions measures. See notes on difference from movement measures in the intro.
+
+```{python}
+
+#row bind all of the diff data for the different teeth
+flatter = {}
+for i in res["mainResults"].keys():
+  aaa = res["mainResults"][i]["diffDat"]
+  aaa["toothNum"] = i
+  flatter[i] = aaa
+fullDiffDat = pd.concat(flatter, axis = 0, ignore_index=True)
+#manipulating the data
+fullDiffDat["toothNum"] = pd.to_numeric(fullDiffDat["toothNum"])
+#converting x from movement to expansion
+fullDiffDat = fullDiffDat.assign(
+  xExpand = lambda d: np.where(pd.to_numeric(d["toothNum"]) <= 8, -d["x"], d["x"])
+)
+
+
+#median table with absolute values of expansion
+medDf = res["medianTable"].assign(
+  medXExpand = lambda d: np.where(pd.to_numeric(d["toothNum"]) <= 8, -d["medX"], d["medX"])
+  )
+medDf["toothNum"] = pd.to_numeric(medDf["toothNum"])
+
+#plots for each direcional movement
+absPlotX = (
+  ggplot(fullDiffDat, aes(x = "toothNum", y = "xExpand", color = "toothNum")) +
+  geom_hline(yintercept = 0, color = "gray") +
+  geom_jitter(alpha = .5, height = 0, width = .3) +
+  scale_x_continuous(
+    breaks = range(
+      np.min(fullDiffDat["toothNum"]),
+      np.max(fullDiffDat["toothNum"]) + 1,
+      1
+    )
+  ) +
+  theme_bw() +
+  theme(legend_position="none") +
+  labs(
+    title = "Expansion in X, " + patNum,
+    y = "X",
+    x = "Tooth Number",
+    subtitle = "Medians plotted"
+  ) +
+  geom_point(data = medDf, mapping = aes(x = "toothNum", y = "medXExpand"), color = "red") 
+)
+absPlotY = (
+  ggplot(fullDiffDat, aes(x = "toothNum", y = "y", color = "toothNum")) +
+  geom_hline(yintercept = 0, color = "gray") +
+  geom_jitter(alpha = .5, height = 0, width = .3) +
+  scale_x_continuous(
+    breaks = range(
+      np.min(fullDiffDat["toothNum"]),
+      np.max(fullDiffDat["toothNum"]) + 1,
+      1
+    )
+  ) +
+  theme_bw() +
+  theme(legend_position="none") +
+  labs(
+    title = "Expansion in Y, " + patNum,
+    y = "Y",
+    x = "Tooth Number",
+    subtitle = "Medians plotted"
+  ) +
+  geom_point(data = medDf, mapping = aes(x = "toothNum", y = "medY"), color = "red")
+)
+absPlotZ = (
+  ggplot(fullDiffDat, aes(x = "toothNum", y = "z", color = "toothNum")) +
+  geom_hline(yintercept = 0, color = "gray") +
+  geom_jitter(alpha = .5, height = 0, width = .3) +
+  scale_x_continuous(
+    breaks = range(
+      np.min(fullDiffDat["toothNum"]),
+      np.max(fullDiffDat["toothNum"]) + 1,
+      1
+    )
+  ) +
+  theme_bw() +
+  theme(legend_position="none") +
+  labs(
+    title = "Expansion in Z, " + patNum,
+    y = "Z",
+    x = "Tooth Number",
+    subtitle = "Median plotted"
+  ) +
+  geom_point(data = medDf, mapping = aes(x = "toothNum", y = "medZ"), color = "red")
+)
+plotL2 = (
+  ggplot(fullDiffDat, aes(x = "toothNum", y = "l2Norm", color = "toothNum")) +
+  geom_hline(yintercept = 0, color = "gray") +
+  geom_jitter(alpha = .5, height = 0, width = .3) +
+  scale_x_continuous(
+    breaks = range(
+      np.min(fullDiffDat["toothNum"]),
+      np.max(fullDiffDat["toothNum"]) + 1,
+      1
+    )
+  ) +
+  theme_bw() +
+  theme(legend_position="none") +
+  labs(
+    title = "Length of Expansion Vector (L2 Norm), " + patNum,
+    y = "L2 Norm",
+    x = "Tooth Number",
+    subtitle = "Median plotted"
+  ) +
+  geom_point(data = medDf, mapping = aes(x = "toothNum", y = "medL2"), color = "red")
+)
+display(plotL2)
+display(absPlotX)
+display(absPlotY)
+display(absPlotZ)
+```
+
+\newpage
+
+# Individual tooth movement plots
+
+Note that these values are movement measures. See notes on difference from expansions measures in the intro. These are just depictions of the distributions so it doesnt really matter, but good to keep everything straight.
+
+```{python}
+#| warning: False
+xyzPlots = allDirectionPlots(res)
+for i in xyzPlots.keys():
+  for j in xyzPlots[i].keys():
+    display(xyzPlots[i][j])
+```
