@@ -32,6 +32,7 @@
 - Do not invent results, output, or data. If code hasn't been run, say so.
 
 ## Editing files
+- Always wait for my explicit permission before editing any file. Describe the change you'd make and where, then wait for me to approve it before editing.
 - Only edit the file we are currently discussing. Don't make changes in other files on your own initiative, even when a change elsewhere seems needed, related, or helpful; instead, tell me what you'd change and where, and wait for me to approve it.
 - If you're unsure whether to edit a file at all, or which file to edit, ask me before making any changes.
 - If I ask a question (e.g., "can we...?", "is it possible to...?"), answer it; don't act on it until I ask you to.
