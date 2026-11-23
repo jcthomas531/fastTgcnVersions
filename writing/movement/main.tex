@@ -38,14 +38,17 @@
 
 \section{Review of methods and literature}
 
-\noindent An affine transformation matrix in 3D space $\mathbf{T}$ has the form:
+\subsection{Rigid motion}
+
+\noindent Rigid motion in $n$-D space is defined by an affine transformation matrix $\mathbf{T}$ with the form:
 
 $$\mathbf{T} = \begin{bmatrix}
 \mathbf{R} & \mathbf{t} \\
 \mathbf{0}^T & 1
 \end{bmatrix}$$
 
-\noindent $\mathbf{T}$ is a 4x4 matrix with submatrix $\mathbf{R}$ a 3x3 rotation matrix and vector $\mathbf{t}$ a 3x1 translation vector. The rotation matrix $\mathbf{R}$ is a member of a group called $SO(n)$ or $SE(n)$ (\textit{or possibly both at the same time, still figuring it out}) and is constrained to be orthogonal ($\mathbf{R}^T\mathbf{R} = \mathbf{I}$) and have determinate 1 ($det(\mathbf{R}) = 1$) (\textit{and potentially have unit vectors for the columns and rows, still figuring it out}). \textbf{The overall goal is to model the affine matrices that define the change in location for each tooth.} \\
+
+\noindent $\mathbf{T}$ is a $(n+1)$ x $(n+1)$ matrix with submatrix $\mathbf{R}$ a $n$ x $n$ rotation matrix and vector $\mathbf{t}$ a $n$ x 1 translation vector. $\mathbf{T}$ is a member of SE(n) and the rotation submatrix $\mathbf{R}$ is a member of $SO(n)$. $\mathbf{R}$ is constrained to be orthogonal ($\mathbf{R}^T\mathbf{R} = \mathbf{I}$) and have determinate 1 ($det(\mathbf{R}) = 1$). \textbf{The applied goal is to model the affine transformation matrices defining the rigid motion of teeth in orthodontic treatment. The methodological goal is to introduce novel modeling strategies for constrained matrix responses, especially those in $\mathbf{SE}(\mathbf{n})$.} \\
 
 \noindent Some good resources on affine transformations and rotation matrices:
 \begin{itemize}
@@ -55,7 +58,39 @@ $$\mathbf{T} = \begin{bmatrix}
     \item \href{https://modernrobotics.northwestern.edu/nu-gm-book-resource/3-2-1-rotation-matrices-part-1-of-2/}{Northwestern robotics video on rotation matrices}
 \end{itemize}
 
-\subsection{Possible approaches}
+\section{Lie groups and Lie algebras}
+
+\subsection{Basics and why we care}
+
+Rigid transformations (along with many other sets of constrained matrices like positive semi-definite and rotation) are a set of matrices that form a manifold. A manifold is just a smooth surface in space that is locally flat. This set of matrices forms a manifold because there are no ``holes" in the set. If you look between any two matrices in the set, there exists another matrix that is part of the set. Thus, a surface.
+
+In addition to the set of rigid transformations (and many other constrained matrix sets) forming a manifold, this set is also a Lie group. Being a Lie group introduces certain properties, most important of which for this work is the associated Lie algebra. The Lie algebra is the space tangent to the Lie group at the identity. Conveniently, the Lie algebra is a vector space which means it is easy to work on. Elements of the Lie group can be projected up to the Lie algebra, worked on in a vector space environment, and then projected back down to the Lie group. The resulting element projected back down to the Lie group will always be a member of the Lie group.
+
+\subsection{Relationship between Lie group and algebra}
+
+The matrix exponential maps the Lie algebra to the Lie group. The exponential map is onto but not one-to-one. The matrix logarithm maps the Lie group to the Lie algebra. The logarithm map is only uniquely defined around the identity, which introduces some problems as matrices get farther from this point.
+
+Define $\mathbf{G}$ to be a Lie group and $\mathbf{g}$ to be the associated Lie algebra. Let $\mathbf{T}$ be a member of the Lie group and $\mathbf{t}$ be a member of the Lie algebra. The mapping is defined as:
+
+\begin{gather*}
+    exp(\mathbf{t}) = \mathbf{T} \\
+    log(\mathbf{T}) = \mathbf{t}.
+\end{gather*}
+
+The details of the non-one-to-one-ness is something I am still figuring out. However, the important part of this relationship is that since the Lie algebra is defined at the identity of the Lie group, members of the Lie group farther from the identity have problems. This comes up over and over again in the literature.
+
+\subsection{Details of the Lie algebra}
+
+When the Lie group is $SE(n)$, the Lie algebra has matrices of a specific form 
+
+\subsection{Log-euclidean regression}
+
+Resources:
+\begin{itemize}
+    \item \href{https://www.tandfonline.com/doi/full/10.1080/01621459.2016.1208615#abstract}{Lin 2016}
+    \item \href{https://arxiv.org/abs/1812.01537}{Sola 2018}
+\end{itemize}
+
 
 \subsubsection{Lie group regression}
 
