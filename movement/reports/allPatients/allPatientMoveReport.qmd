@@ -1,0 +1,213 @@
+---
+title: "Summary of Patient Expansion Medians"
+author: "J. C. Thomas"
+format: 
+  pdf:
+    pdf-engine: xelatex
+    number-sections: true
+execute:
+  echo: false
+---
+
+
+
+
+```{python}
+import os
+from IPython.display import display, Latex, Image
+
+#testing
+# pklPaths = [
+#     "K:/iowaExpTest/rigidMovement/moveSummaryData/" + i + "/mainResults.pkl"
+#     for i in ["pat001", "pat004", "pat007"]
+# ]
+
+#variables from snakemake
+#PKL_PATHS is a space separated list of paths relative to dissModels/intraoralSegmentation
+#quarto runs from movement/reports/allPatients, so go up three levels
+pklPathsIn = os.environ.get("PKL_PATHS").split()
+pklPaths = ["../../../" + i for i in pklPathsIn]
+
+#run the analysis, allPatMoveAnalysis.py sits next to this qmd so it imports directly
+import allPatMoveAnalysis as apma
+apmaRes = apma.allPatMoveAnalysis(pklPaths = pklPaths)
+```
+
+# Intro and notes
+
+## Summary statistics in this report
+
+\textcolor{blue}{This report summarizes median expansion across all patients. Thus, the points in each graphic are an individual patients median expansion for a specific tooth in a specific direction and likewise the means are means of medians.}
+
+```{python}
+#| output: asis
+#list the patients included since this is determined by snakemake and can change
+print("This report includes " + str(len(apmaRes["patNums"])) + " patients: " + ", ".join(apmaRes["patNums"]) + ".")
+```
+
+## Process
+
+Movement is calculated using the following procedure:
+
+* Sara manually annotates the rugae region for both the pre and post scan for each patient
+* The transformation that aligns the rugae region in the post scan to the rugae region in the pre scan is calculated
+* The calculated transformation is applied to the post scan so that it is properly superimposed on the pre scan
+* The next steps are done for each tooth within each patient:
+  * Subset the pre and post treatment to only include the tooth of interest
+  * Calculate the transformation that moves the selected tooth from its position pre treatment to its position post treatment
+  * Move the selected tooth from its pre treatment location to its matched post treatment location using the calculated transformation. I will call the location of the pre treatment tooth moved to the post treatment location the "transformed location".
+  * For each point on the tooth, calculate the distance between the pre treatment location and the transformed location. This is the movement vector. It consists of a movement in X, Y, and Z.
+* This presents as a data set for each patient with thousands of rows and a column for tooth number, X, Y, and Z with each row representing a point on the scan
+
+As the movement for each point on a tooth is represented by a vector of X, Y, and Z movements, we want to have some measure of the length of that vector. Vector lengths are measured via something called "norms". As norms are a measure of length, they will always be positive. In this report and moving forward, I will be using what is called the L2 norm. In case you are interested, it is calculated as:
+
+$$ \sqrt{\sum_{i=1}^{n} a_i^2}$$
+
+where $a_i$ are the elements of the vector, but these details are not important. If there is a different norm that you have seen used in literature, we can use that, but the L2 and L1 norms are the most popular choices.
+
+
+## Movement and expansion
+
+Directional movement is calculated as the post-treatment position minus the pre-treatment position. The scans are set on a coordinate system with the y axis running approximately along the midline and the x axis sitting somewhere around the tooth 2/tooth 14 position (shown in the image above). Using this reference system and directional movement calculated as post minus pre, interpretation of the sign of directional movement is challenging: expansion in the x direction for tooth 2 is denoted by a negative number but expansion for tooth 14 is denoted by a positive number. 
+
+The easy solution is to just multiply all movement on one side of the arch by -1, however, because the scans are aligned to this system in an automated way, we cannot be 100% sure that the midline perfectly separates the right and left half of the arch. To get around the issue of a tooth being able to straddle an axis and having to deal with complicated relations of positive and negative values within a single tooth, I have simply moved all of the scans into the positive quadrant (by 500 units so there is never a concern). This changes nothing about the movement measurements because all of the data involved is moving the same amount.
+
+This allows us to interpret movement measurements in terms of expansion. Because expansion moves in opposite directions for each half of the arch in the x direction, we multiply the left hand side by -1. Thus, all expansive movement (outward x movement) is positive and constrictive movement (inwards x movement) is negative. The y and z directions dont necessary have this complicated relationship, so manipulation of their movement measurements is not necessary. Positive y values mean movement towards the front of the mouth. Positive z values mean movement in the direction the tooth is facing (theres probably a more technical term for that). Additionally, as the L2 norm is always positive, nothing needs to be done with that metric either.
+
+\textbf{TL;DR:} I have made the signs of the movement values consistent so that positive values always mean expansion.
+
+To keep things straight, I am going to call the measures that have been manipulated in the above way "expansion" and the un-manipulated version I will call "movement".
+
+
+\newpage
+
+# Expansion in X
+
+```{python}
+apmaRes["expandXPlot"]
+```
+
+
+
+```{python}
+medXTab = (
+    apmaRes["expandSummary"][["toothNum", "n", "meanX", "medX", "sdX"]].
+    rename(
+        columns = {
+            "toothNum": "Tooth Number",
+            "meanX": "Mean",
+            "medX": "Median",
+            "sdX": "SD"
+        }
+    ).
+    style.
+    format(
+        precision = 3
+    ).
+    hide(axis = "index").
+    to_latex(
+        hrules=True,
+        caption="Summary Statistics on Median Patient X Expansion",
+        position="H"
+))
+display(Latex(medXTab))
+```
+
+
+\newpage
+
+
+# Expansion in Y
+
+```{python}
+apmaRes["expandYPlot"]
+```
+
+```{python}
+medYTab = (
+    apmaRes["expandSummary"][["toothNum", "n", "meanY", "medY", "sdY"]].
+    rename(
+        columns = {
+            "toothNum": "Tooth Number",
+            "meanY": "Mean",
+            "medY": "Median",
+            "sdY": "SD"
+        }
+    ).
+    style.
+    format(
+        precision = 3
+    ).
+    hide(axis = "index").
+    to_latex(
+        hrules=True,
+        caption="Summary Statistics on Median Patient Y Expansion",
+        position="H"
+))
+display(Latex(medYTab))
+```
+
+\newpage
+
+# Expansion in Z
+
+```{python}
+apmaRes["expandZPlot"]
+```
+
+```{python}
+medZTab = (
+    apmaRes["expandSummary"][["toothNum", "n", "meanZ", "medZ", "sdZ"]].
+    rename(
+        columns = {
+            "toothNum": "Tooth Number",
+            "meanZ": "Mean",
+            "medZ": "Median",
+            "sdZ": "SD"
+        }
+    ).
+    style.
+    format(
+        precision = 3
+    ).
+    hide(axis = "index").
+    to_latex(
+        hrules=True,
+        caption="Summary Statistics on Median Patient Z Expansion",
+        position="H"
+))
+display(Latex(medZTab))
+```
+
+\newpage
+
+# L2 Norm of Expansion
+
+```{python}
+apmaRes["expandL2Plot"]
+```
+
+
+```{python}
+medL2Tab = (
+    apmaRes["expandSummary"][["toothNum", "n", "meanL2", "medL2", "sdL2"]].
+    rename(
+        columns = {
+            "toothNum": "Tooth Number",
+            "meanL2": "Mean",
+            "medL2": "Median",
+            "sdL2": "SD"
+        }
+    ).
+    style.
+    format(
+        precision = 3
+    ).
+    hide(axis = "index").
+    to_latex(
+        hrules=True,
+        caption="Summary Statistics on Median Patient L2 Expansion",
+        position="H"
+))
+display(Latex(medL2Tab))
+```
