@@ -1,0 +1,142 @@
+---
+title: "Angle Plots"
+author: "J. C. Thomas"
+format: 
+  pdf:
+    pdf-engine: xelatex
+execute:
+  echo: false
+---
+
+
+```{python}
+import os
+from IPython.display import display, Latex, Image
+
+#testing
+pklPaths = [
+    "K:/iowaExpTest/rigidMovement/moveSummaryData/" + i + "/mainResults.pkl"
+    for i in ["pat001", "pat004", "pat007"]
+]
+
+#variables from snakemake
+#PKL_PATHS is a space separated list of paths relative to dissModels/intraoralSegmentation
+#quarto runs from movement/reports/allPatients, so go up three levels
+pklPathsIn = os.environ.get("PKL_PATHS").split()
+pklPaths = ["../../../" + i for i in pklPathsIn]
+
+import allPatAngleAnalysis as aa
+aaRes = aa.angleAnalysis(pklPaths = pklPaths)
+```
+
+
+# Intro and notes
+
+## Measurements in this report
+
+\textcolor{blue}{The green shaded region represents the range of "acceptable" expansive movement. It is set as 90 degrees in either direction of the ideal direction determined by Sara. The first plot for each tooth number is the median vectors scaled to all lie on the unit circle. The second plot is the unscaled median vectors. In the second plot, the vector of idea direction is 2.5mm in length to serve as a point of reference.}
+
+\textcolor{blue}{As actual direction in the mouth is important for this report, the values used are "movement" and not "expansion". As a reminder, "expansion" values are just "movement" values with a sign change to help them be more interpretable.}
+
+Note to JC: fix sizing of plots
+
+## Process
+
+Movement is calculated using the following procedure:
+
+* Sara manually annotates the rugae region for both the pre and post scan for each patient
+* The transformation that aligns the rugae region in the post scan to the rugae region in the pre scan is calculated
+* The calculated transformation is applied to the post scan so that it is properly superimposed on the pre scan
+* The next steps are done for each tooth within each patient:
+  * Subset the pre and post treatment to only include the tooth of interest
+  * Calculate the transformation that moves the selected tooth from its position pre treatment to its position post treatment
+  * Move the selected tooth from its pre treatment location to its matched post treatment location using the calculated transformation. I will call the location of the pre treatment tooth moved to the post treatment location the "transformed location".
+  * For each point on the tooth, calculate the distance between the pre treatment location and the transformed location. This is the movement vector. It consists of a movement in X, Y, and Z.
+* This presents as a data set for each patient with thousands of rows and a column for tooth number, X, Y, and Z with each row representing a point on the scan
+
+As the movement for each point on a tooth is represented by a vector of X, Y, and Z movements, we want to have some measure of the length of that vector. Vector lengths are measured via something called "norms". As norms are a measure of length, they will always be positive. In this report and moving forward, I will be using what is called the L2 norm. In case you are interested, it is calculated as:
+
+$$ \sqrt{\sum_{i=1}^{n} a_i^2}$$
+
+where $a_i$ are the elements of the vector, but these details are not important. If there is a different norm that you have seen used in literature, we can use that, but the L2 and L1 norms are the most popular choices.
+
+
+## Movement and expansion
+
+Directional movement is calculated as the post-treatment position minus the pre-treatment position. The scans are set on a coordinate system with the y axis running approximately along the midline and the x axis sitting somewhere around the tooth 2/tooth 14 position (shown in the image above). Using this reference system and directional movement calculated as post minus pre, interpretation of the sign of directional movement is challenging: expansion in the x direction for tooth 2 is denoted by a negative number but expansion for tooth 14 is denoted by a positive number. 
+
+The easy solution is to just multiply all movement on one side of the arch by -1, however, because the scans are aligned to this system in an automated way, we cannot be 100% sure that the midline perfectly separates the right and left half of the arch. To get around the issue of a tooth being able to straddle an axis and having to deal with complicated relations of positive and negative values within a single tooth, I have simply moved all of the scans into the positive quadrant (by 500 units so there is never a concern). This changes nothing about the movement measurements because all of the data involved is moving the same amount.
+
+This allows us to interpret movement measurements in terms of expansion. Because expansion moves in opposite directions for each half of the arch in the x direction, we multiply the left hand side by -1. Thus, all expansive movement (outward x movement) is positive and constrictive movement (inwards x movement) is negative. The y and z directions dont necessary have this complicated relationship, so manipulation of their movement measurements is not necessary. Positive y values mean movement towards the front of the mouth. Positive z values mean movement in the direction the tooth is facing (theres probably a more technical term for that). Additionally, as the L2 norm is always positive, nothing needs to be done with that metric either.
+
+\textbf{TL;DR:} I have made the signs of the movement values consistent so that positive values always mean expansion.
+
+To keep things straight, I am going to call the measures that have been manipulated in the above way "expansion" and the un-manipulated version I will call "movement".
+
+```{python}
+#| output: asis
+#output: asis makes printed text be read as markdown, so the page break and header are rendered rather than printed
+for i in aaRes["direcPlots"].keys():
+  print("\n\\newpage\n")
+  print("\n# " + i + "\n")
+  display(aaRes["direcPlots"][i])
+  print("\n")
+  display(aaRes["direcMagPlots"][i])
+```
+
+\newpage
+
+# Scores
+
+WRITE BRIEF EXPLAINATION ABOUT HOW SCORE IS CALCULATED AND HOW SUM MAY BE MISLEADING IF PATIENT HAS LESS TEETH
+
+```{python}
+scorePatTab = (
+  aaRes["scorePat"]
+  .rename(
+    columns = {
+      "patNum": "Pat. Number",
+      "nTeeth": "Num. Teeth",
+      "score": "Score",
+      "meanContrib": "Mean Contrib."
+    }
+  )
+  .style
+  .format(
+    precision = 3
+  )
+  .hide(axis = "index")
+  .to_latex(
+    hrules = True,
+    caption = "Expansion Scores by Patient",
+    position = "H"
+  )
+)
+display(Latex(scorePatTab))
+```
+
+
+```{python}
+scoreToothTab = (
+  aaRes["scoreTooth"]
+  .rename(
+    columns = {
+      "toothNum": "Tooth Number",
+      "nPats": "Num. Pats",
+      "score": "Score",
+      "meanContrib": "Mean Contrib."
+    }
+  )
+  .style
+  .format(
+    precision = 3
+  )
+  .hide(axis = "index")
+  .to_latex(
+    hrules = True,
+    caption = "Expansion Scores by Patient",
+    position = "H"
+  )
+)
+display(Latex(scoreToothTab))
+```

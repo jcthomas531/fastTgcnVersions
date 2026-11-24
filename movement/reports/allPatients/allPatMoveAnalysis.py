@@ -14,6 +14,10 @@ from plotnine import (
     theme_bw,
     labs,
 )
+import sys
+sys.path.append("../../tools/")
+import allPatRes_process1 as p1
+import readInAllPats as riap
 
 #-----
 #plot median expansion across all patients for a single direction
@@ -55,44 +59,11 @@ def plotAllPat(medDat, sumDat, yVar, meanVar, titleVar):
 #pklPaths: list of paths to each patient's mainResults.pkl, as produced by rule getRigidMovementSummary
 def allPatMoveAnalysis(pklPaths):
 
-    #copy input so the caller's list is not modified
-    pklPathsC = list(pklPaths)
+    #read in data
+    allPatRes, patNums = riap.readInAllPats(pklPaths)
 
-    #patient number is the name of the folder containing the pkl
-    patNums = [Path(i).parent.name for i in pklPathsC]
-
-    #duplicated patient numbers would silently overwrite each other in the dict below
-    if len(set(patNums)) != len(patNums):
-        raise ValueError("duplicate patient numbers in pklPaths: " + ", ".join(patNums))
-
-    #load in all files for all patients
-    allPatRes = {}
-    for i in range(len(pklPathsC)):
-        pati = patNums[i]
-        pathi = pklPathsC[i]
-        with open(pathi, "rb") as f:
-            allPatRes[pati] = pickle.load(f)
-    #object structure
-    #allPatRes.keys()
-    #allPatRes["pat004"].keys()
-    #allPatRes["pat004"]["mainResults"]["3"].keys()
-
-    #stack all patient median tables
-    medAll = pd.concat(
-        [allPatRes[i]["medianTable"].assign(patNum=i) for i in patNums], ignore_index=True
-    )[["patNum", "toothNum", "medX", "medY", "medZ", "medL2"]]
-
-    #convert movement to expansion
-    #teeth 1-8 are on the other side of the midline so x is flipped to make outward movement positive
-    medAll_expand = medAll.assign(
-        #this is like ifelse in r
-        medXExpand=lambda d: np.where(
-            pd.to_numeric(d["toothNum"]) <= 8, -d["medX"], d["medX"]
-        )
-    )
-
-    #tooth number to numeric for ease of plotting
-    medAll_expand["toothNum"] = pd.to_numeric(medAll_expand["toothNum"])
+    #process allPatRes
+    medAll_expand = p1.allPatRes_process1(x = allPatRes, patNums = patNums)
 
     #summary statistics on expansion across all patients
     #equivalent of a group_by and summarise pipe in R

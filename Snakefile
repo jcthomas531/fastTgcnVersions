@@ -1739,7 +1739,8 @@ rule getRigidMovementSummary:
 rule movementReports:
     input:
         expand("../../../../Shared/gb_lss/Thomas/iowaExpTest/rigidMovement/reports/{seg1Pat}/{seg1Pat}rigidMoveReport.pdf", seg1Pat = iowaExpTestRAPatsBoth),
-        rigidMoveDir + "reports/allPatients/allPatientMoveReport.pdf"
+        rigidMoveDir + "reports/allPatients/allPatientMoveReport.pdf",
+        rigidMoveDir + "reports/allPatients/allPatAngleReport.pdf"
 
 #all file paths within the quarto document are relative to the location the quarto lives in
 #all file paths in the rule are relative to dissModels/intraoralSegmentation
@@ -1782,7 +1783,8 @@ rule allPatMovementReport:
     input:
         pklPaths = expand(rigidMoveDir + "moveSummaryData/{seg1Pat}/mainResults.pkl", seg1Pat = sorted(iowaExpTestRAPatsBoth)),
         quarto = "movement/reports/allPatients/allPatientMoveReport.qmd",
-        deps = "movement/reports/allPatients/allPatMoveAnalysis.py"
+        analysis = "movement/reports/allPatients/allPatMoveAnalysis.py",
+        toolDeps = ["movement/tools/allPatRes_process1.py", "movement/tools/readInAllPats.py"]
     output:
         outPath = rigidMoveDir + "reports/allPatients/allPatientMoveReport.pdf"
     shell:
@@ -1792,4 +1794,26 @@ rule allPatMovementReport:
         cd "$(dirname {input.quarto})"
         quarto render "$(basename {input.quarto})" --to pdf --output allPatientMoveReport.pdf
         mv allPatientMoveReport.pdf "$out"
+        """
+
+
+rule angleAnalysisReport:
+    threads: 4
+    resources:
+        quarto = 1
+    container: "../../containers/lorwyn.sif"
+    input:
+        pklPaths = expand(rigidMoveDir + "moveSummaryData/{seg1Pat}/mainResults.pkl", seg1Pat = sorted(iowaExpTestRAPatsBoth)),
+        quarto = "movement/reports/allPatients/allPatAngleReport.qmd",
+        analysis = "movement/reports/allPatients/allPatAngleAnalysis.py",
+        toolDeps = ["movement/tools/allPatRes_process1.py", "movement/tools/readInAllPats.py", "movement/tools/desiredDirec.py"]
+    output:
+        outPath = rigidMoveDir + "reports/allPatients/allPatAngleReport.pdf"
+    shell:
+        """
+        export PKL_PATHS="{input.pklPaths}"
+        out="$(realpath -m {output.outPath})"
+        cd "$(dirname {input.quarto})"
+        quarto render "$(basename {input.quarto})" --to pdf --output allPatAngleReport.pdf
+        mv allPatAngleReport.pdf "$out"
         """
